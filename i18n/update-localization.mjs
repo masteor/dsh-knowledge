@@ -142,15 +142,19 @@ for (const f of files) {
 log("");
 log(`Не переведено (нет в словаре): ${untranslated.size} строк`);
 log("(учитываются только UI-файлы: web/ и worklog/; src/ и docs/ исключены)");
+// Файл пишем ВСЕГДА, даже пустым: CI и внешние скрипты проверяют его наличие,
+// чтобы отличить «нет новых строк» от «скрипт не отработал».
+const out = [];
+for (const [lit] of [...untranslated.entries()].sort((a, b) => b[0].length - a[0].length)) {
+  out.push(lit);
+}
+writeFileSync(join(DIR, "untranslated.txt"), out.length ? out.join("\n") + "\n" : "");
 if (untranslated.size) {
-  const out = [];
-  for (const [lit, fs_] of [...untranslated.entries()].sort((a, b) => b[0].length - a[0].length)) {
-    out.push(lit);
-  }
-  writeFileSync(join(DIR, "untranslated.txt"), out.join("\n") + "\n");
   log("Список записан: i18n/untranslated.txt");
   log("Первые 10:");
   out.slice(0, 10).forEach(s => log("  " + s.slice(0, 80)));
+} else {
+  log("Список пуст (i18n/untranslated.txt обнулён) — все строки есть в словаре.");
 }
 
 if (REPORT_ONLY) process.exit(0);
