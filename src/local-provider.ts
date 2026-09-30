@@ -2077,8 +2077,8 @@ function termOverlap(left: string, right: string): number {
 }
 
 function polarity(value: string): -1 | 0 | 1 {
-  const positive = /(?:\b(?:enable|enabled|allow|allowed|true|yes|must|should|use)\b|启用|允许|必须|应该|可以|使用)/iu.test(value)
-  const negative = /(?:\b(?:disable|disabled|deny|denied|false|no|never|must not|should not|do not|don't)\b|禁用|禁止|不得|不应|不可以|不要|不能|关闭|无需)/iu.test(value)
+  const positive = /(?:\b(?:enable|enabled|allow|allowed|true|yes|must|should|use)\b|启用|允许|必须|应该|可以|使用|включ|разреш|можно|нужно|надо|следует|верно|истина|использ|обязательн)/iu.test(value)
+  const negative = /(?:\b(?:disable|disabled|deny|denied|false|no|never|must not|should not|do not|don't)\b|禁用|禁止|不得|不应|不可以|不要|不能|关闭|无需|отключ|запрещ|нельзя|не нужно|не надо|не следует|ложь|никогда|выключ)/iu.test(value)
   return positive === negative ? 0 : positive ? 1 : -1
 }
 

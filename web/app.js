@@ -344,7 +344,7 @@ function cancelPendingSearches() {
 
 function loadingPhaseForView(view) {
   return ({
-    overview: '正在汇总知识活动', bases: '正在读取知识库配置', entries: '正在读取知识目录',
+    overview: 'Сбор сведений о работе с базой', bases: 'Чтение настроек баз знаний', entries: 'Чтение каталога знаний',
     notes: '正在读取笔记目录', shares: '正在读取分享列表', candidates: '正在准备审核队列', tokens: '正在读取访问权限',
   })[view] || '正在准备工作区'
 }
@@ -932,7 +932,7 @@ async function moveKnowledgeDocument(workspace, documentId, targetBaseId) {
         saveState: '已移动',
       }
     }
-    showToast(`已移动到“${target.name}”。`)
+    showToast(`Перемещено в «${target.name}».`)
     return true
   } catch (error) {
     showToast(friendlyError(error), 'error')
@@ -951,7 +951,7 @@ function openMoveKnowledgeDocument(workspace, editor) {
   destination.wrapper.classList.add('span-2')
   form.append(destination.wrapper)
   return openSheet({
-    title: `移动“${editor.title}”`,
+    title: `Переместить «${editor.title}»`,
     description: '文档 ID、版本历史和关联笔记都会保留，Markdown 投影将同步移动。',
     body: form,
     primaryLabel: '移动文档',
@@ -992,8 +992,8 @@ function renderShell() {
   captureScrollPosition()
   const titles = {
     overview: ['概览', '知识库运行状态与最近活动'],
-    bases: ['知识库与挂载', '管理知识目录，并限定项目与会话的召回和写入范围'],
-    entries: ['知识文档', '在知识目录中阅读、整理和维护 Markdown 文档'],
+    bases: ['Базы знаний и подключения', 'Управление каталогом знаний и областью извлечения и записи для проектов и сессий'],
+    entries: ['Документы знаний', 'Чтение, упорядочивание и ведение Markdown-документов в каталоге знаний'],
     notes: ['笔记文档', '像本地目录一样整理笔记和资料，并按需关联到知识文档'],
     shares: ['已分享', '管理只读分享链接，也可以导入别人分享的笔记和目录'],
     candidates: ['待审核', '确认 AI 提取结果后再写入知识文档'],
@@ -1058,7 +1058,7 @@ function renderContextPaneToggle() {
   return paneToggleButton('library', workspace.view.treeOpen, () => {
     workspace.view.treeOpen = !workspace.view.treeOpen
     renderShell()
-  }, '知识目录')
+  }, 'Каталог знаний')
 }
 
 function renderAppSidebarResizer() {
@@ -1175,7 +1175,7 @@ function applySidebarVisibility(shell, hidden) {
   }
   if (toggle) {
     const visible = !hidden
-    const action = `${visible ? '隐藏' : '显示'}主导航栏`
+    const action = `${visible ? 'Скрыть' : 'Показать'} главную навигацию`
     toggle.setAttribute('aria-pressed', String(visible))
     toggle.setAttribute('aria-label', action)
     toggle.title = action
@@ -1202,7 +1202,7 @@ function renderSidebar() {
         type: 'button', class: 'nav-button', 'aria-current': state.view === id ? 'page' : undefined,
         onClick: () => navigate(id),
       }, element('span', { class: 'nav-index', 'aria-hidden': 'true' }, String(++navIndex).padStart(2, '0')), element('span', { class: 'nav-label' }, label),
-      id === 'candidates' && pending ? element('span', { class: 'nav-count', 'aria-label': `${pending} 条待审核` }, pending) : null))))),
+      id === 'candidates' && pending ? element('span', { class: 'nav-count', 'aria-label': `${pending} на проверке` }, pending) : null))))),
     element('div', { class: 'sidebar-footer' },
       element('div', { class: 'connection' }, element('span', { class: 'status-dot', 'aria-hidden': 'true' }), state.service.remote ? '中央知识库已连接' : '本地知识库已连接'),
       AUTH_MODE === 'bearer' ? actionButton('退出当前会话', signOut, 'ghost small') : null,
@@ -1263,9 +1263,9 @@ function renderOverview() {
   const overview = state.overview
   if (!stats || !overview) return loadingView()
   const metrics = [
-    ['生效知识', stats.entries.active, `${stats.entries.archived} 条已归档`],
-    ['待审核候选', stats.candidates.pending, `${stats.candidates.approved} 条已通过`],
-    ['提取任务', stats.extractionJobs.total, `${stats.extractionJobs.failed} 个失败`],
+    ['生效知识', stats.entries.active, `${stats.entries.archived} в архиве`],
+    ['待审核候选', stats.candidates.pending, `${stats.candidates.approved} одобрено`],
+    ['提取任务', stats.extractionJobs.total, `${stats.extractionJobs.failed} с ошибкой`],
     ['知识类型', Object.values(stats.entries.byType).filter(Boolean).length, '共 5 种分类'],
   ]
   return element('div', {},
@@ -1312,7 +1312,7 @@ function renderKnowledgeBases() {
       actionButton('本机回写模型', () => openGlobalWritebackModelEditor(), 'ghost small'),
     ),
     element('p', {}, state.service.writebackProvider && state.service.writebackModel
-      ? `仅当前客户端使用 ${state.service.writebackProvider} / ${state.service.writebackModel} 回写。`
+      ? `Запись только этим клиентом: ${state.service.writebackProvider} / ${state.service.writebackModel}.`
       : '当前客户端跟随每轮会话模型回写。'),
   )
   return element('div', { class: 'bases-page' },
@@ -1335,8 +1335,8 @@ function renderKnowledgeBases() {
           },
         })),
         element('div', { class: 'base-result-summary', 'aria-live': 'polite' }, query
-          ? `找到 ${visibleActiveBases.length + visibleArchivedBases.length} 个知识库`
-          : `${activeBases.length} 个可用 · ${archivedBases.length} 个已归档`),
+          ? `Найдено баз знаний: ${visibleActiveBases.length + visibleArchivedBases.length}`
+          : `${activeBases.length} доступно · ${archivedBases.length} в архиве`),
       ),
       visibleActiveBases.length
         ? baseGroups.render(visibleActiveBases, renderKnowledgeBaseCard, Boolean(query))
@@ -1470,10 +1470,10 @@ function contextPill(label, value) {
 
 function writebackRouteLabel(base) {
   if (state.service.writebackProvider && state.service.writebackModel) {
-    return `本机覆盖 · ${state.service.writebackProvider} / ${state.service.writebackModel}`
+    return `Переопределение · ${state.service.writebackProvider} / ${state.service.writebackModel}`
   }
   if (base?.writebackProvider && base?.writebackModel) {
-    return `知识库专用 · ${base.writebackProvider} / ${base.writebackModel}`
+    return `Только для базы · ${base.writebackProvider} / ${base.writebackModel}`
   }
   return '跟随当前会话模型'
 }
@@ -1534,7 +1534,7 @@ function mountView(base, targetKind, targetId) {
     statusKey = explicit ? 'mounted' : 'inherited'
     statusLabel = explicit ? '已挂载' : '继承项目'
     statusVariant = explicit ? 'success' : 'accent'
-    detail = `${source.recallEnabled ? '召回开启' : '召回关闭'} · ${WRITE_MODE_LABELS[source.writeMode]}`
+    detail = `${source.recallEnabled ? 'извлечение вкл' : 'извлечение выкл'} · ${WRITE_MODE_LABELS[source.writeMode]}`
   } else {
     statusKey = 'unmounted'
     statusLabel = '未挂载'
@@ -1588,13 +1588,13 @@ function renderMountManager(activeBases) {
     element('div', { class: 'mount-target-line' },
       element('span', {}, manager.targetKind === 'project' ? '当前项目' : '当前会话'),
       element('code', { title: targetId }, targetId),
-      element('span', { class: 'field-hint' }, `显示 ${visibleRows.length} / ${activeBases.length}`),
+      element('span', { class: 'field-hint' }, `Показано ${visibleRows.length} / ${activeBases.length}`),
     ),
     visibleRows.length
       ? element('div', { class: 'mount-table', role: 'list', 'aria-label': '知识库挂载列表', 'data-scroll-key': 'mount-table' }, visibleRows.map(({ base, view }) => renderMountListRow(base, view, manager.targetKind, targetId)))
       : emptyState('没有匹配的知识库', '调整搜索词或筛选条件。'),
     element('div', { class: 'mount-bulk-bar', 'aria-live': 'polite' },
-      element('strong', {}, `已选择 ${selectedCount} 个`),
+      element('strong', {}, `Выбрано ${selectedCount}`),
       element('div', { class: 'mount-bulk-actions' },
         actionButton('选择当前结果', () => { visibleIds.forEach(id => manager.selectedIds.add(id)); renderShell() }, 'ghost small', { disabled: visibleIds.length === 0 }),
         actionButton('清除选择', () => { manager.selectedIds.clear(); renderShell() }, 'ghost small', { disabled: selectedCount === 0 }),
@@ -1608,7 +1608,7 @@ function renderMountManager(activeBases) {
 function renderMountListRow(base, view, targetKind, targetId) {
   const selected = state.mountManager.selectedIds.has(base.id)
   const checkbox = element('input', {
-    type: 'checkbox', checked: selected, 'aria-label': `选择 ${knowledgeBasePathLabel(base)}`,
+    type: 'checkbox', checked: selected, 'aria-label': `Выбрать ${knowledgeBasePathLabel(base)}`,
     onChange: (event) => {
       if (event.target.checked) state.mountManager.selectedIds.add(base.id)
       else state.mountManager.selectedIds.delete(base.id)
@@ -1620,13 +1620,13 @@ function renderMountListRow(base, view, targetKind, targetId) {
     class: `mount-list-row${selected ? ' is-selected' : ''}`,
     role: 'listitem',
   },
-    element('label', { class: 'mount-select' }, checkbox, element('span', { class: 'visually-hidden' }, `选择 ${knowledgeBasePathLabel(base)}`)),
+    element('label', { class: 'mount-select' }, checkbox, element('span', { class: 'visually-hidden' }, `Выбрать ${knowledgeBasePathLabel(base)}`)),
     element('div', { class: 'mount-list-main' },
       element('div', { class: 'mount-list-title' }, element('strong', { class: 'mount-base-path', title: knowledgeBasePathLabel(base) }, knowledgeBasePathLabel(base)), badge(view.statusLabel, view.statusVariant), badge(modelLabel)),
       element('p', {}, base.description || '通用知识库'),
       element('div', { class: 'mount-list-meta' }, view.detail,
-        view.source?.includeTags.length ? element('span', {}, ` · 包含 #${view.source.includeTags.join(' #')}`) : null,
-        view.source?.excludeTags.length ? element('span', {}, ` · 排除 #${view.source.excludeTags.join(' #')}`) : null,
+        view.source?.includeTags.length ? element('span', {}, ` · включает #${view.source.includeTags.join(' #')}`) : null,
+        view.source?.excludeTags.length ? element('span', {}, ` · исключает #${view.source.excludeTags.join(' #')}`) : null,
       ),
     ),
     actionButton(view.explicit ? '设置' : view.inherited?.enabled ? '覆盖' : '挂载', () => openMountEditor(base, targetKind, targetId, view.explicit, view.inherited), 'small'),
@@ -1660,7 +1660,7 @@ function compactEmpty(message) {
 }
 
 function renderEntries() {
-  return renderDocumentWorkspace(sessionDocumentWorkspace(), { heading: '知识目录' })
+  return renderDocumentWorkspace(sessionDocumentWorkspace(), { heading: 'Каталог знаний' })
 }
 
 async function applyDocumentGroup(workspace, baseId, ids, group) {
@@ -1742,7 +1742,7 @@ function renderDocumentWorkspace(workspace, options = {}) {
       element('span', { class: 'tree-folder-icon', 'aria-hidden': 'true' }),
       element('span', { class: 'tree-base-name' }, base.name),
       element('span', { class: 'tree-count' }, query ? documents.length : page.loaded ? page.total : '—')),
-      expanded ? element('div', { class: 'note-tree-documents', role: 'group', 'aria-label': `${base.name}文档` },
+      expanded ? element('div', { class: 'note-tree-documents', role: 'group', 'aria-label': `Документы: ${base.name}` },
         !query && page.loading && documents.length === 0 ? element('div', { class: 'note-tree-status', role: 'status' }, '正在读取目录…') : null,
         !query && page.error ? element('div', { class: 'note-tree-status is-error' },
           element('span', {}, page.error),
@@ -1751,7 +1751,7 @@ function renderDocumentWorkspace(workspace, options = {}) {
           type: 'button', class: 'note-tree-document', 'aria-current': document.id === view.documentId ? 'page' : undefined,
           draggable: canOrganize && movingDocumentId !== document.id ? 'true' : undefined,
           'aria-busy': movingDocumentId === document.id ? 'true' : undefined,
-          title: canOrganize ? `${document.title} · 可拖到分组或其他知识库` : document.title,
+          title: canOrganize ? `${document.title} · можно перетащить в группу или другую базу` : document.title,
           'data-document-id': document.id,
           onDragStart: event => {
             knowledgeDocumentDrag = { documentId: document.id, sourceBaseId: base.id, workspaceKind: workspace.kind }
@@ -1767,7 +1767,7 @@ function renderDocumentWorkspace(workspace, options = {}) {
         !query && page.nextCursor ? element('button', {
           type: 'button', class: 'note-tree-more', disabled: page.loading,
           onClick: () => { void loadDocumentPage(workspace, base.id, { append: true }).then(renderShell) },
-        }, page.loading ? '正在加载…' : `继续加载（已显示 ${documents.length} / ${page.total}）`) : null,
+        }, page.loading ? '正在加载…' : `Загрузить ещё (показано ${documents.length} / ${page.total})`) : null,
         !query && page.loaded && documents.length === 0 ? element('div', { class: 'note-tree-status' }, '这个知识库还没有文档。') : null,
         !query && !readOnly ? element('button', { type: 'button', class: 'note-tree-new', onClick: () => { void startBlankDocument(workspace, base.id) } },
           element('span', { 'aria-hidden': 'true' }, '+'), '新建文档') : null,
@@ -1783,16 +1783,16 @@ function renderDocumentWorkspace(workspace, options = {}) {
       view.searchNextCursor ? element('button', {
         type: 'button', class: 'note-tree-more search-more', disabled: view.searchLoading,
         onClick: () => { void loadDocumentSearch(workspace, false) },
-      }, view.searchLoading ? '正在加载…' : `继续加载搜索结果（${view.searchResults.length} / ${view.searchTotal}）`) : null,
+      }, view.searchLoading ? '正在加载…' : `Загрузить ещё результаты (${view.searchResults.length} / ${view.searchTotal})`) : null,
     ]
     : tree.length ? tree : [element('div', { class: 'note-tree-empty' }, workspace.kind === 'session' && state.mountContext.sessionId ? '当前会话未挂载知识库' : '还没有知识库')]
   return element('section', {
     class: `note-workspace note-workspace--${workspace.kind}`, 'aria-labelledby': `${workspace.kind}-documents-heading`,
     'data-tree-open': String(view.treeOpen),
   },
-    element('aside', { class: 'note-tree-panel', 'aria-label': '知识目录' },
+    element('aside', { class: 'note-tree-panel', 'aria-label': 'Каталог знаний' },
       element('header', { class: 'note-tree-header' },
-        element('div', {}, element('h2', { id: `${workspace.kind}-documents-heading` }, options.heading || '知识目录'), element('span', {}, query ? `${view.searchTotal} 条搜索结果` : `${workspaceDocuments.length} 篇已加载`)),
+        element('div', {}, element('h2', { id: `${workspace.kind}-documents-heading` }, options.heading || 'Каталог знаний'), element('span', {}, query ? `${view.searchTotal} результатов поиска` : `Загружено ${workspaceDocuments.length} документов`)),
         !readOnly ? actionButton('+', () => { void startBlankDocument(workspace, view.knowledgeBaseId || activeBases[0]?.id) }, 'ghost note-add-button', { 'aria-label': '新建文档', title: '新建文档' }) : null,
       ),
       element('div', {}, element('div', { class: 'note-tree-search-wrap' }, interfaceIcon('search', 'search-symbol'), search),
@@ -1801,7 +1801,7 @@ function renderDocumentWorkspace(workspace, options = {}) {
       workspace.kind === 'session' ? element('footer', { class: 'note-tree-footer' }, actionButton('新建知识库', () => openKnowledgeBaseEditor(), 'ghost small')) : null,
     ),
     view.treeOpen ? element('button', {
-      type: 'button', class: 'note-tree-scrim', 'aria-label': '关闭知识目录',
+      type: 'button', class: 'note-tree-scrim', 'aria-label': 'Закрыть каталог знаний',
       onClick: () => { view.treeOpen = false; renderShell() },
     }) : null,
     renderNoteEditor(workspace, view.editor, selectedBase),
@@ -1854,8 +1854,8 @@ function renderNoteEditor(workspace, editor, base) {
         element('span', { 'aria-hidden': 'true' }, '/'),
         element('strong', {}, editor.isNew ? '新文档' : documentWorkspaceDocuments(workspace).find(item => item.id === editor.id)?.relPath || editor.title),
         element('span', { class: 'note-toolbar-meta' },
-          element('span', {}, editor.isNew ? '尚未保存' : `更新于 ${formatDate(editor.updatedAt)}`),
-          element('span', {}, editor.scope.kind === 'global' ? '全局知识' : `项目 ${editor.scope.id}`))),
+          element('span', {}, editor.isNew ? '尚未保存' : `Обновлено ${formatDate(editor.updatedAt)}`),
+          element('span', {}, editor.scope.kind === 'global' ? '全局知识' : `Проект ${editor.scope.id}`))),
       element('div', { class: 'note-editor-actions' },
         finalized ? badge(DOCUMENT_STATE_LABELS[editor.documentState] || '已结束', 'success') : readOnly ? badge('只读') : null,
         element('span', { class: 'editor-save-status', role: 'status' }, editor.saveState),
@@ -1878,7 +1878,7 @@ function renderNoteEditor(workspace, editor, base) {
           ? '这个问题已经解决，文档已封存并停止继续回写。'
           : '资料收集已经完成，文档已封存并停止继续回写。'),
         editor.finalizationNote ? element('p', {}, editor.finalizationNote) : null,
-        editor.finalizedAt ? element('small', {}, `结束于 ${formatDate(editor.finalizedAt)}`) : null,
+        editor.finalizedAt ? element('small', {}, `Завершено ${formatDate(editor.finalizedAt)}`) : null,
       ) : null,
       element('article', { class: `note-paper is-${editable ? 'edit' : 'preview'}`, 'data-document-mode': editable ? 'edit' : 'preview' },
         editable ? title : element('h1', { class: 'note-preview-title' }, editor.title || '无标题文档'),
@@ -1887,7 +1887,7 @@ function renderNoteEditor(workspace, editor, base) {
     ),
     renderDocumentReferenceBar(workspace, editor, editable),
     element('footer', { class: 'note-inspector' },
-      readOnly ? element('span', { class: 'note-format-hint' }, `分组：${editor.group || '未分组'}`) : actionButton(`分组：${editor.group || '未分组'}`, () => openDocumentGroupEditor(workspace, editor), 'ghost small document-group-control', { title: editor.group || '未分组', 'aria-label': '调整文档分组' }),
+      readOnly ? element('span', { class: 'note-format-hint' }, `Группа: ${editor.group || 'без группы'}`) : actionButton(`Группа: ${editor.group || 'без группы'}`, () => openDocumentGroupEditor(workspace, editor), 'ghost small document-group-control', { title: editor.group || '未分组', 'aria-label': '调整文档分组' }),
       finalized || readOnly ? element('span', { class: 'note-format-hint' }, readOnly ? '知识库已归档 · 只读' : '只读封存 · 重新打开后才能编辑') : element('label', {}, element('span', {}, '类型'), element('select', {
         class: 'note-meta-select', onChange: event => update('type', event.target.value),
       }, TYPES.map(type => element('option', { value: type, selected: type === editor.type }, TYPE_LABELS[type])))),
@@ -1918,15 +1918,15 @@ function renderDocumentReferenceBar(workspace, editor, editable) {
     element('div', { class: 'document-reference-heading' },
       element('span', { class: 'document-reference-mark', 'aria-hidden': 'true' }),
       element('strong', {}, '关联笔记'),
-      element('small', {}, references.length ? `${references.length} 项` : '未关联')),
+      element('small', {}, references.length ? `${references.length} шт.` : '未关联')),
     element('div', { class: 'document-reference-list' }, references.length
       ? references.map(reference => element('span', { class: 'document-reference-chip' },
         element('button', {
-          type: 'button', class: 'document-reference-open', title: `打开 ${reference.note.name}`,
+          type: 'button', class: 'document-reference-open', title: `Открыть ${reference.note.name}`,
           onClick: () => { void openNoteReference(reference.note.id) },
         }, renderNoteIcon(reference.note), element('span', {}, reference.note.name)),
         editable ? element('button', {
-          type: 'button', class: 'document-reference-remove', 'aria-label': `移除 ${reference.note.name} 的关联`, title: '移除关联',
+          type: 'button', class: 'document-reference-remove', 'aria-label': `Убрать связь с ${reference.note.name}`, title: '移除关联',
           onClick: () => { void removeDocumentNoteReference(workspace, editor, reference) },
         }, '×') : null,
       ))
@@ -1972,7 +1972,7 @@ async function openDocumentNoteReferencePicker(workspace, editor) {
           },
         },
         renderNoteIcon(node),
-        element('span', {}, element('strong', {}, node.name), element('small', {}, `${node.kind === 'document' ? '笔记文档' : formatBytes(node.size)}  ${shortNoteId(node.id)}`))))
+        element('span', {}, element('strong', {}, node.name), element('small', {}, `${node.kind === 'document' ? 'документ заметки' : formatBytes(node.size)}  ${shortNoteId(node.id)}`))))
         : [element('div', { class: 'note-picker-empty' }, '没有匹配的笔记文档或文件。')]))
     } catch (error) {
       if (current !== request) return
@@ -2051,7 +2051,7 @@ function openFinalizeDocument(workspace, editor) {
   note.wrapper.classList.add('span-2')
   form.append(stateField.wrapper, note.wrapper)
   return openSheet({
-    title: `结束“${editor.title}”`,
+    title: `Завершить «${editor.title}»`,
     description: '结束后文档仍可搜索和召回，但 AI 回写、候选审核和人工编辑都会被服务端拒绝；需要修改时必须先重新打开。',
     body: form,
     primaryLabel: '确认结束并封存',
@@ -2072,7 +2072,7 @@ function openFinalizeDocument(workspace, editor) {
 
 function reopenDocument(workspace, editor) {
   openConfirm({
-    title: `重新打开“${editor.title}”？`,
+    title: `Открыть заново «${editor.title}»?`,
     message: '重新打开后，人工编辑、AI 回写和候选审核将恢复。',
     confirmLabel: '确认重新打开',
     onConfirm: async () => {
@@ -2087,7 +2087,7 @@ function reopenDocument(workspace, editor) {
 
 function confirmDeleteDocument(workspace, editor) {
   openConfirm({
-    title: `删除“${editor.title}”？`,
+    title: `Удалить «${editor.title}»?`,
     message: '文档和对应的召回知识会被永久删除，此操作无法撤销。',
     confirmLabel: '永久删除', danger: true,
     onConfirm: async () => {
@@ -2129,7 +2129,7 @@ function renderNotes() {
     }) : null,
     element('aside', { class: 'notes-browser', 'aria-label': '笔记目录' },
       element('header', { class: 'notes-browser-header' },
-        element('div', {}, element('h2', {}, '目录'), element('span', {}, `${rootNodes.length} 个根目录项目`)),
+        element('div', {}, element('h2', {}, '目录'), element('span', {}, `${rootNodes.length} элементов в корне`)),
         element('div', { class: 'notes-browser-actions' },
           actionButton('新建', () => openCreateNoteDocument(), 'primary small'),
           actionButton('目录', () => openCreateNoteFolder(), 'small'),
@@ -2223,7 +2223,7 @@ function renderShares() {
     ),
     element('section', { class: 'panel shares-panel' },
       element('header', { class: 'panel-header shares-panel-header' },
-        element('div', {}, element('h3', {}, '本机已分享'), element('p', {}, `${state.notes.shares.length} 项 · 原内容更新后分享链接自动同步`)),
+        element('div', {}, element('h3', {}, '本机已分享'), element('p', {}, `${state.notes.shares.length} шт. · ссылки синхронизируются при обновлении`)),
       ),
       element('div', { class: 'shares-panel-body' },
     state.notes.shareError
@@ -2300,7 +2300,7 @@ function openImportNoteShare() {
       renderNoteIcon({ kind: manifest.share.kind, name: manifest.share.name, mediaType: null }, true),
       element('div', {},
         element('strong', {}, manifest.share.name),
-        element('p', {}, `${kind} · ${manifest.share.fileCount} 个文件 · ${formatBytes(manifest.share.totalSize)}`),
+        element('p', {}, `${kind} · ${manifest.share.fileCount} файлов · ${formatBytes(manifest.share.totalSize)}`),
       ),
       manifest.truncated ? badge('超过导入上限', 'danger') : badge('可以导入', 'success'),
     )
@@ -2338,7 +2338,7 @@ function openImportNoteShare() {
           element('div', {}, element('strong', {}, '等待内网访问确认'), element('p', {}, '确认后读取分享清单，不会立即导入。')),
         )
         privateConfirmation.replaceChildren(
-          element('p', {}, `目标 ${error.origin} 解析到内网地址。确认后，DSH 服务端将访问此链接的分享接口；请仅允许你信任的来源。授权仅用于本次读取和导入，不会保存到白名单。`),
+          element('p', {}, `Адрес ${error.origin} указывает на внутреннюю сеть. После подтверждения сервер DSH обратится к API этой ссылки — разрешайте только доверенные источники. Разрешение действует лишь для этого чтения и импорта и не сохраняется в белый список.`),
           actionButton('允许本次内网分享并读取', () => { confirmedPrivateUrl = requestedUrl; void inspect() }, 'small'),
         )
         privateConfirmation.hidden = false
@@ -2381,7 +2381,7 @@ function openImportNoteShare() {
         })
         state.notes.children.clear()
         state.notes.loadedFolders.clear()
-        showToast(`已导入“${result.root.name}”，共 ${result.importedNodes} 项。`)
+        showToast(`Импортировано «${result.root.name}», элементов: ${result.importedNodes}.`)
         return true
       } catch (error) {
         showFieldError(friendlyError(error))
@@ -2393,10 +2393,10 @@ function openImportNoteShare() {
   void loadShareImportDestinations().then(options => {
     destination.input.replaceChildren(...options.map(option => element('option', { value: option.value }, option.label)))
     destination.input.disabled = false
-    destinationHint.textContent = options.length > 1 ? `可选择 ${options.length - 1} 个已有目录` : '当前会导入到笔记根目录'
+    destinationHint.textContent = options.length > 1 ? `Доступно папок: ${options.length - 1}` : '当前会导入到笔记根目录'
   }).catch(error => {
     destination.input.disabled = false
-    destinationHint.textContent = `目录读取失败，将导入到根目录：${friendlyError(error)}`
+    destinationHint.textContent = `Не удалось прочитать каталог, импорт в корень: ${friendlyError(error)}`
   })
 }
 
@@ -2511,7 +2511,7 @@ function renderNoteContent() {
 }
 
 function renderNoteSelectionLoading(node) {
-  return element('main', { class: `notes-content notes-selection-loading is-${node.kind}`, role: 'status', 'aria-label': `正在打开 ${node.name}` },
+  return element('main', { class: `notes-content notes-selection-loading is-${node.kind}`, role: 'status', 'aria-label': `Открывается ${node.name}` },
     element('header', { class: 'notes-content-header' },
       element('div', { class: 'notes-breadcrumb' }, element('span', {}, '笔记文档'), element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, node.name)),
       element('div', { class: 'notes-content-title' }, element('div', {}, element('h2', {}, node.name), element('p', {}, node.kind === 'folder' ? '正在读取目录内容' : '正在按需读取文档内容'))),
@@ -2572,7 +2572,7 @@ function renderNoteContentHeader(folder) {
       path.map(node => element('span', {}, element('span', { 'aria-hidden': 'true' }, '/'), element('button', { type: 'button', onClick: () => { void selectNoteNode(node) } }, node.name))),
     ),
     element('div', { class: 'notes-content-title' },
-      element('div', {}, element('h2', {}, folder?.name || '全部笔记'), element('p', {}, folder ? `${(state.notes.children.get(folder.id) || []).length} 个项目` : '你的独立笔记与资料目录')),
+      element('div', {}, element('h2', {}, folder?.name || '全部笔记'), element('p', {}, folder ? `${(state.notes.children.get(folder.id) || []).length} элементов` : '你的独立笔记与资料目录')),
       element('div', { class: 'notes-content-actions' },
         folder ? actionButton(noteShareForNode(folder.id) ? '分享中' : '分享目录', () => { void openNoteShare(folder) }, 'ghost small') : null,
         actionButton('已分享', () => { void navigate('shares') }, 'ghost small'),
@@ -2591,13 +2591,13 @@ function renderEditableNote(node) {
   const markdown = isMarkdownNote(node)
   const title = editableNoteTitle(node)
   const editor = markdown
-    ? element('div', { class: 'notes-live-editor', role: 'status', 'aria-label': `正在打开 ${node.name}` },
+    ? element('div', { class: 'notes-live-editor', role: 'status', 'aria-label': `Открывается ${node.name}` },
       element('div', { class: 'notes-editor-loading' }, '正在打开文档…'))
     : createPlainTextNoteEditor(node)
   const scrollHost = element('div', { class: 'notes-document-scroll', 'data-scroll-key': `notes-document:${node.id}` },
     element('h1', {
       class: 'notes-document-title', contenteditable: 'plaintext-only', spellcheck: 'false',
-      'aria-label': `修改 ${node.name} 的标题`, title: '点击修改标题',
+      'aria-label': `Изменить заголовок ${node.name}`, title: '点击修改标题',
       onInput: () => { state.notes.titleDirty = true },
       onBlur: event => { void saveEditableNoteTitle(event.currentTarget, node) },
       onKeyDown: event => {
@@ -2661,7 +2661,7 @@ async function saveEditableNoteTitle(editor, node) {
 }
 
 function createPlainTextNoteEditor(node) {
-  return element('div', { class: 'notes-plain-editor', role: 'status', 'aria-label': `正在打开 ${node.name}` },
+  return element('div', { class: 'notes-plain-editor', role: 'status', 'aria-label': `Открывается ${node.name}` },
     element('div', { class: 'notes-editor-loading' }, '正在打开文档…'))
 }
 
@@ -2681,7 +2681,7 @@ function mountMarkdownNoteEditor(host, node, frame, scrollHost, outlineHost) {
     scrollHost,
     outlineHost,
     markdown: state.notes.draft,
-    label: `编辑 ${node.name}`,
+    label: `Изменить ${node.name}`,
     isCurrent: () => state.notes.selectedNode?.id === node.id,
     onChange: updateNoteDraft,
     onSave: () => { void saveNoteDocument() },
@@ -2701,7 +2701,7 @@ function mountPlainTextNoteEditor(host, node) {
       plainTextEditorHandle = runtime.createPlainTextEditor({
         host,
         text: state.notes.draft,
-        label: `编辑 ${node.name}`,
+        label: `Изменить ${node.name}`,
         onChange: updateNoteDraft,
         onSave: () => { void saveNoteDocument() },
       })
@@ -2824,7 +2824,7 @@ function renderNoteFile(node) {
   }
   return element('main', { class: 'notes-content is-file' },
     renderNoteFileToolbar(node),
-    element('section', { class: `notes-inline-viewer is-${previewKind}`, 'aria-label': `${node.name}内容` }, preview),
+    element('section', { class: `notes-inline-viewer is-${previewKind}`, 'aria-label': `Содержимое: ${node.name}` }, preview),
     renderNoteFileStatusbar(node),
   )
 }
@@ -2883,7 +2883,7 @@ function renderNoteIcon(node, large = false) {
 function noteKindLabel(node) {
   if (node.kind === 'folder') return '目录'
   if (node.kind === 'document') return 'Markdown 笔记'
-  return `${node.mediaType || '文件'}  ${formatBytes(node.size)}`
+  return `${node.mediaType || 'файл'}  ${formatBytes(node.size)}`
 }
 
 function isMarkdownNote(node) {
@@ -3077,7 +3077,7 @@ async function copyNoteNode(node) {
     const copy = await api(`notes/${encodeURIComponent(node.id)}/copy`, { method: 'POST', body: {} })
     await loadNoteChildren(node.parentId, true)
     renderShell()
-    showToast(`已创建“${copy.name}”。`)
+    showToast(`Создано «${copy.name}».`)
   } catch (error) { showToast(friendlyError(error), 'error') }
 }
 
@@ -3356,23 +3356,23 @@ function noteTransferTitle(transfer) {
 
 function noteTransferDetail(transfer) {
   if (transfer.phase === 'error') return transfer.error || '导入过程中发生错误'
-  if (transfer.phase === 'complete') return `${transfer.files} 个文件、${transfer.folders} 个目录已写入`
+  if (transfer.phase === 'complete') return `Записано: ${transfer.files} файлов, ${transfer.folders} папок`
   if (transfer.phase === 'scanning') return transfer.currentName || '正在读取文件和目录…'
   return transfer.currentName || '准备写入…'
 }
 
 function noteTransferCount(transfer) {
-  if (transfer.phase === 'scanning') return `已读取 ${transfer.scannedItems} 项`
-  const count = `${transfer.completedItems} / ${transfer.totalItems} 项`
+  if (transfer.phase === 'scanning') return `Прочитано ${transfer.scannedItems} шт.`
+  const count = `${transfer.completedItems} / ${transfer.totalItems} шт.`
   const bytes = transfer.totalBytes ? ` · ${formatBytes(transfer.loadedBytes)} / ${formatBytes(transfer.totalBytes)}` : ''
-  const skipped = transfer.skipped ? ` · 跳过 ${transfer.skipped}` : ''
+  const skipped = transfer.skipped ? ` · пропущено ${transfer.skipped}` : ''
   return `${count}${bytes}${skipped}`
 }
 
 function showNoteImportResult(summary) {
-  const added = [summary.folders ? `${summary.folders} 个目录` : '', summary.files ? `${summary.files} 个文件` : ''].filter(Boolean).join('、')
-  const skipped = summary.skipped ? `，跳过 ${summary.skipped} 个超过 64 MiB 的文件` : ''
-  showToast(`已添加${added ? ` ${added}` : ''}${skipped}。`)
+  const added = [summary.folders ? `${summary.folders} папок` : '', summary.files ? `${summary.files} файлов` : ''].filter(Boolean).join('、')
+  const skipped = summary.skipped ? `, пропущено ${summary.skipped} файлов больше 64 МиБ` : ''
+  showToast(`Добавлено ${added ? ` ${added}` : ''}${skipped}。`)
 }
 
 async function saveNoteDocument() {
@@ -3448,12 +3448,12 @@ async function openNoteHistory(node) {
         }
         modal?.close(true)
         renderShell()
-        showToast(`已将版本 ${version.version} 恢复为新的版本 ${updated.version}。`)
+        showToast(`Версия ${version.version} восстановлена как новая версия ${updated.version}.`)
       },
       onError: error => showToast(friendlyError(error), 'error'),
     })
     modal = openModal({
-      title: `${current.name} · 页面历史`,
+      title: `${current.name} · история страницы`,
       description: '每次内容保存都会形成不可变快照；恢复历史不会删除当前版本。',
       body: view.element,
       cancelLabel: '关闭',
@@ -3485,7 +3485,7 @@ function renderNoteHistoryDiff(historical, current, heading = '历史版本 → 
   return element('section', { class: 'note-history-diff', 'aria-label': '历史版本与当前版本的逐行差异' },
     element('div', { class: 'note-history-diff-summary' },
       element('strong', {}, heading),
-      element('div', { class: 'diff-summary', 'aria-label': `新增 ${diff.additions} 行，删除 ${diff.deletions} 行` },
+      element('div', { class: 'diff-summary', 'aria-label': `Добавлено ${diff.additions} строк, удалено ${diff.deletions}` },
         element('span', { class: 'diff-stat additions' }, `+${diff.additions}`),
         element('span', { class: 'diff-stat deletions' }, `-${diff.deletions}`),
       ),
@@ -3505,8 +3505,8 @@ function renderNoteHistoryDiff(historical, current, heading = '历史版本 → 
 
 function noteDownloadButton(node, variant = 'ghost small', label = '下载', attributes = {}) {
   return actionButton(label, event => { void downloadNoteFile(node, event.currentTarget) }, variant, {
-    'aria-label': `下载 ${node.name}`,
-    title: `下载 ${node.name}`,
+    'aria-label': `Скачать ${node.name}`,
+    title: `Скачать ${node.name}`,
     ...attributes,
   })
 }
@@ -3526,9 +3526,9 @@ async function downloadNoteFile(node, button) {
     const anchor = element('a', { href: url, download: current.name })
     document.body.append(anchor); anchor.click(); anchor.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-    showToast(`已下载 ${current.name}。`)
+    showToast(`Скачано ${current.name}.`)
   } catch (error) {
-    showToast(`下载失败：${friendlyError(error)}`, 'error')
+    showToast(`Ошибка скачивания: ${friendlyError(error)}`, 'error')
   } finally {
     if (button?.isConnected) {
       button.disabled = false
@@ -3562,7 +3562,7 @@ async function openNoteShare(node) {
     }
     showNoteShareDialog(share)
   } catch (error) {
-    showToast(`创建分享失败：${friendlyError(error)}`, 'error')
+    showToast(`Не удалось создать ссылку: ${friendlyError(error)}`, 'error')
   }
 }
 
@@ -3570,7 +3570,7 @@ function showNoteShareDialog(share) {
   const url = noteShareUrl(share)
   const input = Object.assign(element('input', {
     class: 'input notes-share-link-input', readonly: true, value: url,
-    'aria-label': `${share.node.name} 的分享链接`, onFocus: event => event.currentTarget.select(),
+    'aria-label': `Ссылка на «${share.node.name}»`, onFocus: event => event.currentTarget.select(),
   }), { value: url })
   let modal
   const body = element('div', { class: 'notes-share-dialog-body' },
@@ -3593,7 +3593,7 @@ function showNoteShareDialog(share) {
 
 function confirmRemoveNoteShare(share, afterRemove) {
   openConfirm({
-    title: `停止分享“${share.node.name}”？`,
+    title: `Прекратить доступ к «${share.node.name}»?`,
     message: '现有分享链接会立即失效，原笔记内容不会被删除。',
     confirmLabel: '停止分享',
     danger: true,
@@ -3620,12 +3620,12 @@ async function confirmDeleteNoteNode(node) {
       const names = references.slice(0, 4).map(item => `“${item.documentTitle}”`).join('、')
       return openModal({
         title: '仍被知识文档引用', description: node.name,
-        body: element('p', {}, `${names}${references.length > 4 ? `等 ${references.length} 篇文档` : ''}仍在引用这里的内容。请先移除引用，再删除。`),
+        body: element('p', {}, `${names}${references.length > 4 ? `и ещё ${references.length} документов` : ''} всё ещё ссылаются на это. Сначала уберите ссылки, потом удаляйте.`),
         cancelLabel: '知道了',
       })
     }
     openConfirm({
-      title: `删除“${node.name}”？`,
+      title: `Удалить «${node.name}»?`,
       message: node.kind === 'folder' ? '目录及其全部子目录和文件会被永久删除。' : '该文档会被永久删除，此操作无法撤销。',
       confirmLabel: '永久删除', danger: true,
       onConfirm: async () => {
@@ -3732,7 +3732,7 @@ function renderCandidates() {
       ),
     ),
     state.candidates.length ? element('div', { class: 'candidate-list' }, state.candidates.map(renderCandidateCard))
-      : emptyState(`没有${STATUS_LABELS[state.candidateStatus]}候选`, state.candidateStatus === 'pending' ? '新的对话结束后，插件会在后台判断是否产生候选。' : '切换其他状态查看历史记录。'),
+      : emptyState(`Нет кандидатов: ${STATUS_LABELS[state.candidateStatus]}`, state.candidateStatus === 'pending' ? '新的对话结束后，插件会在后台判断是否产生候选。' : '切换其他状态查看历史记录。'),
   )
 }
 
@@ -3762,8 +3762,8 @@ function renderCandidateCard(candidate) {
         element('section', {},
           element('strong', {}, '写入位置'),
           element('span', { class: 'candidate-target' }, candidate.action === 'create'
-            ? `创建“${candidate.draft.title}”`
-            : target ? `${candidate.change?.kind === 'group' ? '调整分组：' : candidate.change?.kind === 'finalize' ? '结束整篇' : candidate.change?.kind === 'revise' ? '修订' : '补充到'}“${target.title}”` : `目标 ${candidate.targetId || '不可用'}`),
+            ? `Создать «${candidate.draft.title}»`
+            : target ? `${candidate.change?.kind === 'group' ? 'Смена группы: ' : candidate.change?.kind === 'finalize' ? 'Завершить документ' : candidate.change?.kind === 'revise' ? 'Исправить' : 'Дополнить'}«${target.title}»` : `Цель ${candidate.targetId || 'недоступна'}`),
         ),
         renderCandidateMetadataChanges(candidate, target),
         element('section', {},
@@ -3777,7 +3777,7 @@ function renderCandidateCard(candidate) {
       ),
     ),
     element('div', { class: 'candidate-footer' },
-      element('small', {}, `${scopeLabel(candidate.draft.scope)} · 置信度 ${Math.round(candidate.draft.confidence * 100)}%${candidate.targetId ? ` · 目标 ${candidate.targetId}` : ''} · ${formatDate(candidate.createdAt)}`),
+      element('small', {}, `${scopeLabel(candidate.draft.scope)} · уверенность ${Math.round(candidate.draft.confidence * 100)}%${candidate.targetId ? ` · цель ${candidate.targetId}` : ''} · ${formatDate(candidate.createdAt)}`),
       pending ? element('div', { class: 'candidate-actions' },
         actionButton('拒绝', () => reviewCandidate(candidate, 'reject'), 'danger small'),
         ['finalize', 'group'].includes(candidate.change?.kind) ? null : actionButton(action.editLabel, () => openEntryEditor(undefined, candidate), 'small', {
@@ -3797,17 +3797,17 @@ function renderCandidateDiff(candidate, target) {
   if (candidate.change?.kind === 'group') {
     return element('section', { class: 'candidate-change' },
       element('strong', {}, '调整文档分组'),
-      element('p', {}, `${target?.group || '未分组'} → ${candidate.change.group}`),
+      element('p', {}, `${target?.group || 'без группы'} → ${candidate.change.group}`),
       element('p', {}, '只修改分组，正文、标签、路径和完成状态保持不变。'),
       target && target.version !== candidate.change.baseVersion ? element('p', { role: 'alert' }, '文档版本已变化，请拒绝后重新提交分组调整。') : null,
     )
   }
   if (candidate.change?.kind === 'finalize') {
     return element('section', { class: 'candidate-change', 'aria-label': '文档结束预览' },
-      element('strong', {}, `${target?.title || candidate.draft.title} · ${candidate.change.state === 'resolved' ? '标记已解决' : '标记收集完成'}`),
-      element('p', {}, `确认版本：${candidate.change.baseVersion} · 当前版本：${target?.version ?? '不可用'}`),
-      element('p', {}, `用户确认：${candidate.change.confirmation}`),
-      element('p', {}, `结论：${candidate.change.note}`),
+      element('strong', {}, `${target?.title || candidate.draft.title} · ${candidate.change.state === 'resolved' ? 'отметить решённым' : 'отметить завершённым'}`),
+      element('p', {}, `Базовая версия: ${candidate.change.baseVersion} · текущая: ${target?.version ?? 'недоступна'}`),
+      element('p', {}, `Подтверждение пользователя: ${candidate.change.confirmation}`),
+      element('p', {}, `Вывод: ${candidate.change.note}`),
       target && candidate.status === 'pending' && (target.documentState !== 'open' || target.version !== candidate.change.baseVersion)
         ? element('p', { role: 'alert' }, '文档已变化，请拒绝此候选后重新读取并确认。') : null,
       element('p', {}, '正文保持不变，整篇将停止回写；需要继续补充时可在文档中重新打开。'),
@@ -3825,18 +3825,18 @@ function renderCandidateDiff(candidate, target) {
     : candidate.action === 'conflict' ? '冲突处理预览' : candidate.change?.kind === 'revise' ? '原文修订预览' : '内容补充预览'
   const targetLabel = candidate.action === 'create'
     ? candidate.draft.title
-    : `${target.title} · 当前版本 ${target.version}`
+    : `${target.title} · текущая версия ${target.version}`
   return element('section', { class: `candidate-change is-${candidate.action}`, 'aria-label': title },
     element('div', { class: 'candidate-change-heading' },
       element('div', {}, element('strong', {}, title), element('small', {}, targetLabel)),
-      element('div', { class: 'diff-summary', 'aria-label': `新增 ${review.diff.additions} 行，删除 ${review.diff.deletions} 行，未变更 ${review.diff.unchanged} 行` },
+      element('div', { class: 'diff-summary', 'aria-label': `Добавлено ${review.diff.additions}, удалено ${review.diff.deletions}, без изменений ${review.diff.unchanged}` },
         element('span', { class: 'diff-stat additions' }, `+${review.diff.additions}`),
         element('span', { class: 'diff-stat deletions' }, `-${review.diff.deletions}`),
-        element('span', { class: 'diff-stat unchanged' }, `${review.diff.unchanged} 未变`),
+        element('span', { class: 'diff-stat unchanged' }, `${review.diff.unchanged} без изменений`),
       ),
     ),
     review.diff.simplified ? element('div', { class: 'diff-notice' }, '文档变更较大，已使用简化差异视图。合并内容不受影响。') : null,
-    element('div', { class: 'diff-viewer', role: 'table', 'aria-label': `${title}逐行差异` },
+    element('div', { class: 'diff-viewer', role: 'table', 'aria-label': `${title} — построчные различия` },
       element('div', { class: 'diff-column-headings', role: 'row' },
         element('span', { role: 'columnheader' }, '旧'),
         element('span', { role: 'columnheader' }, '新'),
@@ -3852,17 +3852,17 @@ function renderCandidateDiff(candidate, target) {
 
 function renderDiffLine(line) {
   if (line.kind === 'omitted') {
-    return element('div', { class: 'diff-line is-omitted', role: 'row', 'aria-label': `${line.count} 行未变更，已折叠` },
+    return element('div', { class: 'diff-line is-omitted', role: 'row', 'aria-label': `${line.count} строк без изменений, свёрнуто` },
       element('span', { class: 'diff-line-number', 'aria-hidden': 'true' }),
       element('span', { class: 'diff-line-number', 'aria-hidden': 'true' }),
       element('span', { class: 'diff-marker', 'aria-hidden': 'true' }, '…'),
-      element('span', { class: 'diff-omitted-copy' }, `${line.count} 行未变更`),
+      element('span', { class: 'diff-omitted-copy' }, `${line.count} строк без изменений`),
     )
   }
   const marker = line.kind === 'add' ? '+' : line.kind === 'remove' ? '-' : ' '
   const label = line.kind === 'add'
-    ? `新增第 ${line.newLine} 行`
-    : line.kind === 'remove' ? `删除原第 ${line.oldLine} 行` : `未变更行 ${line.oldLine}`
+    ? `Добавлена строка ${line.newLine}`
+    : line.kind === 'remove' ? `Удалена строка ${line.oldLine}` : `Строка без изменений ${line.oldLine}`
   return element('div', { class: `diff-line is-${line.kind}`, role: 'row', 'aria-label': label },
     element('span', { class: 'diff-line-number', role: 'cell' }, line.oldLine || ''),
     element('span', { class: 'diff-line-number', role: 'cell' }, line.newLine || ''),
@@ -3875,11 +3875,11 @@ function renderCandidateMetadataChanges(candidate, target) {
   if (candidate.change?.kind === 'finalize') return null
   if (!target || candidate.action === 'create') return null
   const changes = []
-  if (target.title !== candidate.draft.title) changes.push(`标题：${target.title} → ${candidate.draft.title}`)
+  if (target.title !== candidate.draft.title) changes.push(`Заголовок: ${target.title} → ${candidate.draft.title}`)
   const addedTags = candidate.draft.tags.filter(tag => !target.tags.includes(tag))
-  if (addedTags.length) changes.push(`新增标签：${addedTags.join('、')}`)
+  if (addedTags.length) changes.push(`Новые теги: ${addedTags.join(', ')}`)
   if (candidate.draft.confidence > target.confidence) {
-    changes.push(`置信度：${Math.round(target.confidence * 100)}% → ${Math.round(candidate.draft.confidence * 100)}%`)
+    changes.push(`Уверенность: ${Math.round(target.confidence * 100)}% → ${Math.round(candidate.draft.confidence * 100)}%`)
   }
   if (!changes.length) return null
   return element('section', { class: 'candidate-metadata' },
@@ -3939,7 +3939,7 @@ function renderTokenRow(token) {
     element('div', {},
       element('strong', {}, token.name, ' ', revoked ? badge('已撤销', 'danger') : badge('有效', 'success')),
       element('div', { class: 'permissions' }, token.permissions.map(permission => badge(permission))),
-      element('small', {}, `创建于 ${formatDate(token.createdAt)}${token.lastUsedAt ? ` · 最近使用 ${formatDate(token.lastUsedAt)}` : ' · 尚未使用'}`),
+      element('small', {}, `Создан ${formatDate(token.createdAt)}${token.lastUsedAt ? ` · последнее использование ${formatDate(token.lastUsedAt)}` : ' · ещё не использовался'}`),
     ),
     revoked
       ? actionButton('永久删除', () => confirmDeleteToken(token), 'danger small')
@@ -4066,8 +4066,8 @@ function openBulkMountEditor() {
   const excludeTags = formField('排除标签', 'input', '', { placeholder: '可选，逗号分隔' })
   const form = element('form', { class: 'form-grid' },
     element('div', { class: 'selection-summary span-2' },
-      element('strong', {}, `将挂载 ${bases.length} 个知识库`),
-      element('p', {}, bases.slice(0, 8).map(knowledgeBasePathLabel).join('、'), bases.length > 8 ? ` 等 ${bases.length} 个` : ''),
+      element('strong', {}, `Будет подключено баз: ${bases.length}`),
+      element('p', {}, bases.slice(0, 8).map(knowledgeBasePathLabel).join('、'), bases.length > 8 ? ` и ещё ${bases.length}` : ''),
     ),
     element('label', { class: 'check-option' }, recall, element('span', {}, element('strong', {}, '开启召回'), element('small', {}, '回答前检索所选知识库。'))),
     writeMode.wrapper,
@@ -4075,10 +4075,10 @@ function openBulkMountEditor() {
     excludeTags.wrapper,
   )
   openSheet({
-    title: `批量挂载到${manager.targetKind === 'project' ? '项目' : '会话'}`,
+    title: `Подключить к ${manager.targetKind === 'project' ? 'проекту' : 'сессии'}`,
     description: targetId,
     body: form,
-    primaryLabel: `挂载 ${bases.length} 个`,
+    primaryLabel: `Подключено ${bases.length}`,
     onPrimary: async () => {
       const include = parseTags(includeTags.input.value)
       const exclude = parseTags(excludeTags.input.value)
@@ -4101,7 +4101,7 @@ function openBulkMountEditor() {
         deleteIds: [],
       } })
       manager.selectedIds.clear()
-      showToast(`已批量挂载 ${bases.length} 个知识库。`)
+      showToast(`Подключено баз: ${bases.length}.`)
       await navigate('bases')
       return true
     },
@@ -4122,7 +4122,7 @@ async function bulkRemoveMounts() {
   try {
     await api('mounts/bulk', { method: 'POST', body: { upserts: [], deleteIds: explicit.map(mount => mount.id) } })
     manager.selectedIds.clear()
-    showToast(manager.targetKind === 'session' ? `已恢复 ${explicit.length} 个知识库的项目继承。` : `已取消 ${explicit.length} 个项目挂载。`)
+    showToast(manager.targetKind === 'session' ? `Восстановлено наследование проекта для баз: ${explicit.length}.` : `Отключено подключений проекта: ${explicit.length}.`)
     await navigate('bases')
   } catch (error) {
     showToast(friendlyError(error), 'error')
@@ -4174,7 +4174,7 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
   enabled.addEventListener('change', updateAvailability)
   updateAvailability()
   openSheet({
-    title: `${targetKind === 'project' ? '项目' : '会话'}挂载 · ${knowledgeBasePathLabel(base)}`,
+    title: `${targetKind === 'project' ? 'Проект' : 'Сессия'} · ${knowledgeBasePathLabel(base)}`,
     description: targetId,
     body: form,
     primaryLabel: '保存挂载',
@@ -4203,7 +4203,7 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
 
 function confirmArchiveKnowledgeBase(base) {
   openConfirm({
-    title: `归档“${base.name}”？`,
+    title: `Архивировать «${base.name}»?`,
     message: '归档后所有挂载会自动关闭，其中的知识仍保留，但不再参与召回与回写。',
     confirmLabel: '确认归档', danger: true,
     onConfirm: async () => {
@@ -4216,7 +4216,7 @@ function confirmArchiveKnowledgeBase(base) {
 
 function confirmRestoreKnowledgeBase(base) {
   openConfirm({
-    title: `恢复“${base.name}”？`,
+    title: `Восстановить «${base.name}»?`,
     message: '恢复后知识库可再次挂载；之前归档时关闭的挂载不会自动重开。',
     confirmLabel: '确认恢复', danger: false,
     onConfirm: async () => {
@@ -4239,7 +4239,7 @@ function confirmDeleteKnowledgeBase(base) {
   )
   confirmation.wrapper.classList.add('delete-base-confirmation')
   openModal({
-    title: `永久删除“${base.name}”？`,
+    title: `Удалить навсегда «${base.name}»?`,
     description: '只有已归档知识库可以永久删除。',
     body: form,
     primaryLabel: '永久删除',
@@ -4374,7 +4374,7 @@ async function loadModelCatalog() {
   try {
     state.modelCatalog = await readModelCatalog()
   } catch (error) {
-    showToast(`无法读取当前 DSH 的模型目录：${error.message}，重新打开可重试。`, 'error')
+    showToast(`Не удалось прочитать каталог моделей DSH: ${error.message}. Откройте заново, чтобы повторить.`, 'error')
   }
   return state.modelCatalog || []
 }
@@ -4382,14 +4382,14 @@ async function loadModelCatalog() {
 function modelRouteFields(currentProvider, currentModel) {
   const providers = [...(state.modelCatalog || [])]
   if (currentProvider && !providers.some(item => item.id === currentProvider)) {
-    providers.push({ id: currentProvider, name: `${currentProvider}（当前配置）`, models: [] })
+    providers.push({ id: currentProvider, name: `${currentProvider} (текущая настройка)`, models: [] })
   }
   const provider = selectField('模型提供方', providers.map(item => ({ value: item.id, label: item.name || item.id })), currentProvider || providers[0]?.id || '')
   const model = selectField('回写模型', [], '')
   const refreshModels = preferred => {
     const selected = providers.find(item => item.id === provider.input.value)
     const models = [...(selected?.models || [])]
-    if (preferred && !models.some(item => item.id === preferred)) models.push({ id: preferred, name: `${preferred}（当前配置）` })
+    if (preferred && !models.some(item => item.id === preferred)) models.push({ id: preferred, name: `${preferred} (текущая настройка)` })
     model.input.replaceChildren(...models.map(item => element('option', {
       value: item.id, selected: item.id === preferred,
     }, item.name && item.name !== item.id ? `${item.name} · ${item.id}` : item.id)))
@@ -4407,7 +4407,7 @@ async function reviewCandidate(candidate, decision, resolution) {
   const message = !approve
     ? '拒绝后会保留审核记录，但不会进入知识库。'
     : candidate.change?.kind === 'group'
-      ? `确认后仅将文档归入“${candidate.change.group}”，不修改正文或完成状态。`
+      ? `Документ будет только помещён в «${candidate.change.group}» — текст и статус не изменятся.`
     : candidate.change?.kind === 'finalize'
       ? '确认后整篇文档将结束并停止回写，正文保持不变。如需继续补充，可在文档中重新打开；版本变化时本次确认不会生效。'
     : candidate.action === 'create'
@@ -4417,8 +4417,8 @@ async function reviewCandidate(candidate, decision, resolution) {
           ? '确认后会按预览替换或删除原文。请重点核对红色删除行和绿色新增行。'
           : '确认后会保留当前文档，并补充候选内容。'
         : candidate.change?.kind === 'revise'
-          ? '确认后会按预览修订原文；无关的并发补充会被保留，同一区域变化会转为冲突。'
-          : '确认后将按预览补充目标文档；若出现矛盾会转为冲突项。'
+          ? 'После подтверждения текст будет исправлен по предпросмотру; посторонние параллельные дополнения сохранятся, а изменения в той же области станут конфликтами.'
+          : 'После подтверждения документ будет дополнен по предпросмотру; при противоречиях появятся конфликты.'
   openConfirm({
     title,
     message,
@@ -4428,7 +4428,7 @@ async function reviewCandidate(candidate, decision, resolution) {
         method: 'POST', body: { decision, ...(resolution ? { resolution } : {}) },
       })
       if (approve && reviewed.status === 'pending' && reviewed.action === 'conflict') {
-        showToast('审核期间知识已变化，候选已转为冲突项，请比较后重新确认。')
+        showToast('За время проверки знания изменились, кандидат стал конфликтом — сравните и подтвердите заново.')
         state.stats = null
         await navigate('candidates')
         return
@@ -4443,7 +4443,7 @@ async function reviewCandidate(candidate, decision, resolution) {
 function openBulkApprove() {
   if (state.candidateBatchRunning) return
   const pendingCount = state.stats?.candidates.pending ?? state.candidates.length
-  const summary = element('strong', {}, `准备处理 ${pendingCount} 条待审核候选`)
+  const summary = element('strong', {}, `К обработке ${pendingCount} кандидатов на проверке`)
   const detail = element('p', {}, '开始后会按创建时间分批处理，并实时显示结果。')
   const metrics = element('div', { class: 'bulk-review-metrics' })
   const status = element('div', {
@@ -4469,7 +4469,7 @@ function openBulkApprove() {
       const totals = { approved: 0, deferred: 0, failed: 0, selected: 0, remainingReviewable: pendingCount, remainingManual: 0 }
       const updateProgress = (message = '正在按顺序审核候选…') => {
         summary.textContent = message
-        detail.textContent = `已检查 ${totals.selected} 条；每批最多 25 条。`
+        detail.textContent = `Проверено ${totals.selected}; не более 25 за раз.`
         metrics.replaceChildren(
           bulkReviewMetric('已通过', totals.approved, 'success'),
           bulkReviewMetric('转为冲突', totals.deferred, 'warning'),
@@ -4495,18 +4495,18 @@ function openBulkApprove() {
           if (result.selected === 0) throw new Error('批量审核没有继续推进；剩余候选已保留，请刷新后重试。')
         }
         if (totals.remainingReviewable > 0) throw new Error('待审核候选过多，本次处理已达到安全上限，请再次执行。')
-        summary.textContent = totals.approved > 0 ? `已通过 ${totals.approved} 条候选` : '没有可自动通过的候选'
+        summary.textContent = totals.approved > 0 ? `Одобрено кандидатов: ${totals.approved}` : '没有可自动通过的候选'
         detail.textContent = totals.remainingManual > 0
-          ? `仍有 ${totals.remainingManual} 条冲突或失败项保留，需逐条确认。`
+          ? `Осталось ${totals.remainingManual} конфликтов или ошибок — подтвердите по одному.`
           : '待审核队列已处理完成。'
         state.stats = null
         await loadCandidates()
         state.candidateBatchRunning = false
         renderShell()
-        const parts = [`已通过 ${totals.approved} 条`]
-        if (totals.deferred) parts.push(`${totals.deferred} 条转为冲突`)
-        if (totals.failed) parts.push(`${totals.failed} 条失败并保留`)
-        if (totals.remainingManual) parts.push(`${totals.remainingManual} 条待人工处理`)
+        const parts = [`Одобрено ${totals.approved}`]
+        if (totals.deferred) parts.push(`${totals.deferred} стали конфликтами`)
+        if (totals.failed) parts.push(`${totals.failed} с ошибкой, сохранены`)
+        if (totals.remainingManual) parts.push(`${totals.remainingManual} требуют ручной обработки`)
         showToast(`${parts.join('，')}。`, totals.failed ? 'error' : '')
         return true
       } finally {
@@ -4547,7 +4547,7 @@ async function openHistory(entry) {
       element('div', { class: 'history-line' }, element('span', { class: 'history-dot', 'aria-hidden': 'true' })),
       element('div', { class: 'history-content' }, element('strong', {}, `v${version.version} · ${CHANGE_LABELS[version.changeKind]}`), element('small', {}, formatDate(version.createdAt)), element('p', {}, version.snapshot.body)),
     )))
-    openModal({ title: `${entry.title} · 版本历史`, description: '每次修改都会保留不可变快照。', body: content, cancelLabel: '关闭' })
+    openModal({ title: `${entry.title} · история версий`, description: '每次修改都会保留不可变快照。', body: content, cancelLabel: '关闭' })
   } catch (error) { showToast(friendlyError(error), 'error') }
 }
 
@@ -4583,7 +4583,7 @@ function showSecret(token) {
 }
 
 function confirmRevokeToken(token) {
-  openConfirm({ title: `撤销“${token.name}”？`, message: '使用此令牌的客户端会立即失去访问权限，此操作不可撤销。', confirmLabel: '确认撤销', danger: true, onConfirm: async () => {
+  openConfirm({ title: `Отозвать «${token.name}»?`, message: '使用此令牌的客户端会立即失去访问权限，此操作不可撤销。', confirmLabel: '确认撤销', danger: true, onConfirm: async () => {
     await api(`tokens/${encodeURIComponent(token.id)}`, { method: 'DELETE' })
     showToast('令牌已撤销。')
     await loadTokens()
@@ -4592,7 +4592,7 @@ function confirmRevokeToken(token) {
 }
 
 function confirmDeleteToken(token) {
-  openConfirm({ title: `永久删除“${token.name}”？`, message: '这条已撤销令牌记录会被永久删除，此操作无法撤销。', confirmLabel: '永久删除', danger: true, onConfirm: async () => {
+  openConfirm({ title: `Удалить навсегда «${token.name}»?`, message: '这条已撤销令牌记录会被永久删除，此操作无法撤销。', confirmLabel: '永久删除', danger: true, onConfirm: async () => {
     await api(`tokens/${encodeURIComponent(token.id)}`, { method: 'DELETE' })
     showToast('已撤销令牌已永久删除。')
     await loadTokens()
@@ -4605,7 +4605,7 @@ function formatDate(value) {
 }
 
 function scopeLabel(scope) {
-  return scope.kind === 'global' ? '全局' : `项目 · ${scope.id}`
+  return scope.kind === 'global' ? '全局' : `Проект · ${scope.id}`
 }
 
 function friendlyError(error) {

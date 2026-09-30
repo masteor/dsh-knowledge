@@ -120,5 +120,5 @@ function automaticRecallQuery(
 function shouldRecall(query: string): boolean {
   const normalized = query.normalize('NFKC').trim().toLocaleLowerCase('zh-CN')
   if (normalized.length < 2) return false
-  return !/^(?:你好|您好|嗨|哈喽|hello|hi|hey|谢谢|感谢|ok|okay|好的|在吗)[!！,.，。?？\s]*$/iu.test(normalized)
+  return !/^(?:你好|您好|嗨|哈喽|hello|hi|hey|谢谢|感谢|ok|okay|好的|在吗|привет|прив|здравствуй(?:те)?|добрый (?:день|вечер)|доброе утро|спасибо|благодарю|понятно|ясно|хорошо|ага|угу)[!！,.，。?？\s]*$/iu.test(normalized)
 }

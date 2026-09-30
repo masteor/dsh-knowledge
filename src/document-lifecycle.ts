@@ -27,16 +27,18 @@ export function assertLifecycleConfirmation(text: string, quote: string, state: 
   if (!evidence || evidence.length > 2000 || !normalized.includes(evidence)) throw new Error('请引用本轮用户明确确认解决或结束的原话')
   const clause = normalized.split(/[。！!；;\n]/u).find(value => value.includes(evidence)) ?? evidence
   if (/[?？]/u.test(clause) || /(?:是否|能否|是不是|好像|似乎|可能|也许|应该|大概|要是)/u.test(clause)
-    || /(?:解决|完成|结束)(?:了)?(?:吗|么|嘛)/u.test(clause)) throw new Error('疑问或不确定表述不能作为结束确认')
-  if (/(?:不代表|不表示|不意味着|不能算|不确定|不知道|未确认|没有确认|一旦|等到|假设|如果|假如|要是).{0,80}(?:解决|修复|完成|结束)|\b(?:wasn't|wasn’t|isn’t|isn't|hasn't|hasn’t|if|unless)\b.{0,80}\b(?:resolved|fixed|completed|finished)\b/iu.test(normalized)) throw new Error('尚未确认或假设性的说明不能作为结束确认')
+    || /(?:解决|完成|结束)(?:了)?(?:吗|么|嘛)/u.test(clause)
+    || /(?:ли|разве|неужели|вроде|кажется|возможно|наверн|может быть|ежели)/iu.test(clause)) throw new Error('疑问或不确定表述不能作为结束确认')
+  if (/(?:不代表|不表示|不意味着|不能算|不确定|不知道|未确认|没有确认|一旦|等到|假设|如果|假如|要是).{0,80}(?:解决|修复|完成|结束)|\b(?:wasn't|wasn’t|isn’t|isn't|hasn't|hasn’t|if|unless)\b.{0,80}\b(?:resolved|fixed|completed|finished)\b|(?:не значит|не означает|не считается|не уверен|неизвестно|не подтвержд|если|ежели|предположим|допустим).{0,80}(?:реш|исправ|заверш|законч|готов|сделан)/iu.test(normalized)) throw new Error('尚未确认或假设性的说明不能作为结束确认')
   // A later negation or refusal must defeat an earlier affirmative quotation.
-  if (/(?:没有|还没|尚未|未能|并未|不算|没|未).{0,8}(?:解决|完成|结束)|(?:不要|别|不必|暂不).{0,14}(?:标记|封存|关闭|结束)|(?:如果|假如|假设|若是).{0,20}(?:解决|完成|结束)|\b(?:not|never|isn't|isn’t|hasn't|hasn’t|don't|don’t)\b.{0,20}\b(?:resolved|fixed|complete|completed|close|mark)\b/iu.test(normalized)) {
+  if (/(?:没有|还没|尚未|未能|并未|不算|没|未).{0,8}(?:解决|完成|结束)|(?:不要|别|不必|暂不).{0,14}(?:标记|封存|关闭|结束)|(?:如果|假如|假设|若是).{0,20}(?:解决|完成|结束)|\b(?:not|never|isn't|isn’t|hasn't|hasn’t|don't|don’t)\b.{0,20}\b(?:resolved|fixed|complete|completed|close|mark)\b|(?:не|ещё не|еще не|пока не|так и не).{0,8}(?:реш|исправ|заверш|законч|готов|сделан)|(?:не надо|не нужно|нельзя|не стоит|повремени).{0,14}(?:помеч|закрыв|заверш|законч|архив|отмет)|(?:если|ежели|предположим|допустим).{0,20}(?:реш|исправ|заверш|законч)/iu.test(normalized)) {
     throw new Error('本轮包含未解决、假设或拒绝标记的说明，不能自动结束文档')
   }
-  if (/[?？]/u.test(evidence) || /(?:是否|能否|是不是|好像|似乎|可能|也许|应该|大概|要是)/u.test(evidence)) throw new Error('疑问或不确定表述不能作为结束确认')
+  if (/[?？]/u.test(evidence) || /(?:是否|能否|是不是|好像|似乎|可能|也许|应该|大概|要是)/u.test(evidence)
+    || /(?:ли|разве|неужели|вроде|кажется|возможно|наверн|может быть|ежели)/iu.test(evidence)) throw new Error('疑问或不确定表述不能作为结束确认')
   const confirmed = state === 'resolved'
-    ? /(?:已(?:经)?解决|解决了|解决好|已(?:经)?修复|修好了|问题好了|标记.{0,6}(?:解决|修复)|\b(?:resolved|fixed)\b)/iu.test(evidence)
-    : state === 'complete' && /(?:已(?:经)?完成|完成了|收集完成|已(?:经)?结束|结束了|可以结束|就此结束|不再补充|标记.{0,6}(?:完成|结束)|\b(?:completed|finished)\b)/iu.test(evidence)
+    ? /(?:已(?:经)?解决|解决了|解决好|已(?:经)?修复|修好了|问题好了|标记.{0,6}(?:解决|修复)|\b(?:resolved|fixed)\b|(?:решён|решен|решена|решено|исправлен|исправлено|починен|починено|устранён|устранен|поправлен|поправлено|вопрос закрыт|проблема решена|баг исправлен|ошибка устранена)|(?:помеч|отмет).{0,10}(?:решён|решен|исправлен))/iu.test(evidence)
+    : state === 'complete' && /(?:已(?:经)?完成|完成了|收集完成|已(?:经)?结束|结束了|可以结束|就此结束|不再补充|标记.{0,6}(?:完成|结束)|\b(?:completed|finished)\b|(?:завершён|завершен|завершена|завершено|закончен|закончено|готово|сделано|выполнен|выполнено|собрано|можно закрывать|всё готово|все готово)|(?:помеч|отмет).{0,10}(?:завершён|завершен|закончен|выполнен))/iu.test(evidence)
   if (!confirmed) throw new Error('需要用户明确确认“已解决”或“收集完成／结束”，普通“好了”不自动封存知识')
 }
 
