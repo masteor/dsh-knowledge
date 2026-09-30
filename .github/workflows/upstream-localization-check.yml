@@ -1,0 +1,183 @@
+name: Проверка обновлений upstream
+
+# Следит за новыми версиями оригинального плагина и сообщает, сколько строк
+# требует перевода. НИЧЕГО НЕ ПУШИТ и не переводит автоматически — только
+# проверяет и открывает issue.
+#
+# Почему без автоперевода:
+#   * LLM-ключ в CI — лишняя поверхность атаки для публичного форка;
+#   * перевод недетерминирован, каждый прогон давал бы шумные диффы;
+#   * качество перевода нельзя проверить автотестом;
+#   * словарь из 1179 проверенных пар — главная ценность, машинный
+#     перевод его размыл бы.
+#
+# Поэтому CI делает механическую часть (перенос по словарю + сборка + тесты),
+# а перевод новых строк остаётся за человеком: их обычно 5–20 на релиз.
+
+on:
+  schedule:
+    # каждый день в 06:00 UTC (09:00 МСК)
+    - cron: '0 6 * * *'
+  workflow_dispatch:        # и по кнопке
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрать форк с переводом
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ru-localization
+
+      - name: Подключить upstream
+        run: |
+          git remote add upstream https://github.com/lemoncat7/dsh-knowledge.git
+          git fetch upstream main --depth=200
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Настроить git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Сколько коммитов отстаём
+        id: behind
+        run: |
+          N=$(git rev-list --count HEAD..upstream/main || echo 0)
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "Отстаём на $N коммитов"
+
+      # Если обновлений нет — дальше идти незачем
+      - name: Обновлений нет
+        if: steps.behind.outputs.count == '0'
+        run: echo "Перевод на актуальной версии."
+
+      # Прогоняем перенос ТОЛЬКО по существующему словарю (без LLM, без секретов).
+      # Скрипт пересоздаёт ветку, поэтому результат смотрим в рабочем дереве,
+      # но НЕ пушим.
+      - name: Перенести перевод по словарю
+        if: steps.behind.outputs.count != '0'
+        working-directory: i18n
+        run: |
+          set +e
+          node update-localization.mjs --report > report.txt 2>&1
+          cat report.txt
+          exit 0
+
+      - name: Собрать список непереведённых строк
+        if: steps.behind.outputs.count != '0'
+        id: strings
+        run: |
+          F=i18n/untranslated.txt
+          if [ -f "$F" ]; then
+            N=$(wc -l < "$F")
+          else
+            N=0
+          fi
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "Новых строк без перевода: $N"
+
+      # Проверяем, что перенос не ломает сборку и тесты. Это ловит случаи,
+      # когда автор переписал код так, что словарь больше не подходит.
+      - name: Установить зависимости
+        if: steps.behind.outputs.count != '0'
+        run: npm ci || npm install
+
+      - name: Сборка
+        if: steps.behind.outputs.count != '0'
+        id: build
+        continue-on-error: true
+        run: npm run build 2>&1 | tail -20
+
+      - name: Тесты
+        if: steps.behind.outputs.count != '0'
+        id: test
+        continue-on-error: true
+        run: |
+          npm test 2>&1 | tee test-output.txt | grep -E "^# (tests|pass|fail)" || true
+
+      - name: Итог тестов
+        if: steps.behind.outputs.count != '0'
+        id: testcount
+        run: |
+          P=$(grep -oP '^# pass \K\d+' test-output.txt 2>/dev/null | tail -1 || echo '?')
+          F=$(grep -oP '^# fail \K\d+' test-output.txt 2>/dev/null | tail -1 || echo '?')
+          echo "pass=$P" >> "$GITHUB_OUTPUT"
+          echo "fail=$F" >> "$GITHUB_OUTPUT"
+
+      - name: Открыть issue
+        if: steps.behind.outputs.count != '0' && steps.strings.outputs.count != '0'
+        uses: actions/github-script@v7
+        env:
+          BEHIND: ${{ steps.behind.outputs.count }}
+          UNTRANSLATED: ${{ steps.strings.outputs.count }}
+          PASSED: ${{ steps.testcount.outputs.pass }}
+          FAILED: ${{ steps.testcount.outputs.fail }}
+          BUILD_OK: ${{ steps.build.outcome }}
+        with:
+          script: |
+            const behind = process.env.BEHIND;
+            const n = process.env.UNTRANSLATED;
+            const passed = process.env.PASSED;
+            const failed = process.env.FAILED;
+            const buildOk = process.env.BUILD_OK === 'success' ? 'да' : 'НЕТ';
+
+            // Не плодим дубли: ищем уже открытый issue
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'upstream-update',
+            });
+            if (existing.data.length > 0) {
+              core.info('Issue уже открыт — пропускаю');
+              return;
+            }
+
+            const body = [
+              '## Вышла новая версия оригинального плагина',
+              '',
+              `Отстаём от upstream на **${behind}** коммитов.`,
+              '',
+              '### Что уже сделано автоматически',
+              '',
+              '- перевод перенесён по словарю (только существующие пары, без машинного перевода)',
+              `- сборка: ${buildOk}`,
+              `- тесты: **${passed}** пройдено, **${failed}** упало`,
+              '',
+              '### Что нужно сделать вручную',
+              '',
+              `Перевести **${n}** новых строк. Список — в \`i18n/untranslated.txt\`.`,
+              '',
+              '```bash',
+              'cd ~/.dsh/plugin-patches/dsh-knowledge/i18n',
+              'node update-localization.mjs          # перенести на свежий upstream',
+              'cat untranslated.txt                   # что перевести',
+              '```',
+              '',
+              'После перевода: дописать пары в `pairs.json`, собрать, прогнать тесты, запушить.',
+              '',
+              '> Автоматический перевод в CI намеренно не делается: это требовало бы',
+              '> LLM-ключа в репозитории и размывало бы проверенный словарь.',
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Обновление upstream: ${behind} коммитов, ${n} новых строк`,
+              body,
+              labels: ['upstream-update'],
+            });
+
+      - name: Обновлений нет, но есть непереведённое
+        if: steps.behind.outputs.count == '0' && steps.strings.outputs.count != '0'
+        run: |
+          echo "::warning::В словаре есть пропуски: ${{ steps.strings.outputs.count }} строк"
