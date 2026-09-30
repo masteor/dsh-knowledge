@@ -67,6 +67,7 @@ import {
   type NoteReference,
   type NoteVersion,
 } from './notes/domain.js'
+import { compareNames } from './collation.js'
 
 type SqlRow = Record<string, unknown>
 
@@ -517,13 +518,7 @@ export class LocalKnowledgeProvider implements KnowledgeProvider {
       if (base === undefined || base.status !== 'active') continue
       output.push({ ...mount, base, ...inheritedFrom === undefined ? {} : { inheritedFrom } })
     }
-    // Сортировка по имени базы. Локаль выбирается по фактическому языку имени:
-    // при китайской локали русское название встаёт в неожиданном порядке,
-    // а китайское — при русской. Поэтому локаль определяется по первой букве имени.
-    const collatorFor = (name: string): string => /[\u4e00-\u9fff]/.test(name) ? 'zh-CN' : 'ru-RU'
-    return output.sort((left, right) => collatorFor(left.base.name) === collatorFor(right.base.name)
-      ? left.base.name.localeCompare(right.base.name, collatorFor(left.base.name))
-      : left.base.name.localeCompare(right.base.name, 'en'))
+    return output.sort((left, right) => compareNames(left.base.name, right.base.name))
   }
 
   async stats(): Promise<KnowledgeStats> {
