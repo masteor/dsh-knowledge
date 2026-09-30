@@ -18,9 +18,9 @@ test('schedule is opt-in; strict HH:mm validation and legacy settings stay disab
   const s = setup(t)
   assert.equal(settings({ ...defaults, scheduleEnabled: undefined }).scheduleEnabled, false)
   for (const scheduleTime of ['24:00', '23:60', '9:00', '00:00:01', '', null, 123]) {
-    assert.throws(() => settings({ ...config, scheduleTime }), /时间/)
+    assert.throws(() => settings({ ...config, scheduleTime }), /время|Время/)
   }
-  assert.throws(() => settings({ ...config, scheduleEnabled: 'true' }), /时间/)
+  assert.throws(() => settings({ ...config, scheduleEnabled: 'true' }), /время|Время/)
   s.configure(defaults, before)
   s.note('2026-09-30', '不应被自动整理')
   s.schedule(due); assert.equal(count(s), 0)
@@ -79,11 +79,11 @@ test('no new records and manual edits are skipped without a model call', t => {
   assert.equal(s.scheduleState().last.status, 'skipped')
   s.note('2026-10-01', '新素材'); s.save('2026-10-01', '人工正文', 0)
   s.schedule(due + 86400000)
-  assert.equal(count(s), 0); assert.match(s.scheduleState().last.message, /手工修改/)
+  assert.equal(count(s), 0); assert.match(s.scheduleState().last.message, /ручны/)
   s.note('2026-10-02', '已覆盖')
   s.save('2026-10-02', '已整理', 0, s.records('2026-10-02').map(r => r.id), false)
   s.schedule(due + 2 * 86400000)
-  assert.equal(count(s), 0); assert.match(s.scheduleState().last.message, /没有待整理/)
+  assert.equal(count(s), 0); assert.match(s.scheduleState().last.message, /Нет новых материалов для обработки|нет записей для обработки/)
 })
 
 test('pending manual task is not duplicated; scheduler waits for its result', t => {

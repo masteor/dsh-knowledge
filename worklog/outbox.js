@@ -61,9 +61,9 @@ export class Outbox {
       try {
         if (i === 0) {
           const identity = await this.request(connection, 'GET', '/identity', undefined, undefined, this.controller.signal)
-          if (identity.protocol !== 1 || typeof identity.id !== 'string' || !identity.id) throw fail('中央日报协议不兼容，请升级中央插件', 409)
+          if (identity.protocol !== 1 || typeof identity.id !== 'string' || !identity.id) throw fail('Протокол центрального журнала несовместим, обновите плагин центра', 409)
           const bound = this.db.prepare('SELECT central_id FROM journal_targets WHERE destination=?').get(target)
-          if (bound && bound.central_id !== identity.id) throw fail('该地址的中央实例已变更，已暂停上传；请恢复原实例或使用新地址', 409)
+          if (bound && bound.central_id !== identity.id) throw fail('Экземпляр центра по этому адресу изменился, загрузка приостановлена; восстановите прежний экземпляр или используйте новый адрес', 409)
           this.db.prepare('INSERT OR IGNORE INTO journal_targets VALUES (?,?)').run(target, identity.id)
         }
         await this.request(connection, 'POST', item.path, JSON.parse(item.body), undefined, this.controller.signal)
@@ -72,7 +72,7 @@ export class Outbox {
       } catch (e) {
         if (this.closed) break
         const delay = Math.min(300000, 5000 * 2 ** Math.min(item.attempts, 6))
-        this.db.prepare('UPDATE journal_outbox SET attempts=attempts+1,due=?,error=? WHERE destination=? AND id=?').run(Date.now() + delay, e.status ? e.message : '本地上传队列异常，请检查磁盘后重试', target, item.id)
+        this.db.prepare('UPDATE journal_outbox SET attempts=attempts+1,due=?,error=? WHERE destination=? AND id=?').run(Date.now() + delay, e.status ? e.message : 'Сбой очереди локальной загрузки. Проверьте диск и повторите', target, item.id)
         break
       }
     }

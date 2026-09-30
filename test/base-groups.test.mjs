@@ -18,7 +18,7 @@ test('mount labels and sorting use group then natural library name without mutat
   const sorted = sortKnowledgeBasesByGroup(bases)
   assert.deepEqual(sorted.map(base => base.id), ['2', '10', 'a', 'u'])
   assert.deepEqual(bases, original)
-  assert.equal(knowledgeBasePathLabel(bases[0]), '未分组 / 默认')
+  assert.equal(knowledgeBasePathLabel(bases[0]), 'без группы / 默认')
   assert.equal(knowledgeBasePathLabel(bases[1]), '工作 / 规范10')
 })
 

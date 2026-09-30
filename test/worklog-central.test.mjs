@@ -142,7 +142,7 @@ test('changed server identity at the same URL halts upload', async t => {
   a.service.collect(session('second'), 1)
   a.store.db.prepare('UPDATE journal_targets SET central_id=?').run('different-server')
   await a.service.outbox.tick()
-  assert.match(a.service.collectorState().sync.error, /实例已变更/)
+  assert.match(a.service.collectorState().sync.error, /изменился, загрузка приостановлена/)
   assert.equal(c.store.records(dayOf(Date.now(), config.timezone)).length, 1)
 })
 
@@ -196,6 +196,6 @@ test('central redirect is rejected without forwarding authorization to another s
   const redirect = createServer((_req, res) => res.writeHead(302, { location: `http://127.0.0.1:${target.address().port}/steal` }).end())
   await new Promise(resolve => redirect.listen(0, '127.0.0.1', resolve))
   t.after(async () => { for (const server of [redirect, target]) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)) } })
-  await assert.rejects(requestCentral({ backend: 'remote', remoteUrl: `http://127.0.0.1:${redirect.address().port}`, remoteToken: 'private-token-for-test', remoteTimeoutMs: 1000 }, 'GET', '/state'), /重定向/)
+  await assert.rejects(requestCentral({ backend: 'remote', remoteUrl: `http://127.0.0.1:${redirect.address().port}`, remoteToken: 'private-token-for-test', remoteTimeoutMs: 1000 }, 'GET', '/state'), /перенаправл/)
   assert.equal(leaked, false)
 })

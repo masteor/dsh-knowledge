@@ -23,16 +23,16 @@ export function SyncStatus() {
   if (!state?.remote) return null
   return <>
     <div className="wl-sync-status">
-      <span role="status">中央日报 · 本机待上传 {state.sync.pending} 条{state.sync.otherDestinations > 0 && ` · 另有 ${state.sync.otherDestinations} 条保留在原中央地址队列`}</span>
+      <span role="status">Центральный журнал · ожидает загрузки с этого устройства {state.sync.pending} записей{state.sync.otherDestinations > 0 && ` · Также есть ${state.sync.otherDestinations} записей остаётся в очереди по прежнему центральному адресу`}</span>
       {(error || state.sync.error) && <span role="alert">{error || state.sync.error}</span>}
-      {state.sync.pending > 0 && <button disabled={busy} onClick={() => act('/retry-sync')}>重试上传</button>}
-      {(state.localHistory > 0 || state.localReports > 0) && <button disabled={busy} onClick={() => setConfirm(true)}>迁移本地历史</button>}
+      {state.sync.pending > 0 && <button disabled={busy} onClick={() => act('/retry-sync')}>Повторить загрузку</button>}
+      {(state.localHistory > 0 || state.localReports > 0) && <button disabled={busy} onClick={() => setConfirm(true)}>Перенести локальную историю</button>}
     </div>
-    {confirm && <Dialog title="迁移到当前中央知识库" close={() => !busy && setConfirm(false)}>
-      <p>将上传本机原有素材及日报历史至当前连接的中央知识库。历史对话可能包含敏感信息，请确认当前中央服务可信且已授权。</p>
-      <p>来源会去重；旧日报保存在中央的历史版本中，不覆盖中央正文。本地原始数据继续保留，不迁移本地定时配置或未完成的整理任务。</p>
+    {confirm && <Dialog title="Перенести в текущую центральную базу знаний" close={() => !busy && setConfirm(false)}>
+      <p>На текущую подключённую центральную базу знаний будут загружены существующие материалы этого устройства и история журналов. История диалогов может содержать конфиденциальные сведения; убедитесь, что центральная служба вызывает доверие и авторизация выполнена.</p>
+      <p>Источники дедуплицируются; старые журналы сохраняются в истории версий на центре и не перезаписывают центральный текст. Локальные исходные данные сохраняются; локальные настройки расписания и незавершённые задачи обработки не переносятся.</p>
       {error && <p role="alert">{error}</p>}
-      <footer><button disabled={busy} onClick={() => setConfirm(false)}>取消</button><button disabled={busy} onClick={() => act('/migrate')}>{busy ? '加入队列…' : '确认上传历史'}</button></footer>
+      <footer><button disabled={busy} onClick={() => setConfirm(false)}>Отмена</button><button disabled={busy} onClick={() => act('/migrate')}>{busy ? 'Добавление в очередь…' : 'Подтвердить загрузку истории'}</button></footer>
     </Dialog>}
   </>
 }

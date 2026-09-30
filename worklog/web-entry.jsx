@@ -11,7 +11,7 @@ export function mount(element) {
     const origin = document.referrer ? new URL(document.referrer).origin : location.origin
     window.parent.postMessage({ type: '@lemoncat7/dsh-worklog/open-session', sessionId }, origin === 'null' ? '*' : origin)
   } : undefined} />) }
-  style.onerror = () => { if (!disposed) element.textContent = '工作日报样式加载失败，请切换工作区后重试。' }
+  style.onerror = () => { if (!disposed) element.textContent = 'Не удалось загрузить стили рабочего журнала. Переключите рабочую область и повторите.' }
   document.head.append(style)
   return () => { disposed = true; root.unmount(); style.remove() }
 }

@@ -8,7 +8,7 @@ export function Dialog({ title, close, children }) {
     return () => { ref.current?.close(); previous?.focus?.() }
   }, [])
   return <dialog className="dsh-worklog wl-dialog" ref={ref} onCancel={e => { e.preventDefault(); close() }}>
-    <header><h2>{title}</h2><button onClick={close} aria-label="关闭弹窗">关闭</button></header>
+    <header><h2>{title}</h2><button onClick={close} aria-label="Закрыть окно">Закрыть</button></header>
     <div className="wl-dialog-content">{children}</div>
   </dialog>
 }

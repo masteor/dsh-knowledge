@@ -12,7 +12,7 @@ export class Store {
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 })
     this.db = new DatabaseSync(path)
     const schema = this.db.prepare('PRAGMA user_version').get().user_version
-    if (schema > 1) { this.db.close(); throw new Error('工作记录数据库版本较新，请升级插件') }
+    if (schema > 1) { this.db.close(); throw new Error('База данных журнала работы новее — обновите плагин') }
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY);
@@ -67,10 +67,10 @@ export class Store {
       if (day && !active) {
         const report = this.report(day), records = this.records(day)
         const last = { day, time: now, status: 'skipped', message: '' }
-        if (report.edited) last.message = '日报有手工修改，未自动覆盖；可在对应日期手动整理。'
-        else if (!records.some(r => !report.covered.includes(r.id))) last.message = '没有待整理的新素材，已跳过。'
+        if (report.edited) last.message = 'В журнале есть ручные правки, автоматическая перезапись не выполнена; можно запустить обработку вручную на нужную дату.'
+        else if (!records.some(r => !report.covered.includes(r.id))) last.message = 'Нет новых материалов для обработки, пропущено.'
         else {
-          try { last.jobId = this.enqueue(day); last.status = 'queued'; last.message = '已加入整理队列，可在对应日期查看进度或重试。' }
+          try { last.jobId = this.enqueue(day); last.status = 'queued'; last.message = 'Добавлено в очередь обработки: прогресс и повтор можно посмотреть на нужную дату.' }
           catch (e) {
             if (!e.status) throw e
             last.status = 'failed'; last.message = e.message
@@ -99,7 +99,7 @@ export class Store {
   save(day, markdown, expected, covered, edited = true) {
     validDay(day); text(markdown)
     const old = this.report(day)
-    if (old.revision !== expected) throw fail('日报已被修改，请重新打开后再保存；你的草稿仍保留。', 409)
+    if (old.revision !== expected) throw fail('Журнал был изменён: откройте его заново и сохраните; ваш черновик сохранён.', 409)
     const next = { markdown, covered: covered || old.covered, edited, updated: Date.now() }
     this.db.exec('BEGIN IMMEDIATE')
     try {
@@ -108,23 +108,23 @@ export class Store {
       this.db.exec('COMMIT')
     } catch (e) { this.db.exec('ROLLBACK'); throw e }
   }
-  note(day, body, project = '') { validDay(day); this.observe(project); this.insert({ id: randomUUID(), day, project, time: Date.now(), user: '手工补记', answer: text(body, 16000), sessionId: null, route: null, truncated: false }) }
+  note(day, body, project = '') { validDay(day); this.observe(project); this.insert({ id: randomUUID(), day, project, time: Date.now(), user: 'Ручная запись', answer: text(body, 16000), sessionId: null, route: null, truncated: false }) }
   exclude(id, excluded) {
-    if (typeof excluded !== 'boolean') throw fail('排除状态无效')
-    if (!this.db.prepare('UPDATE records SET excluded=? WHERE id=?').run(+excluded, id).changes) throw fail('记录不存在', 404)
+    if (typeof excluded !== 'boolean') throw fail('Недопустимое состояние исключения')
+    if (!this.db.prepare('UPDATE records SET excluded=? WHERE id=?').run(+excluded, id).changes) throw fail('Запись не найдена', 404)
   }
   enqueue(day, allowReplace = false) {
     validDay(day)
     const active = this.db.prepare("SELECT id FROM jobs WHERE day=? AND status IN ('queued','running')").get(day)
     if (active) return active.id
     const records = this.records(day), report = this.report(day)
-    if (!records.length) throw fail('当天没有可整理的记录')
-    if (report.edited && !allowReplace) throw fail('日报有手工修改，请明确确认后再重新整理。', 409)
+    if (!records.length) throw fail('За этот день нет записей для обработки')
+    if (report.edited && !allowReplace) throw fail('В журнале есть ручные правки — перед повторной обработкой явно подтвердите действие.', 409)
     const config = this.config()
     const route = config.provider && config.model ? { provider: config.provider, model: config.model } : records.findLast(r => r.route)?.route
-    if (!route) throw fail('尚无可用的会话模型。请在采集项目完成一轮对话，或在采集设置中指定日报模型。')
+    if (!route) throw fail('Доступных моделей сессий пока нет. Завершите один ход диалога в проекте сбора или укажите модель журнала в настройках сбора.')
     const id = randomUUID(), body = { revision: report.revision, records, route, error: '' }
-    if (JSON.stringify(body).length > 180000) throw fail('当天素材过多，请先排除无关记录后重试；尚未截断或覆盖日报。', 413)
+    if (JSON.stringify(body).length > 180000) throw fail('За этот день слишком много материалов. Сначала исключите лишние записи и повторите; журнал пока не обрезан и не перезаписан.', 413)
     this.db.prepare("INSERT INTO jobs VALUES (?,?,'queued',0,?,?)").run(id, day, Date.now(), JSON.stringify(body))
     return id
   }
@@ -133,7 +133,7 @@ export class Store {
   status(id, status, body, attempts = 0, due = Date.now()) { this.db.prepare('UPDATE jobs SET status=?,body=?,attempts=?,due=? WHERE id=?').run(status, JSON.stringify(body), attempts, due, id) }
   retry(id) {
     const job = this.job(id)
-    if (!job || !['failed', 'cancelled'].includes(job.status)) throw fail('只有失败或取消的任务可以重试')
+    if (!job || !['failed', 'cancelled'].includes(job.status)) throw fail('Повторить можно только неудачные или отменённые задачи')
     return this.enqueue(job.day)
   }
   close() { if (!this.closed) { this.db.close(); this.closed = true } }

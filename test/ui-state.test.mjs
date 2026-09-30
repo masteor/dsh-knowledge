@@ -59,7 +59,7 @@ test('model discovery retries transient failures and shares successful pending r
 test('invalid model responses are not cached and successful catalogs expire', async () => {
   let calls = 0
   const load = createModelCatalogLoader(async () => ({ ok: true, json: async () => ++calls === 1 ? {} : { providers: [] } }), 0)
-  await assert.rejects(load(), /无效数据/)
+  await assert.rejects(load(), /некорректные данные/)
   assert.deepEqual(await load(), [])
   assert.deepEqual(await load(), [])
   assert.equal(calls, 3)

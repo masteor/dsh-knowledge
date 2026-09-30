@@ -41,8 +41,8 @@ test('dedup, source exclusions, notes and report versions', t => {
   assert.equal(s.records(day).length, 1)
   s.save(day, '# 日报', 0, ['s:1'], false)
   s.save(day, '# 人工编辑', 1)
-  assert.throws(() => s.save(day, '过期编辑', 1), /已被修改/)
-  assert.throws(() => s.enqueue(day), /手工修改/)
+  assert.throws(() => s.save(day, '过期编辑', 1), /изменён/)
+  assert.throws(() => s.enqueue(day), /ручны/)
   s.note(day, '补充工作')
   assert.equal(s.detail(day).pending, 1)
   s.exclude('s:1', true); assert.equal(s.records(day).length, 1)
@@ -53,8 +53,8 @@ test('manual-only days can use an explicitly configured model', t => {
   s.note(day, '完成验收')
   const id = s.enqueue(day)
   assert.deepEqual(JSON.parse(s.job(id).body).route, { provider: 'local', model: 'daily' })
-  assert.throws(() => settings({ ...defaults, timezone: 'Bad/Timezone' }), /有效的 IANA/)
-  assert.throws(() => settings({ ...defaults, provider: 'local' }), /同时填写/)
+  assert.throws(() => settings({ ...defaults, timezone: 'Bad/Timezone' }), /корректный часовой пояс IANA/)
+  assert.throws(() => settings({ ...defaults, provider: 'local' }), /заполнить вместе/)
 })
 test('durable queued work survives restart, running is recovered', async t => {
   const dir = mkdtempSync(join(tmpdir(), 'worklog-test-')); t.after(() => rmSync(dir, { recursive: true, force: true }))
@@ -103,7 +103,7 @@ test('browser and official loopback desktop origin checks', () => {
 test('generator uses deltas once and rejects invented evidence', async () => {
   const llm = { async *stream() { yield { type: 'text-delta', text: '完成 [依据:s:1]' }; yield { type: 'block-end', block: { type: 'text', text: '完成 [依据:s:1]' } } } }
   assert.equal(await generate(llm, { records: [record()], route: {} }, new AbortController().signal), '完成 [依据:s:1]')
-  await assert.rejects(generate(llm, { records: [], route: {} }, new AbortController().signal), /未知来源/)
+  await assert.rejects(generate(llm, { records: [], route: {} }, new AbortController().signal), /неизвестный источник/)
 })
 test('HTTP serves JSON errors and supports notes/settings', async t => {
   const s = db(t), w = new Worker(s, {}), server = createServer(handler(s, w, () => undefined))
@@ -122,6 +122,6 @@ test('custom API fails closed without Host authentication', async t => {
   t.after(() => { server.closeAllConnections(); server.close() })
   const response = await fetch(`http://127.0.0.1:${server.address().port}/worklog-control/v1/state`, { headers: { 'x-dsh-worklog-client': 'workspace' } })
   assert.equal(response.status, 401)
-  assert.match((await response.json()).error, /登录/)
+  assert.match((await response.json()).error, /Войдите/)
 })
 

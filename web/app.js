@@ -28,13 +28,13 @@ let writebackWorkspace
 let worklogWorkspace
 const TOKEN_KEY = 'dsh-knowledge.session-token'
 const TYPES = ['preference', 'fact', 'decision', 'procedure', 'lesson']
-const TYPE_LABELS = { preference: '偏好', fact: '事实', decision: '决策', procedure: '流程', lesson: '经验' }
-const ACTION_LABELS = { create: '新增', update: '更新', conflict: '冲突' }
-const STATUS_LABELS = { active: '生效中', archived: '已归档', pending: '待审核', approved: '已通过', rejected: '已拒绝' }
-const CHANGE_LABELS = { create: '创建', update: '更新', archive: '归档', restore: '恢复' }
-const WRITE_MODE_LABELS = { none: '仅召回', audit: '审核写入', direct: '直接写入' }
-const EVIDENCE_LABELS = { explicit: '用户明确', verified: '结果已验证', inferred: '模型推断' }
-const DOCUMENT_STATE_LABELS = { open: '进行中', resolved: '已解决', complete: '已收集完成' }
+const TYPE_LABELS = { preference: 'Предпочтение', fact: 'Факт', decision: 'Решение', procedure: 'Процесс', lesson: 'Опыт' }
+const ACTION_LABELS = { create: 'Добавлено', update: 'Обновить', conflict: 'Конфликт' }
+const STATUS_LABELS = { active: 'Действует', archived: 'В архиве', pending: 'На проверке', approved: 'Принято', rejected: 'Отклонено' }
+const CHANGE_LABELS = { create: 'Создать', update: 'Обновить', archive: 'В архив', restore: 'Восстановить' }
+const WRITE_MODE_LABELS = { none: 'Только извлечение', audit: 'Запись с проверкой', direct: 'Прямая запись' }
+const EVIDENCE_LABELS = { explicit: 'Явно указано пользователем', verified: 'Результат проверен', inferred: 'Вывод модели' }
+const DOCUMENT_STATE_LABELS = { open: 'В процессе', resolved: 'Решено', complete: 'Сбор завершён' }
 const DOCUMENT_LAYOUT_KEY = 'dsh-knowledge.document-layout'
 const KNOWLEDGE_DOCUMENT_DRAG_TYPE = 'application/x-dsh-knowledge-document-id'
 const NOTE_MAX_FILE_SIZE = 64 * 1024 * 1024
@@ -230,24 +230,24 @@ async function boot() {
   } catch (error) {
     sessionStorage.removeItem(TOKEN_KEY)
     state.token = ''
-    renderLogin(error.status === 401 ? '令牌无效或已被撤销，请重新输入。' : '暂时无法连接知识库。')
+    renderLogin(error.status === 401 ? 'Токен недействителен или отозван, введите его заново.' : 'Пока не удаётся подключиться к базе знаний.')
   }
 }
 
 function renderLogin(message = '') {
   const tokenInput = element('input', {
     class: 'input', type: 'password', name: 'token', autocomplete: 'current-password',
-    placeholder: '输入管理员或只读访问令牌', required: true, autofocus: true,
+    placeholder: 'Введите токен доступа администратора или только для чтения', required: true, autofocus: true,
   })
   const error = element('p', { class: 'login-error', role: 'alert' }, message)
-  const submit = actionButton('连接知识库', () => form.requestSubmit(), 'primary')
+  const submit = actionButton('Подключить базу знаний', () => form.requestSubmit(), 'primary')
   const form = element('form', {
     onSubmit: async (event) => {
       event.preventDefault()
       const token = tokenInput.value.trim()
       if (!token) return
       submit.disabled = true
-      submit.textContent = '正在连接…'
+      submit.textContent = 'Подключение…'
       error.textContent = ''
       state.token = token
       try {
@@ -256,23 +256,23 @@ function renderLogin(message = '') {
         await navigate(initialView)
       } catch (requestError) {
         state.token = ''
-        error.textContent = requestError.status === 401 ? '令牌无效或已被撤销。' : '连接失败，请检查服务状态后重试。'
+        error.textContent = requestError.status === 401 ? 'Токен недействителен или отозван.' : 'Не удалось подключиться. Проверьте состояние сервиса и повторите попытку.'
         submit.disabled = false
-        submit.textContent = '连接知识库'
+        submit.textContent = 'Подключить базу знаний'
         tokenInput.focus()
       }
     },
   },
   element('div', { class: 'field' },
-    element('label', { for: 'login-token' }, '访问令牌'),
+    element('label', { for: 'login-token' }, 'Токен доступа'),
     Object.assign(tokenInput, { id: 'login-token' }),
-    element('span', { class: 'field-hint' }, '令牌仅保存在当前浏览器标签页，关闭后自动清除。'),
+    element('span', { class: 'field-hint' }, 'Токен хранится только в текущей вкладке браузера и удаляется при её закрытии.'),
   ), error, submit)
 
   app.replaceChildren(element('main', { class: 'login-page' }, element('section', { class: 'login-card', 'aria-labelledby': 'login-title' },
     element('div', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K'),
-    element('h1', { id: 'login-title' }, 'DSH 知识库'),
-    element('p', {}, '管理对话中沉淀的长期知识与 AI 提取候选。'),
+    element('h1', { id: 'login-title' }, 'База знаний DSH'),
+    element('p', {}, 'Управляйте долгосрочными знаниями из диалогов и кандидатами от ИИ.'),
     form,
   )))
 }
@@ -345,8 +345,8 @@ function cancelPendingSearches() {
 function loadingPhaseForView(view) {
   return ({
     overview: 'Сбор сведений о работе с базой', bases: 'Чтение настроек баз знаний', entries: 'Чтение каталога знаний',
-    notes: '正在读取笔记目录', shares: '正在读取分享列表', candidates: '正在准备审核队列', tokens: '正在读取访问权限',
-  })[view] || '正在准备工作区'
+    notes: 'Чтение каталога заметок', shares: 'Чтение списка ссылок общего доступа', candidates: 'Подготовка очереди проверки', tokens: 'Чтение прав доступа',
+  })[view] || 'Подготовка рабочей области'
 }
 
 function updateLoadingPhase(request, label, progress) {
@@ -441,7 +441,7 @@ async function loadEntries(cursor = '') {
 }
 
 async function loadDocuments(signal, onPhase = () => {}) {
-  onPhase('正在读取可用知识库', .24)
+  onPhase('Чтение доступных баз знаний', .24)
   const options = { signal }
   const requests = [api('knowledge-bases', options)]
   if (state.mountContext.sessionId) {
@@ -457,7 +457,7 @@ async function loadDocuments(signal, onPhase = () => {}) {
   state.knowledgeBases = bases
   state.resolvedMounts = resolved
   state.stats = stats
-  onPhase('正在建立文档索引', .56)
+  onPhase('Построение индекса документов', .56)
   const visibleBaseIds = new Set(documentKnowledgeBases(bases).map(base => base.id))
   state.documents = state.documents.filter(document => visibleBaseIds.has(document.knowledgeBaseId))
   const workspace = sessionDocumentWorkspace()
@@ -487,14 +487,14 @@ async function loadDocuments(signal, onPhase = () => {}) {
   }
   selectDefaultDocument(workspace)
   if (view.documentId) {
-    onPhase('正在打开最近文档', .82)
+    onPhase('Открытие последнего документа', .82)
     await loadDocumentEditor(workspace, view.documentId, signal)
   }
   else view.editor = null
 }
 
 async function loadNotes(signal, onPhase = () => {}) {
-  onPhase('正在读取顶层目录', .36)
+  onPhase('Чтение каталога верхнего уровня', .36)
   const [rootNodes] = await Promise.all([
     api('notes?limit=500', { signal }),
     loadNoteShares(signal),
@@ -502,7 +502,7 @@ async function loadNotes(signal, onPhase = () => {}) {
   state.notes.children.set('root', rootNodes)
   state.notes.loadedFolders.add('root')
   if (state.notes.selectedId) {
-    onPhase('正在恢复上次打开的笔记', .74)
+    onPhase('Восстановление последней открытой заметки', .74)
     const selected = state.notes.selectedNode?.id === state.notes.selectedId
       ? state.notes.selectedNode
       : await api(`notes/${encodeURIComponent(state.notes.selectedId)}`, { signal }).catch(() => null)
@@ -735,14 +735,14 @@ async function loadDocumentEditor(workspace, id, signal) {
     tagsText: entry.tags.join(', '),
     dirty: false,
     isNew: false,
-    saveState: '已保存',
+    saveState: 'Сохранено',
   }
   return true
 }
 
 function createBlankDocument(workspace, baseId, group) {
   const base = state.knowledgeBases.find(item => item.id === baseId && item.status === 'active')
-  if (!base) return showToast('请先选择一个可用知识库。', 'error')
+  if (!base) return showToast('Сначала выберите доступную базу знаний.', 'error')
   const view = workspace.view
   view.knowledgeBaseId = base.id
   view.documentId = ''
@@ -752,7 +752,7 @@ function createBlankDocument(workspace, baseId, group) {
   view.editor = {
     id: '', knowledgeBaseId: base.id, title: '', body: '', type: 'fact', tags: [], tagsText: '',
     group,
-    scope: { kind: 'global' }, confidence: .8, noteReferences: [], dirty: true, isNew: true, saveState: '新文档',
+    scope: { kind: 'global' }, confidence: .8, noteReferences: [], dirty: true, isNew: true, saveState: 'Новый документ',
   }
   renderShell()
   document.querySelector('.note-title-input')?.focus()
@@ -762,14 +762,14 @@ async function startBlankDocument(workspace, baseId, group) {
   const editor = workspace.view.editor
   const emptyDraft = editor?.isNew && !editor.title.trim() && !editor.body.trim()
   if (editor?.dirty && !emptyDraft && !await saveDocumentEditor(workspace)) return
-  if (!baseId) return showToast('请先选择知识库。', 'error')
+  if (!baseId) return showToast('Сначала выберите базу знаний.', 'error')
   if (group) return createBlankDocument(workspace, baseId, group)
   const field = createDocumentGroupField({ element, api, baseId, required: true })
-  openSheet({ title: '新建知识文档', description: '先选择文档分组，优先复用已有分组。', body: field.wrapper, primaryLabel: '开始编写', onPrimary: async () => {
+  openSheet({ title: 'Создать документ знаний', description: 'Сначала выберите группу документа, предпочтительно из существующих.', body: field.wrapper, primaryLabel: 'Начать написание', onPrimary: async () => {
     await field.ready
     let name
     try { name = field.validate() } catch { return false }
-    if (!name || name === '未分组') throw new Error('请选择已有分组，或填写新分组名称。')
+    if (!name || name === 'без группы') throw new Error('Выберите существующую группу или укажите название новой.')
     createBlankDocument(workspace, baseId, name)
     return true
   } })
@@ -818,18 +818,18 @@ async function saveDocumentEditor(workspace = activeDocumentWorkspace()) {
   if (!editor || !editor.dirty) return true
   if (editor.saving) return false
   if (!editor.isNew && editor.documentState !== 'open') {
-    showToast('这篇文档已经结束并封存；请先重新打开。', 'error')
+    showToast('Этот документ завершён и запечатан; сначала откройте его заново.', 'error')
     return false
   }
   if (!editor.title.trim() || !editor.body.trim()) {
-    showToast('标题和正文填写完整后才能保存。', 'error')
+    showToast('Сохранить можно только после заполнения заголовка и текста.', 'error')
     return false
   }
-  if (editor.isNew && (!editor.group?.trim() || editor.group === '未分组')) {
-    showToast('新建知识文档必须指定分组。', 'error')
+  if (editor.isNew && (!editor.group?.trim() || editor.group === 'без группы')) {
+    showToast('Для нового документа знаний нужно указать группу.', 'error')
     return false
   }
-  editor.saveState = '正在保存…'
+  editor.saveState = 'Сохранение…'
   editor.saving = true
   updateEditorSaveState(editor.saveState)
   try {
@@ -843,13 +843,13 @@ async function saveDocumentEditor(workspace = activeDocumentWorkspace()) {
     editor.version = saved.version
     editor.documentState = saved.documentState
     editor.updatedAt = saved.updatedAt
-    editor.saveState = editor.dirty ? '未保存' : '已保存'
+    editor.saveState = editor.dirty ? 'Не сохранено' : 'Сохранено'
     workspace.view.documentId = saved.id
     updateEditorSaveState(editor.saveState)
     await reloadDocumentWorkspace(workspace)
     return !editor.dirty
   } catch (error) {
-    editor.saveState = '保存失败'
+    editor.saveState = 'Не удалось сохранить'
     updateEditorSaveState(editor.saveState)
     showToast(friendlyError(error), 'error')
     if (error.status === 409) void openDocumentSyncConflict()
@@ -929,7 +929,7 @@ async function moveKnowledgeDocument(workspace, documentId, targetBaseId) {
         tagsText: saved.tags.join(', '),
         dirty: false,
         isNew: false,
-        saveState: '已移动',
+        saveState: 'Перемещено',
       }
     }
     showToast(`Перемещено в «${target.name}».`)
@@ -945,16 +945,16 @@ async function moveKnowledgeDocument(workspace, documentId, targetBaseId) {
 
 function openMoveKnowledgeDocument(workspace, editor) {
   const targets = documentWorkspaceBases(workspace).filter(base => base.status === 'active' && base.id !== editor.knowledgeBaseId)
-  if (!targets.length) return showToast('当前没有其他可移动到的知识库。', 'error')
+  if (!targets.length) return showToast('Сейчас нет других баз знаний для перемещения.', 'error')
   const form = element('form', { class: 'form-grid' })
-  const destination = selectField('目标知识库', targets.map(base => ({ value: base.id, label: base.name })), targets[0].id)
+  const destination = selectField('Целевая база знаний', targets.map(base => ({ value: base.id, label: base.name })), targets[0].id)
   destination.wrapper.classList.add('span-2')
   form.append(destination.wrapper)
   return openSheet({
     title: `Переместить «${editor.title}»`,
-    description: '文档 ID、版本历史和关联笔记都会保留，Markdown 投影将同步移动。',
+    description: 'ID документа, история версий и связанные заметки сохранятся, проекция Markdown переместится вместе с ним.',
     body: form,
-    primaryLabel: '移动文档',
+    primaryLabel: 'Переместить документ',
     onPrimary: () => moveKnowledgeDocument(workspace, editor.id, destination.input.value),
   })
 }
@@ -991,15 +991,15 @@ function renderShell() {
   releaseNoteEditors()
   captureScrollPosition()
   const titles = {
-    overview: ['概览', '知识库运行状态与最近活动'],
+    overview: ['Обзор', 'Состояние базы знаний и последняя активность'],
     bases: ['Базы знаний и подключения', 'Управление каталогом знаний и областью извлечения и записи для проектов и сессий'],
     entries: ['Документы знаний', 'Чтение, упорядочивание и ведение Markdown-документов в каталоге знаний'],
-    notes: ['笔记文档', '像本地目录一样整理笔记和资料，并按需关联到知识文档'],
-    shares: ['已分享', '管理只读分享链接，也可以导入别人分享的笔记和目录'],
-    candidates: ['待审核', '确认 AI 提取结果后再写入知识文档'],
-    writeback: ['回写任务', '查看本机队列，处理失败和阻塞的回写'],
-    worklog: ['工作日报', '按日期整理工作进展、决定与交付，保留来源依据'],
-    tokens: ['访问管理', '管理其他客户端连接中央知识库的权限'],
+    notes: ['Документ заметки', 'Упорядочивайте заметки и материалы как локальные каталоги и привязывайте их к документам базы знаний по необходимости'],
+    shares: ['Опубликовано', 'Управляйте ссылками общего доступа только для чтения и импортируйте чужие заметки и каталоги'],
+    candidates: ['На проверке', 'Подтвердите результаты извлечения ИИ, прежде чем записывать их в документ базы знаний'],
+    writeback: ['Задачи записи', 'Посмотреть локальную очередь и разобрать неудачные и заблокированные записи'],
+    worklog: ['Ежедневный отчёт', 'Упорядочивать по датам рабочий прогресс, решения и результаты, сохраняя источники'],
+    tokens: ['Управление доступом', 'Управление правами других клиентов на подключение к центральной базе знаний'],
   }
   const [title, subtitle] = titles[state.view]
   const viewIndexes = { overview: '00', notes: '01', shares: '02', entries: '03', candidates: '04', writeback: '05', bases: '06', worklog: '07', tokens: '08' }
@@ -1015,17 +1015,17 @@ function renderShell() {
     renderAppSidebarResizer(),
     element('button', {
       type: 'button', class: 'app-sidebar-scrim', hidden: !state.menuOpen,
-      'aria-label': '关闭导航菜单',
+      'aria-label': 'Закрыть меню навигации',
       onClick: () => setMenuOpen(false),
     }),
     element('main', { class: 'main' },
       element('header', { class: 'topbar' },
         element('div', { class: 'topbar-title' },
           actionButton(interfaceIcon('menu'), () => setMenuOpen(!state.menuOpen), 'ghost mobile-menu', {
-            'aria-label': state.menuOpen ? '关闭导航菜单' : '打开导航菜单',
+            'aria-label': state.menuOpen ? 'Закрыть меню навигации' : 'Открыть меню навигации',
             'aria-expanded': String(state.menuOpen),
           }),
-          paneToggleButton('main', !state.documentView.sidebarHidden, () => setSidebarHidden(!state.documentView.sidebarHidden), '主导航栏'),
+          paneToggleButton('main', !state.documentView.sidebarHidden, () => setSidebarHidden(!state.documentView.sidebarHidden), 'Основная навигация'),
           renderContextPaneToggle(),
           element('div', { class: 'topbar-heading' },
             element('span', { class: 'topbar-kicker' }, `KNOWLEDGE / ${viewIndexes[state.view] || '00'}`),
@@ -1033,7 +1033,7 @@ function renderShell() {
             element('p', {}, subtitle)),
         ),
         state.loading ? element('div', {
-          class: 'route-progress', role: 'progressbar', 'aria-label': state.loadingPhase || '正在加载',
+          class: 'route-progress', role: 'progressbar', 'aria-label': state.loadingPhase || 'Загрузка',
           'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.round(state.loadingProgress * 100)),
         }, element('span', { style: `--route-progress: ${state.loadingProgress}` })) : null,
       ),
@@ -1051,7 +1051,7 @@ function renderContextPaneToggle() {
     return paneToggleButton('library', state.notes.browserOpen, () => {
       state.notes.browserOpen = !state.notes.browserOpen
       renderShell()
-    }, '笔记目录')
+    }, 'Каталог заметок')
   }
   const workspace = activeDocumentWorkspace()
   if (!workspace) return null
@@ -1067,8 +1067,8 @@ function renderAppSidebarResizer() {
   const value = state.documentView.sidebarWidth
   return element('div', {
     class: 'app-sidebar-resizer', role: 'separator', tabindex: '0',
-    title: '拖动调整主导航栏宽度',
-    'aria-label': '调整主导航栏宽度', 'aria-orientation': 'vertical',
+    title: 'Перетащите, чтобы изменить ширину главной панели навигации',
+    'aria-label': 'Изменить ширину главной панели навигации', 'aria-orientation': 'vertical',
     'aria-valuemin': minimum, 'aria-valuemax': maximum, 'aria-valuenow': value,
     onPointerDown: event => startSidebarResize(event, minimum, maximum),
     onKeyDown: event => resizeSidebarWithKeyboard(event, minimum, maximum),
@@ -1142,7 +1142,7 @@ function setMenuOpen(open) {
   shell.querySelector('.app-sidebar-scrim')?.toggleAttribute('hidden', !open)
   const toggle = shell.querySelector('.mobile-menu')
   toggle?.setAttribute('aria-expanded', String(open))
-  toggle?.setAttribute('aria-label', open ? '关闭导航菜单' : '打开导航菜单')
+  toggle?.setAttribute('aria-label', open ? 'Закрыть меню навигации' : 'Открыть меню навигации')
   applySidebarVisibility(shell, state.documentView.sidebarHidden)
 }
 
@@ -1185,16 +1185,16 @@ function applySidebarVisibility(shell, hidden) {
 function renderSidebar() {
   const pending = state.stats?.candidates.pending
   const navGroups = [
-    ['笔记工作区', [['notes', '笔记文档'], ['shares', '已分享']]],
-    ['知识工作区', [['entries', '知识文档'], ['candidates', '待审核'], ['writeback', '回写任务'], ['bases', '知识库与挂载']]],
-    ['工作记录', [['worklog', '工作日报']]],
-    ['连接', [['tokens', '访问管理']].filter(([id]) => id !== 'tokens' || !state.service.remote)],
+    ['Рабочая область заметок', [['notes', 'Документ заметки'], ['shares', 'Опубликовано']]],
+    ['Рабочая область знаний', [['entries', 'Документ базы знаний'], ['candidates', 'На проверке'], ['writeback', 'Задачи записи'], ['bases', 'Базы знаний и подключения']]],
+    ['Рабочие записи', [['worklog', 'Ежедневный отчёт']]],
+    ['Подключить', [['tokens', 'Управление доступом']].filter(([id]) => id !== 'tokens' || !state.service.remote)],
   ].filter(([, items]) => items.length)
   let navIndex = 0
-  return element('aside', { class: 'sidebar', 'aria-label': '知识库导航' },
+  return element('aside', { class: 'sidebar', 'aria-label': 'Навигация по базе знаний' },
     element('div', { class: 'brand' },
       element('span', { class: 'brand-emblem', 'aria-hidden': 'true' }, element('span', {})),
-      element('div', { class: 'brand-copy' }, element('span', {}, 'DSH Knowledge'), element('strong', {}, '知识库')),
+      element('div', { class: 'brand-copy' }, element('span', {}, 'DSH Knowledge'), element('strong', {}, 'база знаний')),
     ),
     element('nav', { class: 'nav' }, navGroups.map(([group, items]) => element('div', { class: 'nav-group' },
       element('div', { class: 'nav-group-label' }, group),
@@ -1204,8 +1204,8 @@ function renderSidebar() {
       }, element('span', { class: 'nav-index', 'aria-hidden': 'true' }, String(++navIndex).padStart(2, '0')), element('span', { class: 'nav-label' }, label),
       id === 'candidates' && pending ? element('span', { class: 'nav-count', 'aria-label': `${pending} на проверке` }, pending) : null))))),
     element('div', { class: 'sidebar-footer' },
-      element('div', { class: 'connection' }, element('span', { class: 'status-dot', 'aria-hidden': 'true' }), state.service.remote ? '中央知识库已连接' : '本地知识库已连接'),
-      AUTH_MODE === 'bearer' ? actionButton('退出当前会话', signOut, 'ghost small') : null,
+      element('div', { class: 'connection' }, element('span', { class: 'status-dot', 'aria-hidden': 'true' }), state.service.remote ? 'Центральная база знаний подключена' : 'Локальная база знаний подключена'),
+      AUTH_MODE === 'bearer' ? actionButton('Выйти из текущей сессии', signOut, 'ghost small') : null,
     ),
   )
 }
@@ -1230,7 +1230,7 @@ function renderCurrentView() {
   return renderTokens()
 }
 
-function loadingView(view = state.view, phase = '正在加载', progress = 0) {
+function loadingView(view = state.view, phase = 'Загрузка', progress = 0) {
   const label = phase || loadingPhaseForView(view)
   const header = element('div', { class: 'skeleton-heading' },
     element('div', {}, element('div', { class: 'skeleton-line skeleton-title', 'aria-hidden': 'true' }), element('div', { class: 'skeleton-line skeleton-copy', 'aria-hidden': 'true' })),
@@ -1255,7 +1255,7 @@ function loadingView(view = state.view, phase = '正在加载', progress = 0) {
 }
 
 function errorView(message, retry) {
-  return element('div', { class: 'error-state', role: 'alert' }, element('p', {}, message), actionButton('重试', retry, 'small'))
+  return element('div', { class: 'error-state', role: 'alert' }, element('p', {}, message), actionButton('Повторить', retry, 'small'))
 }
 
 function renderOverview() {
@@ -1263,25 +1263,25 @@ function renderOverview() {
   const overview = state.overview
   if (!stats || !overview) return loadingView()
   const metrics = [
-    ['生效知识', stats.entries.active, `${stats.entries.archived} в архиве`],
-    ['待审核候选', stats.candidates.pending, `${stats.candidates.approved} одобрено`],
-    ['提取任务', stats.extractionJobs.total, `${stats.extractionJobs.failed} с ошибкой`],
-    ['知识类型', Object.values(stats.entries.byType).filter(Boolean).length, '共 5 种分类'],
+    ['Действующие знания', stats.entries.active, `${stats.entries.archived} в архиве`],
+    ['Кандидаты на проверку', stats.candidates.pending, `${stats.candidates.approved} одобрено`],
+    ['Задачи извлечения', stats.extractionJobs.total, `${stats.extractionJobs.failed} с ошибкой`],
+    ['Тип знания', Object.values(stats.entries.byType).filter(Boolean).length, 'Всего 5 категорий'],
   ]
   return element('div', {},
-    element('section', { class: 'metrics', 'aria-label': '知识库指标' }, metrics.map(([label, value, detail]) => element('article', { class: 'metric' },
+    element('section', { class: 'metrics', 'aria-label': 'Метрики базы знаний' }, metrics.map(([label, value, detail]) => element('article', { class: 'metric' },
       element('div', { class: 'metric-label' }, label),
       element('strong', { class: 'metric-value' }, value),
       element('div', { class: 'metric-detail' }, detail),
     ))),
     element('div', { class: 'dashboard-grid' },
       element('section', { class: 'panel', 'aria-labelledby': 'recent-title' },
-        element('div', { class: 'panel-header' }, element('h2', { id: 'recent-title' }, '最近更新'), actionButton('查看全部', () => navigate('entries'), 'ghost small')),
-        element('div', { class: 'panel-body' }, overview.recent.length ? element('div', { class: 'list' }, overview.recent.map(renderCompactEntry)) : compactEmpty('还没有已生效知识')),
+        element('div', { class: 'panel-header' }, element('h2', { id: 'recent-title' }, 'Последнее обновление'), actionButton('Показать все', () => navigate('entries'), 'ghost small')),
+        element('div', { class: 'panel-body' }, overview.recent.length ? element('div', { class: 'list' }, overview.recent.map(renderCompactEntry)) : compactEmpty('Пока нет действующих знаний')),
       ),
       element('section', { class: 'panel', 'aria-labelledby': 'pending-title' },
-        element('div', { class: 'panel-header' }, element('h2', { id: 'pending-title' }, '等待确认'), actionButton('进入审核', () => navigate('candidates'), 'ghost small')),
-        element('div', { class: 'panel-body' }, overview.pending.length ? element('div', { class: 'list' }, overview.pending.map(renderCompactCandidate)) : compactEmpty('当前没有待审核候选')),
+        element('div', { class: 'panel-header' }, element('h2', { id: 'pending-title' }, 'Ожидает подтверждения'), actionButton('Перейти к проверке', () => navigate('candidates'), 'ghost small')),
+        element('div', { class: 'panel-body' }, overview.pending.length ? element('div', { class: 'list' }, overview.pending.map(renderCompactCandidate)) : compactEmpty('Сейчас нет кандидатов на проверку')),
       ),
     ),
   )
@@ -1302,32 +1302,32 @@ function renderKnowledgeBases() {
   const visibleArchivedBases = archivedBases.filter(matchesQuery)
   const switcher = element('div', { class: 'workspace-switcher' },
     element('div', { class: 'workspace-switcher-leading' },
-      element('div', { class: 'tabs workspace-tabs', role: 'tablist', 'aria-label': '知识库管理范围' }, [
-      ['libraries', '知识库', activeBases.length],
-      ['mounts', '项目与会话挂载', state.mounts.filter(mount => mount.enabled).length],
+      element('div', { class: 'tabs workspace-tabs', role: 'tablist', 'aria-label': 'Область управления базой знаний' }, [
+      ['libraries', 'база знаний', activeBases.length],
+      ['mounts', 'Подключения проектов и сессий', state.mounts.filter(mount => mount.enabled).length],
     ].map(([id, label, count]) => element('button', {
       type: 'button', role: 'tab', class: 'tab', 'aria-selected': String(state.knowledgeBaseView === id),
       onClick: () => { state.knowledgeBaseView = id; renderShell() },
       }, element('span', {}, label), element('span', { class: 'tab-count' }, count)))),
-      actionButton('本机回写模型', () => openGlobalWritebackModelEditor(), 'ghost small'),
+      actionButton('Локальная модель записи', () => openGlobalWritebackModelEditor(), 'ghost small'),
     ),
     element('p', {}, state.service.writebackProvider && state.service.writebackModel
       ? `Запись только этим клиентом: ${state.service.writebackProvider} / ${state.service.writebackModel}.`
-      : '当前客户端跟随每轮会话模型回写。'),
+      : 'Текущий клиент пишет по модели каждого раунда сеанса.'),
   )
   return element('div', { class: 'bases-page' },
     switcher,
     state.knowledgeBaseView === 'libraries' ? element('section', { class: 'library-management', 'aria-labelledby': 'bases-heading' },
       element('div', { class: 'section-heading' },
-        element('div', {}, element('h2', { id: 'bases-heading' }, '我的知识库'), element('p', {}, '名称和描述帮助 AI 判断知识应该写到哪里。')),
+        element('div', {}, element('h2', { id: 'bases-heading' }, 'Мои базы знаний'), element('p', {}, 'Название и описание помогают AI определить, куда записывать знания.')),
         element('div', { class: 'base-heading-actions' },
-          actionButton('新建分组', () => baseGroups.edit(), 'ghost', { disabled: !state.knowledgeBases.length }),
-          actionButton('+ 创建知识库', () => openKnowledgeBaseEditor(), 'primary')),
+          actionButton('Создать группу', () => baseGroups.edit(), 'ghost', { disabled: !state.knowledgeBases.length }),
+          actionButton('+ Создать базу знаний', () => openKnowledgeBaseEditor(), 'primary')),
       ),
       element('div', { class: 'knowledge-base-toolbar' },
         element('div', { class: 'search-box base-search' }, interfaceIcon('search', 'search-symbol'), element('input', {
           class: 'input', type: 'search', value: state.knowledgeBaseQuery,
-          placeholder: '搜索名称、分组、描述或标签', 'aria-label': '搜索知识库',
+          placeholder: 'Поиск по названию, группе, описанию или тегам', 'aria-label': 'Поиск баз знаний',
           onInput: event => {
             state.knowledgeBaseQuery = event.target.value
             renderShell()
@@ -1341,23 +1341,23 @@ function renderKnowledgeBases() {
       visibleActiveBases.length
         ? baseGroups.render(visibleActiveBases, renderKnowledgeBaseCard, Boolean(query))
         : query && visibleArchivedBases.length === 0
-          ? emptyState('没有匹配的知识库', '尝试搜索名称、描述或标签。')
-          : !query ? emptyState('还没有可用知识库', '使用右上角按钮创建第一个知识库。') : null,
+          ? emptyState('Нет подходящих баз знаний', 'Попробуйте поискать по названию, описанию или тегам.')
+          : !query ? emptyState('Пока нет доступных баз знаний', 'Создайте первую базу знаний кнопкой в правом верхнем углу.') : null,
       visibleArchivedBases.length ? element('details', { class: 'archived-bases', open: Boolean(query) },
-        element('summary', {}, element('span', {}, '已归档知识库'), element('span', { class: 'summary-count' }, visibleArchivedBases.length)),
+        element('summary', {}, element('span', {}, 'Архивные базы знаний'), element('span', { class: 'summary-count' }, visibleArchivedBases.length)),
         baseGroups.render(visibleArchivedBases, renderKnowledgeBaseCard, Boolean(query), 'archived'),
       ) : null,
     ) : element('section', { class: 'mount-section', 'aria-labelledby': 'mounts-heading' },
       element('div', { class: 'section-heading' }, element('div', {},
-        element('h2', { id: 'mounts-heading' }, '挂载范围'),
-        element('p', {}, '会话默认继承项目；只有需要差异时才创建会话覆盖。'),
+        element('h2', { id: 'mounts-heading' }, 'Область подключения'),
+        element('p', {}, 'Сессия по умолчанию наследует проект; переопределение сессии создавайте только при необходимости отличий.'),
       )),
       contextAvailable
         ? element('div', { class: 'mount-context' },
-          state.mountContext.projectId ? contextPill('项目', state.mountContext.projectId) : contextPill('项目', '当前页面未提供'),
-          state.mountContext.sessionId ? contextPill('会话', state.mountContext.sessionId) : contextPill('会话', '当前页面未提供'),
+          state.mountContext.projectId ? contextPill('Проект', state.mountContext.projectId) : contextPill('Проект', 'На текущей странице не предоставлено'),
+          state.mountContext.sessionId ? contextPill('Сессия', state.mountContext.sessionId) : contextPill('Сессия', 'На текущей странице не предоставлено'),
         )
-        : element('div', { class: 'context-warning' }, '请从 DSH 当前会话的左侧“知识库”入口打开，才能管理当前项目和会话的挂载。'),
+        : element('div', { class: 'context-warning' }, 'Откройте раздел «База знаний» слева в текущей сессии DSH, чтобы управлять подключениями текущего проекта и сессии.'),
       contextAvailable && activeBases.length
         ? renderMountManager(activeBases)
         : null,
@@ -1413,7 +1413,7 @@ async function closeKnowledgeBaseDetail() {
 
 function renderKnowledgeBaseDetail() {
   const base = state.knowledgeBases.find(item => item.id === state.libraryDetail.knowledgeBaseId)
-  if (!base) return emptyState('知识库不可用', '它可能已被删除，请返回知识库列表重新选择。', '返回我的知识库', () => { state.knowledgeBaseView = 'libraries'; renderShell() })
+  if (!base) return emptyState('База знаний недоступна', 'Возможно, он удалён. Вернитесь к списку баз знаний и выберите заново.', 'Вернуться к моим базам знаний', () => { state.knowledgeBaseView = 'libraries'; renderShell() })
   const workspace = libraryDocumentWorkspace()
   const archived = base.status === 'archived'
   const mountStatus = state.mountContext.sessionId
@@ -1421,24 +1421,24 @@ function renderKnowledgeBaseDetail() {
     : state.mountContext.projectId ? mountView(base, 'project', state.mountContext.projectId) : null
   return element('section', { class: 'library-detail', 'aria-labelledby': 'library-detail-title' },
     element('header', { class: 'library-detail-header' },
-      actionButton('我的知识库', () => { void closeKnowledgeBaseDetail() }, 'ghost small library-detail-back', { 'aria-label': '返回我的知识库' }),
+      actionButton('Мои базы знаний', () => { void closeKnowledgeBaseDetail() }, 'ghost small library-detail-back', { 'aria-label': 'Вернуться к моим базам знаний' }),
       element('div', { class: 'library-detail-identity' },
         element('span', { class: 'base-symbol', 'aria-hidden': 'true' }, base.name.trim().slice(0, 1).toLocaleUpperCase() || 'K'),
         element('div', {},
           element('div', { class: 'library-detail-title-line' },
             element('h2', { id: 'library-detail-title' }, base.name),
-            badge(archived ? '已归档' : '可用', archived ? '' : 'success'),
-            mountStatus ? badge(mountStatus.statusLabel, mountStatus.statusVariant) : badge('未选择挂载范围'),
+            badge(archived ? 'В архиве' : 'Доступно', archived ? '' : 'success'),
+            mountStatus ? badge(mountStatus.statusLabel, mountStatus.statusVariant) : badge('Область подключения не выбрана'),
           ),
-          element('p', {}, base.description || '通用知识库，尚未设置匹配描述。'),
+          element('p', {}, base.description || 'Общая база знаний, описание соответствия не задано.'),
         ),
       ),
       element('div', { class: 'library-detail-actions' },
-        archived ? actionButton('恢复知识库', () => confirmRestoreKnowledgeBase(base), 'small') : actionButton('编辑知识库', () => openKnowledgeBaseEditor(base), 'small'),
-        !archived ? actionButton('+ 新建文档', () => { void startBlankDocument(workspace, base.id) }, 'primary small') : null,
+        archived ? actionButton('Восстановить базу знаний', () => confirmRestoreKnowledgeBase(base), 'small') : actionButton('Редактировать базу знаний', () => openKnowledgeBaseEditor(base), 'small'),
+        !archived ? actionButton('+ Создать документ', () => { void startBlankDocument(workspace, base.id) }, 'primary small') : null,
       ),
     ),
-    archived ? element('div', { class: 'library-detail-notice', role: 'status' }, '这个知识库已经归档。文档仍可阅读，但恢复知识库后才能新建或修改。') : null,
+    archived ? element('div', { class: 'library-detail-notice', role: 'status' }, 'Эта база знаний уже заархивирована. Документы можно читать, но создавать и изменять их можно только после восстановления базы знаний.') : null,
     state.libraryDetail.error
       ? errorView(state.libraryDetail.error, () => { void openKnowledgeBaseDocuments(base) })
       : renderDocumentWorkspace(workspace, { heading: base.name, singleBase: true }),
@@ -1450,17 +1450,17 @@ async function openGlobalWritebackModelEditor() {
   const custom = element('input', { type: 'checkbox', checked: Boolean(state.service.writebackProvider && state.service.writebackModel) })
   const route = modelRouteFields(state.service.writebackProvider || '', state.service.writebackModel || '')
   const form = element('form', { class: 'form-grid' },
-    element('label', { class: 'check-option span-2' }, custom, element('span', {}, element('strong', {}, '当前客户端使用专用模型'), element('small', {}, '关闭后，跟随当前客户端每轮会话实际使用的模型。'))),
+    element('label', { class: 'check-option span-2' }, custom, element('span', {}, element('strong', {}, 'Текущий клиент использует отдельную модель'), element('small', {}, 'Если выключено, используется модель, фактически применяемая текущим клиентом в каждом раунде сессии.'))),
     route.provider.wrapper, route.model.wrapper,
   )
   const sync = () => { route.provider.input.disabled = route.model.input.disabled = !custom.checked; route.provider.input.required = route.model.input.required = custom.checked }
   custom.addEventListener('change', sync); sync()
-  openSheet({ title: '本机回写模型', description: '此设置只保存在当前 DSH 客户端，不会写入中央知识库或影响其他设备。', body: form, primaryLabel: '保存', onPrimary: async () => {
+  openSheet({ title: 'Локальная модель записи', description: 'Эта настройка хранится только в текущем клиенте DSH, не записывается в центральную базу знаний и не влияет на другие устройства.', body: form, primaryLabel: 'Сохранить', onPrimary: async () => {
     if (!form.reportValidity()) return false
     state.service = await api('service', { method: 'PUT', body: custom.checked
       ? { writebackProvider: route.provider.input.value, writebackModel: route.model.input.value }
       : { writebackProvider: null, writebackModel: null } })
-    showToast('当前客户端的回写模型已更新。'); renderShell(); return true
+    showToast('Модель записи текущего клиента обновлена.'); renderShell(); return true
   } })
 }
 
@@ -1475,7 +1475,7 @@ function writebackRouteLabel(base) {
   if (base?.writebackProvider && base?.writebackModel) {
     return `Только для базы · ${base.writebackProvider} / ${base.writebackModel}`
   }
-  return '跟随当前会话模型'
+  return 'Следовать модели текущей сессии'
 }
 
 function renderKnowledgeBaseCard(base) {
@@ -1488,25 +1488,25 @@ function renderKnowledgeBaseCard(base) {
     element('div', { class: 'base-card-header' },
       element('div', { class: 'base-card-identity' },
         element('span', { class: 'base-symbol', 'aria-hidden': 'true' }, base.name.trim().slice(0, 1).toLocaleUpperCase() || 'K'),
-        element('div', {}, element('h3', {}, base.name), element('small', { title: base.id }, base.id === 'default' ? '系统默认库' : `ID · ${base.id}`)),
+        element('div', {}, element('h3', {}, base.name), element('small', { title: base.id }, base.id === 'default' ? 'Системная база по умолчанию' : `ID · ${base.id}`)),
       ),
-      badge(archived ? '已归档' : '可用', archived ? '' : 'success'),
+      badge(archived ? 'В архиве' : 'Доступно', archived ? '' : 'success'),
     ),
-    element('p', { class: 'base-description' }, base.description || '通用知识库，尚未设置匹配描述。'),
+    element('p', { class: 'base-description' }, base.description || 'Общая база знаний, описание соответствия не задано.'),
     element('div', { class: 'base-card-tags' }, visibleTags.length
       ? visibleTags.map(tag => element('span', { class: 'tag' }, `#${tag}`))
-      : element('span', { class: 'tag is-empty' }, '无默认标签'),
+      : element('span', { class: 'tag is-empty' }, 'Без тегов по умолчанию'),
     hiddenTagCount ? element('span', { class: 'tag' }, `+${hiddenTagCount}`) : null),
     element('div', { class: 'base-card-meta' },
-      element('span', {}, element('strong', {}, '回写策略'), base.writebackPolicy === 'proactive' ? '主动' : '严谨'),
-      element('span', {}, element('strong', {}, '回写模型'), writebackRouteLabel(base)),
-      base.extractionInstructions ? element('span', {}, element('strong', {}, '提取规则'), '已设置') : null,
+      element('span', {}, element('strong', {}, 'Стратегия записи'), base.writebackPolicy === 'proactive' ? 'Активный' : 'Строгий'),
+      element('span', {}, element('strong', {}, 'Модель записи'), writebackRouteLabel(base)),
+      base.extractionInstructions ? element('span', {}, element('strong', {}, 'Правила извлечения'), 'Задано') : null,
     ),
     element('div', { class: 'base-card-actions' },
-      actionButton('查看知识', () => { void openKnowledgeBaseDocuments(base) }, 'ghost small', { 'data-open-knowledge-base': base.id }),
-      archived ? actionButton('恢复', () => confirmRestoreKnowledgeBase(base), 'small') : actionButton('编辑', () => openKnowledgeBaseEditor(base), 'small'),
-      archived ? actionButton('永久删除', () => confirmDeleteKnowledgeBase(base), 'danger small') : null,
-      !archived && base.id !== 'default' ? actionButton('归档', () => confirmArchiveKnowledgeBase(base), 'danger small') : null,
+      actionButton('Просмотреть знания', () => { void openKnowledgeBaseDocuments(base) }, 'ghost small', { 'data-open-knowledge-base': base.id }),
+      archived ? actionButton('Восстановить', () => confirmRestoreKnowledgeBase(base), 'small') : actionButton('Редактировать', () => openKnowledgeBaseEditor(base), 'small'),
+      archived ? actionButton('Удалить навсегда', () => confirmDeleteKnowledgeBase(base), 'danger small') : null,
+      !archived && base.id !== 'default' ? actionButton('В архив', () => confirmArchiveKnowledgeBase(base), 'danger small') : null,
     ),
   )
 }
@@ -1527,18 +1527,18 @@ function mountView(base, targetKind, targetId) {
   let detail
   if (explicit && !explicit.enabled) {
     statusKey = 'disabled'
-    statusLabel = '已关闭'
+    statusLabel = 'Закрыто'
     statusVariant = 'danger'
-    detail = '显式禁用，不会继承项目设置'
+    detail = 'Явно отключено, настройки проекта не наследуются'
   } else if (source) {
     statusKey = explicit ? 'mounted' : 'inherited'
-    statusLabel = explicit ? '已挂载' : '继承项目'
+    statusLabel = explicit ? 'Подключено' : 'Наследовать от проекта'
     statusVariant = explicit ? 'success' : 'accent'
     detail = `${source.recallEnabled ? 'извлечение вкл' : 'извлечение выкл'} · ${WRITE_MODE_LABELS[source.writeMode]}`
   } else {
     statusKey = 'unmounted'
-    statusLabel = '未挂载'
-    detail = '不召回、不提取、不回写'
+    statusLabel = 'Не подключено'
+    detail = 'Без извлечения, без отбора, без записи'
   }
   return { explicit, inherited, source, statusKey, statusLabel, statusVariant, detail }
 }
@@ -1546,8 +1546,8 @@ function mountView(base, targetKind, targetId) {
 function renderMountManager(activeBases) {
   const manager = state.mountManager
   const availableKinds = [
-    state.mountContext.projectId ? ['project', '项目'] : null,
-    state.mountContext.sessionId ? ['session', '会话'] : null,
+    state.mountContext.projectId ? ['project', 'Проект'] : null,
+    state.mountContext.sessionId ? ['session', 'Сессия'] : null,
   ].filter(Boolean)
   if (!availableKinds.some(([kind]) => kind === manager.targetKind)) manager.targetKind = availableKinds[0][0]
   const targetId = manager.targetKind === 'project' ? state.mountContext.projectId : state.mountContext.sessionId
@@ -1561,19 +1561,19 @@ function renderMountManager(activeBases) {
   const selectedCount = manager.selectedIds.size
   const searchInput = element('input', {
     class: 'input', type: 'search', value: manager.query,
-    placeholder: '搜索分类、名称、描述或标签', 'aria-label': '搜索可挂载知识库',
+    placeholder: 'Поиск по категории, названию, описанию или тегам', 'aria-label': 'Поиск баз знаний для подключения',
     onInput: (event) => { manager.query = event.target.value; renderShell(); document.querySelector('.mount-search input')?.focus() },
   })
-  const filter = selectControl('筛选挂载状态', [
-    { value: 'all', label: '全部状态' },
-    { value: 'mounted', label: '已挂载' },
-    { value: 'unmounted', label: '未挂载' },
-    ...(manager.targetKind === 'session' ? [{ value: 'inherited', label: '继承项目' }] : []),
-    { value: 'disabled', label: '已关闭' },
+  const filter = selectControl('Фильтр по состоянию подключения', [
+    { value: 'all', label: 'Все статусы' },
+    { value: 'mounted', label: 'Подключено' },
+    { value: 'unmounted', label: 'Не подключено' },
+    ...(manager.targetKind === 'session' ? [{ value: 'inherited', label: 'Наследовать от проекта' }] : []),
+    { value: 'disabled', label: 'Закрыто' },
   ], manager.filter, (value) => { manager.filter = value; renderShell() })
   return element('div', { class: 'mount-manager' },
     element('div', { class: 'mount-manager-toolbar' },
-      element('div', { class: 'tabs', role: 'tablist', 'aria-label': '挂载目标' }, availableKinds.map(([kind, label]) => element('button', {
+      element('div', { class: 'tabs', role: 'tablist', 'aria-label': 'Цель подключения' }, availableKinds.map(([kind, label]) => element('button', {
         type: 'button', role: 'tab', class: 'tab', 'aria-selected': String(manager.targetKind === kind),
         onClick: () => {
           manager.targetKind = kind
@@ -1586,20 +1586,20 @@ function renderMountManager(activeBases) {
       filter,
     ),
     element('div', { class: 'mount-target-line' },
-      element('span', {}, manager.targetKind === 'project' ? '当前项目' : '当前会话'),
+      element('span', {}, manager.targetKind === 'project' ? 'Текущий проект' : 'Текущий сеанс'),
       element('code', { title: targetId }, targetId),
       element('span', { class: 'field-hint' }, `Показано ${visibleRows.length} / ${activeBases.length}`),
     ),
     visibleRows.length
-      ? element('div', { class: 'mount-table', role: 'list', 'aria-label': '知识库挂载列表', 'data-scroll-key': 'mount-table' }, visibleRows.map(({ base, view }) => renderMountListRow(base, view, manager.targetKind, targetId)))
-      : emptyState('没有匹配的知识库', '调整搜索词或筛选条件。'),
+      ? element('div', { class: 'mount-table', role: 'list', 'aria-label': 'Список подключений базы знаний', 'data-scroll-key': 'mount-table' }, visibleRows.map(({ base, view }) => renderMountListRow(base, view, manager.targetKind, targetId)))
+      : emptyState('Нет подходящих баз знаний', 'Измените поисковый запрос или фильтры.'),
     element('div', { class: 'mount-bulk-bar', 'aria-live': 'polite' },
       element('strong', {}, `Выбрано ${selectedCount}`),
       element('div', { class: 'mount-bulk-actions' },
-        actionButton('选择当前结果', () => { visibleIds.forEach(id => manager.selectedIds.add(id)); renderShell() }, 'ghost small', { disabled: visibleIds.length === 0 }),
-        actionButton('清除选择', () => { manager.selectedIds.clear(); renderShell() }, 'ghost small', { disabled: selectedCount === 0 }),
-        actionButton(manager.targetKind === 'session' ? '恢复继承' : '取消挂载', () => void bulkRemoveMounts(), 'danger small', { disabled: selectedCount === 0 }),
-        actionButton('批量挂载', () => openBulkMountEditor(), 'primary small', { disabled: selectedCount === 0 }),
+        actionButton('Выбрать текущий результат', () => { visibleIds.forEach(id => manager.selectedIds.add(id)); renderShell() }, 'ghost small', { disabled: visibleIds.length === 0 }),
+        actionButton('Сбросить выбор', () => { manager.selectedIds.clear(); renderShell() }, 'ghost small', { disabled: selectedCount === 0 }),
+        actionButton(manager.targetKind === 'session' ? 'Восстановить наследование' : 'Отключить', () => void bulkRemoveMounts(), 'danger small', { disabled: selectedCount === 0 }),
+        actionButton('Пакетное подключение', () => openBulkMountEditor(), 'primary small', { disabled: selectedCount === 0 }),
       ),
     ),
   )
@@ -1623,13 +1623,13 @@ function renderMountListRow(base, view, targetKind, targetId) {
     element('label', { class: 'mount-select' }, checkbox, element('span', { class: 'visually-hidden' }, `Выбрать ${knowledgeBasePathLabel(base)}`)),
     element('div', { class: 'mount-list-main' },
       element('div', { class: 'mount-list-title' }, element('strong', { class: 'mount-base-path', title: knowledgeBasePathLabel(base) }, knowledgeBasePathLabel(base)), badge(view.statusLabel, view.statusVariant), badge(modelLabel)),
-      element('p', {}, base.description || '通用知识库'),
+      element('p', {}, base.description || 'Общая база знаний'),
       element('div', { class: 'mount-list-meta' }, view.detail,
         view.source?.includeTags.length ? element('span', {}, ` · включает #${view.source.includeTags.join(' #')}`) : null,
         view.source?.excludeTags.length ? element('span', {}, ` · исключает #${view.source.excludeTags.join(' #')}`) : null,
       ),
     ),
-    actionButton(view.explicit ? '设置' : view.inherited?.enabled ? '覆盖' : '挂载', () => openMountEditor(base, targetKind, targetId, view.explicit, view.inherited), 'small'),
+    actionButton(view.explicit ? 'Настройки' : view.inherited?.enabled ? 'Перезаписать' : 'Подключение', () => openMountEditor(base, targetKind, targetId, view.explicit, view.inherited), 'small'),
   )
 }
 
@@ -1640,7 +1640,7 @@ function renderCompactEntry(entry) {
       element('p', { class: 'list-summary' }, entry.body),
       element('div', { class: 'list-meta' }, knowledgeBaseName(entry.knowledgeBaseId), scopeLabel(entry.scope), formatDate(entry.updatedAt)),
     ),
-    actionButton('编辑', () => openEntryEditor(entry), 'ghost small'),
+    actionButton('Редактировать', () => openEntryEditor(entry), 'ghost small'),
   )
 }
 
@@ -1651,7 +1651,7 @@ function renderCompactCandidate(candidate) {
       element('p', { class: 'list-summary' }, candidate.reason || candidate.draft.body),
       element('div', { class: 'list-meta' }, knowledgeBaseName(candidate.draft.knowledgeBaseId), TYPE_LABELS[candidate.draft.type], formatDate(candidate.createdAt)),
     ),
-    actionButton('审核', () => navigate('candidates'), 'ghost small'),
+    actionButton('Проверка', () => navigate('candidates'), 'ghost small'),
   )
 }
 
@@ -1664,31 +1664,31 @@ function renderEntries() {
 }
 
 async function applyDocumentGroup(workspace, baseId, ids, group) {
-  if (workspace.view.editor?.dirty && !await saveDocumentEditor(workspace)) throw new Error('请先保存当前文档，再调整分组。')
+  if (workspace.view.editor?.dirty && !await saveDocumentEditor(workspace)) throw new Error('Сначала сохраните текущий документ, затем меняйте группу.')
   await api('document-groups', { method: 'POST', body: { knowledgeBaseId: baseId, ids, group } })
   await reloadDocumentWorkspace(workspace)
   if (workspace.view.documentId) await loadDocumentEditor(workspace, workspace.view.documentId)
   workspace.view.collapsedGroups.delete(JSON.stringify([baseId, group]))
   renderShell()
-  showToast('文档分组已更新。')
+  showToast('Группа документа обновлена.')
 }
 
 async function dropDocumentIntoGroup(event, workspace, baseId, group) {
   event.preventDefault()
   const drag = knowledgeDocumentDrag
   clearKnowledgeDocumentDragState()
-  if (!drag || drag.sourceBaseId !== baseId) return showToast('分组内拖动仅用于同一知识库；跨库请拖到知识库名称。', 'error')
+  if (!drag || drag.sourceBaseId !== baseId) return showToast('Перетаскивание внутри группы работает только в одной базе знаний; между базами перетаскивайте на имя базы знаний.', 'error')
   try { await applyDocumentGroup(workspace, baseId, [drag.documentId], group) }
   catch (error) { showToast(friendlyError(error), 'error') }
 }
 
 function openDocumentGroupEditor(workspace, editor) {
   const field = createDocumentGroupField({ element, api, baseId: editor.knowledgeBaseId, value: editor.group || '', required: editor.isNew })
-  openSheet({ title: '文档分组', description: '修改分组不会移动文件或更改文档引用。', body: field.wrapper, primaryLabel: '保存分组', onPrimary: async () => {
+  openSheet({ title: 'Группа документа', description: 'Смена группы не перемещает файлы и не меняет ссылки в документах.', body: field.wrapper, primaryLabel: 'Сохранить группу', onPrimary: async () => {
     await field.ready
     field.validate()
     if (editor.isNew) {
-      if (!field.value() || field.value() === '未分组') throw new Error('新文档必须选择有效分组。')
+      if (!field.value() || field.value() === 'без группы') throw new Error('Для нового документа нужно выбрать допустимую группу.')
       editor.group = field.value(); editor.dirty = true; renderShell()
     } else await applyDocumentGroup(workspace, editor.knowledgeBaseId, [editor.id], field.value())
     return true
@@ -1704,7 +1704,7 @@ function renderDocumentWorkspace(workspace, options = {}) {
   const canOrganize = !readOnly
   const selectedBase = activeBases.find(base => base.id === view.knowledgeBaseId)
   const search = element('input', {
-    class: 'note-tree-search', type: 'search', value: view.query, placeholder: '搜索文档', 'aria-label': '搜索知识库文档',
+    class: 'note-tree-search', type: 'search', value: view.query, placeholder: 'Поиск документов', 'aria-label': 'Поиск документов базы знаний',
     'data-document-scope': workspace.kind,
     onInput: (event) => {
       view.query = event.target.value
@@ -1743,10 +1743,10 @@ function renderDocumentWorkspace(workspace, options = {}) {
       element('span', { class: 'tree-base-name' }, base.name),
       element('span', { class: 'tree-count' }, query ? documents.length : page.loaded ? page.total : '—')),
       expanded ? element('div', { class: 'note-tree-documents', role: 'group', 'aria-label': `Документы: ${base.name}` },
-        !query && page.loading && documents.length === 0 ? element('div', { class: 'note-tree-status', role: 'status' }, '正在读取目录…') : null,
+        !query && page.loading && documents.length === 0 ? element('div', { class: 'note-tree-status', role: 'status' }, 'Чтение каталога…') : null,
         !query && page.error ? element('div', { class: 'note-tree-status is-error' },
           element('span', {}, page.error),
-          actionButton('重试', () => { void loadDocumentPage(workspace, base.id, { reset: true }).then(renderShell) }, 'ghost small')) : null,
+          actionButton('Повторить', () => { void loadDocumentPage(workspace, base.id, { reset: true }).then(renderShell) }, 'ghost small')) : null,
         renderDocumentGroups({ element, documents, baseId: base.id, collapsed: view.collapsedGroups, searching: Boolean(query), onNew: readOnly ? undefined : group => { void startBlankDocument(workspace, base.id, group) }, onDrop: readOnly ? undefined : (event, group) => { void dropDocumentIntoGroup(event, workspace, base.id, group) }, renderRow: document => element('button', {
           type: 'button', class: 'note-tree-document', 'aria-current': document.id === view.documentId ? 'page' : undefined,
           draggable: canOrganize && movingDocumentId !== document.id ? 'true' : undefined,
@@ -1763,29 +1763,29 @@ function renderDocumentWorkspace(workspace, options = {}) {
           onClick: () => { view.knowledgeBaseId = base.id; void selectDocument(workspace, document.id) },
         }, element('span', { class: 'tree-document-icon', 'aria-hidden': 'true' }), element('span', { class: 'tree-document-copy' },
           element('strong', { title: document.title }, document.title), element('small', { title: document.relPath }, document.relPath)),
-        document.documentState !== 'open' ? badge(DOCUMENT_STATE_LABELS[document.documentState] || '已结束', 'success') : null) }),
+        document.documentState !== 'open' ? badge(DOCUMENT_STATE_LABELS[document.documentState] || 'Завершено', 'success') : null) }),
         !query && page.nextCursor ? element('button', {
           type: 'button', class: 'note-tree-more', disabled: page.loading,
           onClick: () => { void loadDocumentPage(workspace, base.id, { append: true }).then(renderShell) },
-        }, page.loading ? '正在加载…' : `Загрузить ещё (показано ${documents.length} / ${page.total})`) : null,
-        !query && page.loaded && documents.length === 0 ? element('div', { class: 'note-tree-status' }, '这个知识库还没有文档。') : null,
+        }, page.loading ? 'Загрузка…' : `Загрузить ещё (показано ${documents.length} / ${page.total})`) : null,
+        !query && page.loaded && documents.length === 0 ? element('div', { class: 'note-tree-status' }, 'В этой базе знаний пока нет документов.') : null,
         !query && !readOnly ? element('button', { type: 'button', class: 'note-tree-new', onClick: () => { void startBlankDocument(workspace, base.id) } },
-          element('span', { 'aria-hidden': 'true' }, '+'), '新建文档') : null,
+          element('span', { 'aria-hidden': 'true' }, '+'), 'Создать документ') : null,
       ) : null,
     )
   })
   const treeContent = query
     ? [
-      view.searchLoading && view.searchResults.length === 0 ? element('div', { class: 'note-tree-status', role: 'status' }, '正在搜索文档…') : null,
+      view.searchLoading && view.searchResults.length === 0 ? element('div', { class: 'note-tree-status', role: 'status' }, 'Поиск документов…') : null,
       view.searchError ? element('div', { class: 'note-tree-status is-error' }, view.searchError) : null,
       ...tree,
-      !view.searchLoading && !view.searchError && view.searchResults.length === 0 ? element('div', { class: 'note-tree-empty' }, '没有匹配的文档') : null,
+      !view.searchLoading && !view.searchError && view.searchResults.length === 0 ? element('div', { class: 'note-tree-empty' }, 'Нет подходящих документов') : null,
       view.searchNextCursor ? element('button', {
         type: 'button', class: 'note-tree-more search-more', disabled: view.searchLoading,
         onClick: () => { void loadDocumentSearch(workspace, false) },
-      }, view.searchLoading ? '正在加载…' : `Загрузить ещё результаты (${view.searchResults.length} / ${view.searchTotal})`) : null,
+      }, view.searchLoading ? 'Загрузка…' : `Загрузить ещё результаты (${view.searchResults.length} / ${view.searchTotal})`) : null,
     ]
-    : tree.length ? tree : [element('div', { class: 'note-tree-empty' }, workspace.kind === 'session' && state.mountContext.sessionId ? '当前会话未挂载知识库' : '还没有知识库')]
+    : tree.length ? tree : [element('div', { class: 'note-tree-empty' }, workspace.kind === 'session' && state.mountContext.sessionId ? 'В текущем сеансе база знаний не подключена' : 'Пока нет баз знаний')]
   return element('section', {
     class: `note-workspace note-workspace--${workspace.kind}`, 'aria-labelledby': `${workspace.kind}-documents-heading`,
     'data-tree-open': String(view.treeOpen),
@@ -1793,12 +1793,12 @@ function renderDocumentWorkspace(workspace, options = {}) {
     element('aside', { class: 'note-tree-panel', 'aria-label': 'Каталог знаний' },
       element('header', { class: 'note-tree-header' },
         element('div', {}, element('h2', { id: `${workspace.kind}-documents-heading` }, options.heading || 'Каталог знаний'), element('span', {}, query ? `${view.searchTotal} результатов поиска` : `Загружено ${workspaceDocuments.length} документов`)),
-        !readOnly ? actionButton('+', () => { void startBlankDocument(workspace, view.knowledgeBaseId || activeBases[0]?.id) }, 'ghost note-add-button', { 'aria-label': '新建文档', title: '新建文档' }) : null,
+        !readOnly ? actionButton('+', () => { void startBlankDocument(workspace, view.knowledgeBaseId || activeBases[0]?.id) }, 'ghost note-add-button', { 'aria-label': 'Создать документ', title: 'Создать документ' }) : null,
       ),
       element('div', {}, element('div', { class: 'note-tree-search-wrap' }, interfaceIcon('search', 'search-symbol'), search),
-        !readOnly && view.knowledgeBaseId ? actionButton('整理分组', () => { const baseId = view.knowledgeBaseId; void openDocumentGroupOrganizer({ element, api, openSheet, baseId, onApply: (ids, group) => applyDocumentGroup(workspace, baseId, ids, group) }) }, 'ghost small document-groups-manage') : null),
+        !readOnly && view.knowledgeBaseId ? actionButton('Упорядочить группы', () => { const baseId = view.knowledgeBaseId; void openDocumentGroupOrganizer({ element, api, openSheet, baseId, onApply: (ids, group) => applyDocumentGroup(workspace, baseId, ids, group) }) }, 'ghost small document-groups-manage') : null),
       element('nav', { class: 'note-tree', 'data-scroll-key': `${workspace.kind}-note-tree` }, treeContent),
-      workspace.kind === 'session' ? element('footer', { class: 'note-tree-footer' }, actionButton('新建知识库', () => openKnowledgeBaseEditor(), 'ghost small')) : null,
+      workspace.kind === 'session' ? element('footer', { class: 'note-tree-footer' }, actionButton('Создать базу знаний', () => openKnowledgeBaseEditor(), 'ghost small')) : null,
     ),
     view.treeOpen ? element('button', {
       type: 'button', class: 'note-tree-scrim', 'aria-label': 'Закрыть каталог знаний',
@@ -1815,9 +1815,9 @@ function renderNoteEditor(workspace, editor, base) {
   if (!editor) return element('main', { class: 'note-editor note-editor-empty' },
     element('div', { class: 'note-empty-content' },
       element('span', { class: 'empty-document-mark', 'aria-hidden': 'true' }),
-      element('h3', {}, '选择或新建一篇文档'),
-      element('p', {}, readOnly ? '这个知识库已归档，当前只能阅读已有文档。' : '文档保存后会立即参与当前知识库的搜索与召回。'),
-      !readOnly ? actionButton('新建文档', () => { void startBlankDocument(workspace, view.knowledgeBaseId || state.knowledgeBases.find(item => item.status === 'active')?.id) }, 'primary') : null,
+      element('h3', {}, 'Выберите или создайте документ'),
+      element('p', {}, readOnly ? 'Эта база знаний заархивирована, сейчас можно только читать существующие документы.' : 'После сохранения документ сразу участвует в поиске и извлечении текущей базы знаний.'),
+      !readOnly ? actionButton('Создать документ', () => { void startBlankDocument(workspace, view.knowledgeBaseId || state.knowledgeBases.find(item => item.status === 'active')?.id) }, 'primary') : null,
     ))
   const saveShortcut = event => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === 's') {
@@ -1828,82 +1828,82 @@ function renderNoteEditor(workspace, editor, base) {
   const update = (key, value) => {
     editor[key] = value
     editor.dirty = true
-    editor.saveState = editor.saving ? '正在保存…' : '未保存'
+    editor.saveState = editor.saving ? 'Сохранение…' : 'Не сохранено'
     updateEditorSaveState(editor.saveState)
   }
   const title = element('input', {
-    class: 'note-title-input', value: editor.title, maxlength: 200, placeholder: '无标题文档', 'aria-label': '文档标题',
+    class: 'note-title-input', value: editor.title, maxlength: 200, placeholder: 'Документ без названия', 'aria-label': 'Заголовок документа',
     onInput: event => update('title', event.target.value), onKeyDown: saveShortcut,
   })
   const finalized = !editor.isNew && editor.documentState !== 'open'
   const editable = !finalized && !readOnly
   const body = editable
-    ? element('div', { class: 'notes-live-editor knowledge-live-editor', role: 'status', 'aria-label': '正在打开知识文档正文' },
-      element('div', { class: 'notes-editor-loading' }, '正在打开文档…'))
+    ? element('div', { class: 'notes-live-editor knowledge-live-editor', role: 'status', 'aria-label': 'Открытие текста документа знаний' },
+      element('div', { class: 'notes-editor-loading' }, 'Открытие документа…'))
     : renderMarkdownPreview(editor.body)
   if (editable) mountMarkdownEditor(body, {
     markdown: editor.body,
-    label: '编辑知识文档正文',
+    label: 'Редактировать текст документа базы знаний',
     onChange: value => update('body', value),
     onSave: () => { void saveDocumentEditor(workspace).then(saved => { if (saved) renderShell() }) },
   })
-  return element('main', { class: 'note-editor', 'aria-label': '文档编辑器' },
+  return element('main', { class: 'note-editor', 'aria-label': 'Редактор документов' },
     element('header', { class: 'note-editor-toolbar' },
       element('div', { class: 'note-breadcrumb' },
-        element('span', {}, base?.name || '知识库'),
+        element('span', {}, base?.name || 'база знаний'),
         element('span', { 'aria-hidden': 'true' }, '/'),
-        element('strong', {}, editor.isNew ? '新文档' : documentWorkspaceDocuments(workspace).find(item => item.id === editor.id)?.relPath || editor.title),
+        element('strong', {}, editor.isNew ? 'Новый документ' : documentWorkspaceDocuments(workspace).find(item => item.id === editor.id)?.relPath || editor.title),
         element('span', { class: 'note-toolbar-meta' },
-          element('span', {}, editor.isNew ? '尚未保存' : `Обновлено ${formatDate(editor.updatedAt)}`),
-          element('span', {}, editor.scope.kind === 'global' ? '全局知识' : `Проект ${editor.scope.id}`))),
+          element('span', {}, editor.isNew ? 'Ещё не сохранено' : `Обновлено ${formatDate(editor.updatedAt)}`),
+          element('span', {}, editor.scope.kind === 'global' ? 'Глобальные знания' : `Проект ${editor.scope.id}`))),
       element('div', { class: 'note-editor-actions' },
-        finalized ? badge(DOCUMENT_STATE_LABELS[editor.documentState] || '已结束', 'success') : readOnly ? badge('只读') : null,
+        finalized ? badge(DOCUMENT_STATE_LABELS[editor.documentState] || 'Завершено', 'success') : readOnly ? badge('Только чтение') : null,
         element('span', { class: 'editor-save-status', role: 'status' }, editor.saveState),
-        finalized && !readOnly ? actionButton('重新打开', () => reopenDocument(workspace, editor), 'small') : null,
-        !readOnly && !finalized ? actionButton(editor.isNew ? '创建文档' : '保存', () => { void saveDocumentEditor(workspace).then(saved => { if (saved) renderShell() }) }, 'primary small') : null,
-        !readOnly && !editor.isNew ? renderDocumentMenu(editor.title || '知识文档', [
+        finalized && !readOnly ? actionButton('Открыть заново', () => reopenDocument(workspace, editor), 'small') : null,
+        !readOnly && !finalized ? actionButton(editor.isNew ? 'Создать документ' : 'Сохранить', () => { void saveDocumentEditor(workspace).then(saved => { if (saved) renderShell() }) }, 'primary small') : null,
+        !readOnly && !editor.isNew ? renderDocumentMenu(editor.title || 'Документ базы знаний', [
           [
             ...(documentWorkspaceBases(workspace).some(item => item.id !== editor.knowledgeBaseId)
-              ? [{ label: '移动到…', icon: 'move', run: () => openMoveKnowledgeDocument(workspace, editor) }] : []),
-            ...(!finalized ? [{ label: '标记结束', icon: 'check', run: () => openFinalizeDocument(workspace, editor) }] : []),
+              ? [{ label: 'Переместить в…', icon: 'move', run: () => openMoveKnowledgeDocument(workspace, editor) }] : []),
+            ...(!finalized ? [{ label: 'Отметить как закрытое', icon: 'check', run: () => openFinalizeDocument(workspace, editor) }] : []),
           ],
-          !finalized ? [{ label: '删除文档', icon: 'trash', danger: true, run: () => confirmDeleteDocument(workspace, editor) }] : [],
+          !finalized ? [{ label: 'Удалить документ', icon: 'trash', danger: true, run: () => confirmDeleteDocument(workspace, editor) }] : [],
         ]) : null,
       ),
     ),
     element('div', { class: 'note-editor-scroll', 'data-scroll-key': 'note-editor' },
       finalized ? element('aside', { class: 'document-finalized-banner', role: 'status' },
-        element('strong', {}, DOCUMENT_STATE_LABELS[editor.documentState] || '文档已结束'),
+        element('strong', {}, DOCUMENT_STATE_LABELS[editor.documentState] || 'Документ закрыт'),
         element('span', {}, editor.documentState === 'resolved'
-          ? '这个问题已经解决，文档已封存并停止继续回写。'
-          : '资料收集已经完成，文档已封存并停止继续回写。'),
+          ? 'Этот вопрос решён, документ запечатан и запись в него остановлена.'
+          : 'Сбор материалов завершён, документ запечатан и запись в него остановлена.'),
         editor.finalizationNote ? element('p', {}, editor.finalizationNote) : null,
         editor.finalizedAt ? element('small', {}, `Завершено ${formatDate(editor.finalizedAt)}`) : null,
       ) : null,
       element('article', { class: `note-paper is-${editable ? 'edit' : 'preview'}`, 'data-document-mode': editable ? 'edit' : 'preview' },
-        editable ? title : element('h1', { class: 'note-preview-title' }, editor.title || '无标题文档'),
+        editable ? title : element('h1', { class: 'note-preview-title' }, editor.title || 'Документ без названия'),
         body,
       ),
     ),
     renderDocumentReferenceBar(workspace, editor, editable),
     element('footer', { class: 'note-inspector' },
-      readOnly ? element('span', { class: 'note-format-hint' }, `Группа: ${editor.group || 'без группы'}`) : actionButton(`Группа: ${editor.group || 'без группы'}`, () => openDocumentGroupEditor(workspace, editor), 'ghost small document-group-control', { title: editor.group || '未分组', 'aria-label': '调整文档分组' }),
-      finalized || readOnly ? element('span', { class: 'note-format-hint' }, readOnly ? '知识库已归档 · 只读' : '只读封存 · 重新打开后才能编辑') : element('label', {}, element('span', {}, '类型'), element('select', {
+      readOnly ? element('span', { class: 'note-format-hint' }, `Группа: ${editor.group || 'без группы'}`) : actionButton(`Группа: ${editor.group || 'без группы'}`, () => openDocumentGroupEditor(workspace, editor), 'ghost small document-group-control', { title: editor.group || 'без группы', 'aria-label': 'Изменить группу документа' }),
+      finalized || readOnly ? element('span', { class: 'note-format-hint' }, readOnly ? 'База знаний в архиве · только чтение' : 'Только чтение · для редактирования снова откройте') : element('label', {}, element('span', {}, 'Тип'), element('select', {
         class: 'note-meta-select', onChange: event => update('type', event.target.value),
       }, TYPES.map(type => element('option', { value: type, selected: type === editor.type }, TYPE_LABELS[type])))),
-      finalized || readOnly ? null : element('label', { class: 'note-tags-field' }, element('span', {}, '标签'), element('input', {
-        value: editor.tagsText, placeholder: '用逗号分隔', onInput: event => update('tagsText', event.target.value),
+      finalized || readOnly ? null : element('label', { class: 'note-tags-field' }, element('span', {}, 'Теги'), element('input', {
+        value: editor.tagsText, placeholder: 'Через запятую', onInput: event => update('tagsText', event.target.value),
       })),
-      editable ? element('span', { class: 'note-format-hint' }, 'Markdown · Ctrl/⌘ S 保存') : null,
+      editable ? element('span', { class: 'note-format-hint' }, 'Markdown · Ctrl/⌘ S — сохранить') : null,
     ),
   )
 }
 
 function renderDocumentEditorLoading(base) {
-  return element('main', { class: 'note-editor note-editor-loading', role: 'status', 'aria-label': '正在打开知识文档' },
+  return element('main', { class: 'note-editor note-editor-loading', role: 'status', 'aria-label': 'Открытие документа знаний' },
     element('header', { class: 'note-editor-toolbar' },
-      element('div', { class: 'note-breadcrumb' }, element('span', {}, base?.name || '知识库'), element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, '正在打开文档')),
-      element('span', { class: 'editor-load-label' }, '按需加载正文与关联笔记'),
+      element('div', { class: 'note-breadcrumb' }, element('span', {}, base?.name || 'база знаний'), element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, 'Открытие документа')),
+      element('span', { class: 'editor-load-label' }, 'Загружать текст и связанные заметки по требованию'),
     ),
     element('div', { class: 'note-editor-scroll' }, element('article', { class: 'note-paper editor-paper-skeleton', 'aria-hidden': 'true' },
       element('div', { class: 'skeleton-line skeleton-paper-title' }),
@@ -1914,11 +1914,11 @@ function renderDocumentEditorLoading(base) {
 
 function renderDocumentReferenceBar(workspace, editor, editable) {
   const references = editor.noteReferences || []
-  return element('section', { class: 'document-reference-bar', 'aria-label': '关联笔记' },
+  return element('section', { class: 'document-reference-bar', 'aria-label': 'Связать заметку' },
     element('div', { class: 'document-reference-heading' },
       element('span', { class: 'document-reference-mark', 'aria-hidden': 'true' }),
-      element('strong', {}, '关联笔记'),
-      element('small', {}, references.length ? `${references.length} шт.` : '未关联')),
+      element('strong', {}, 'Связать заметку'),
+      element('small', {}, references.length ? `${references.length} шт.` : 'Не связано')),
     element('div', { class: 'document-reference-list' }, references.length
       ? references.map(reference => element('span', { class: 'document-reference-chip' },
         element('button', {
@@ -1926,18 +1926,18 @@ function renderDocumentReferenceBar(workspace, editor, editable) {
           onClick: () => { void openNoteReference(reference.note.id) },
         }, renderNoteIcon(reference.note), element('span', {}, reference.note.name)),
         editable ? element('button', {
-          type: 'button', class: 'document-reference-remove', 'aria-label': `Убрать связь с ${reference.note.name}`, title: '移除关联',
+          type: 'button', class: 'document-reference-remove', 'aria-label': `Убрать связь с ${reference.note.name}`, title: 'Убрать связь',
           onClick: () => { void removeDocumentNoteReference(workspace, editor, reference) },
         }, '×') : null,
       ))
-      : element('span', { class: 'document-reference-empty' }, editor.isNew ? '保存文档后可以关联笔记或资料文件' : '这篇知识还没有关联笔记')),
-    editable && !editor.isNew ? actionButton('+ 添加', () => { void openDocumentNoteReferencePicker(workspace, editor) }, 'ghost small document-reference-add') : null,
+      : element('span', { class: 'document-reference-empty' }, editor.isNew ? 'После сохранения документа можно привязать заметки или файлы материалов' : 'У этого знания пока нет связанных заметок')),
+    editable && !editor.isNew ? actionButton('+ Добавить', () => { void openDocumentNoteReferencePicker(workspace, editor) }, 'ghost small document-reference-add') : null,
   )
 }
 
 async function openDocumentNoteReferencePicker(workspace, editor) {
   const search = element('input', {
-    class: 'input', type: 'search', placeholder: '搜索笔记文档或文件', 'aria-label': '搜索可关联的笔记',
+    class: 'input', type: 'search', placeholder: 'Поиск заметок, документов или файлов', 'aria-label': 'Поиск заметок для связи',
   })
   const results = element('div', { class: 'note-picker-results', 'aria-live': 'polite' })
   let modal
@@ -1946,10 +1946,10 @@ async function openDocumentNoteReferencePicker(workspace, editor) {
     const current = ++request
     const query = search.value.trim()
     if (!query) {
-      results.replaceChildren(element('div', { class: 'note-picker-empty' }, '输入名称以搜索可关联的笔记文档和文件。'))
+      results.replaceChildren(element('div', { class: 'note-picker-empty' }, 'Введите название, чтобы найти документы заметок и файлы для связи.'))
       return
     }
-    results.replaceChildren(element('div', { class: 'note-picker-empty' }, '正在搜索…'))
+    results.replaceChildren(element('div', { class: 'note-picker-empty' }, 'Поиск…'))
     try {
       const linked = new Set((editor.noteReferences || []).map(reference => reference.note.id))
       const visible = (await api(`notes?q=${encodeURIComponent(query)}&limit=100`)).filter(node => node.kind !== 'folder' && !linked.has(node.id))
@@ -1964,7 +1964,7 @@ async function openDocumentNoteReferencePicker(workspace, editor) {
               editor.noteReferences = [...(editor.noteReferences || []), reference]
               modal.close(true)
               renderShell()
-              showToast('已关联笔记。')
+              showToast('Заметка связана.')
             } catch (error) {
               event.currentTarget.disabled = false
               showToast(friendlyError(error), 'error')
@@ -1973,7 +1973,7 @@ async function openDocumentNoteReferencePicker(workspace, editor) {
         },
         renderNoteIcon(node),
         element('span', {}, element('strong', {}, node.name), element('small', {}, `${node.kind === 'document' ? 'документ заметки' : formatBytes(node.size)}  ${shortNoteId(node.id)}`))))
-        : [element('div', { class: 'note-picker-empty' }, '没有匹配的笔记文档或文件。')]))
+        : [element('div', { class: 'note-picker-empty' }, 'Нет подходящих документов-заметок или файлов.')]))
     } catch (error) {
       if (current !== request) return
       results.replaceChildren(element('div', { class: 'note-picker-empty is-error' }, friendlyError(error)))
@@ -1982,10 +1982,10 @@ async function openDocumentNoteReferencePicker(workspace, editor) {
   let timer = 0
   search.addEventListener('input', () => { window.clearTimeout(timer); timer = window.setTimeout(() => void paint(), 180) })
   modal = openSheet({
-    title: '添加关联笔记',
-    description: '关联保存在文档正文之外；笔记移动或改名后仍然有效。',
+    title: 'Добавить связанную заметку',
+    description: 'Связи хранятся вне текста документа и сохраняются при перемещении или переименовании заметки.',
     body: element('div', { class: 'note-picker' }, search, results),
-    cancelLabel: '取消',
+    cancelLabel: 'Отмена',
   })
   search.focus()
 }
@@ -1995,18 +1995,18 @@ async function removeDocumentNoteReference(workspace, editor, reference) {
     await api(`entries/${encodeURIComponent(editor.id)}/note-references/${encodeURIComponent(reference.note.id)}`, { method: 'DELETE' })
     editor.noteReferences = (editor.noteReferences || []).filter(item => item.note.id !== reference.note.id)
     if (workspace.view.editor === editor) renderShell()
-    showToast('已移除关联。')
+    showToast('Связь удалена.')
   } catch (error) { showToast(friendlyError(error), 'error') }
 }
 
 function renderMarkdownPreview(markdown) {
-  if (!markdown.trim()) return element('div', { class: 'markdown-preview is-empty', role: 'document' }, '暂无正文')
+  if (!markdown.trim()) return element('div', { class: 'markdown-preview is-empty', role: 'document' }, 'Текста пока нет')
   const preview = element('div', { class: 'markdown-preview', role: 'document' })
   preview.innerHTML = window.DshKnowledgeMarkdown.renderMarkdown(markdown)
   preview.querySelectorAll('table').forEach(table => {
     const scroller = element('div', {
       class: 'markdown-table-scroll', role: 'region', tabindex: '0',
-      'aria-label': '表格内容，可横向滚动',
+      'aria-label': 'Содержимое таблицы, прокручивается по горизонтали',
     })
     table.replaceWith(scroller)
     scroller.append(table)
@@ -2014,7 +2014,7 @@ function renderMarkdownPreview(markdown) {
   preview.querySelectorAll('[data-note-id]').forEach(link => {
     link.setAttribute('role', 'button')
     link.setAttribute('tabindex', '0')
-    link.setAttribute('title', '打开笔记文档')
+    link.setAttribute('title', 'Открыть заметку-документ')
     const open = event => {
       if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return
       event.preventDefault()
@@ -2039,32 +2039,32 @@ async function openNoteReference(id) {
 
 function openFinalizeDocument(workspace, editor) {
   const form = element('form', { class: 'form-grid' })
-  const stateField = selectField('结束状态', [
-    { value: 'resolved', label: '已解决 — 问题已有最终结论' },
-    { value: 'complete', label: '已收集完成 — 资料不再补充' },
+  const stateField = selectField('Состояние завершения', [
+    { value: 'resolved', label: 'Решено — по вопросу есть окончательный вывод' },
+    { value: 'complete', label: 'Сбор завершён — материалы больше не дополняются' },
   ], 'resolved')
-  const note = formField('结束说明（可选）', 'textarea', '', {
+  const note = formField('Пояснение к завершению (необязательно)', 'textarea', '', {
     maxlength: 1000,
-    placeholder: '例如：生产环境验证通过，问题关闭。',
+    placeholder: 'Например: проверено в продакшене, вопрос закрыт.',
   })
   stateField.wrapper.classList.add('span-2')
   note.wrapper.classList.add('span-2')
   form.append(stateField.wrapper, note.wrapper)
   return openSheet({
     title: `Завершить «${editor.title}»`,
-    description: '结束后文档仍可搜索和召回，但 AI 回写、候选审核和人工编辑都会被服务端拒绝；需要修改时必须先重新打开。',
+    description: 'После завершения документ всё ещё доступен для поиска и извлечения, но запись от ИИ, проверка кандидатов и ручное редактирование будут отклоняться сервером; для изменения нужно сначала открыть документ заново.',
     body: form,
-    primaryLabel: '确认结束并封存',
+    primaryLabel: 'Подтвердить завершение и запечатывание',
     onPrimary: async () => {
       const saved = await api(`documents/${encodeURIComponent(editor.id)}/finalize`, {
         method: 'POST',
         body: { state: stateField.input.value, note: note.input.value.trim() },
       })
-      workspace.view.editor = { ...saved, tagsText: saved.tags.join(', '), dirty: false, isNew: false, saveState: '已封存' }
+      workspace.view.editor = { ...saved, tagsText: saved.tags.join(', '), dirty: false, isNew: false, saveState: 'Запечатано' }
       workspace.view.mode = 'preview'
       await reloadDocumentWorkspace(workspace)
       renderShell()
-      showToast(stateField.input.value === 'resolved' ? '文档已标记为已解决并封存。' : '文档已标记为收集完成并封存。')
+      showToast(stateField.input.value === 'resolved' ? 'Документ отмечен как решённый и закрыт.' : 'Документ отмечен как полностью собранный и закрыт.')
       return true
     },
   })
@@ -2073,14 +2073,14 @@ function openFinalizeDocument(workspace, editor) {
 function reopenDocument(workspace, editor) {
   openConfirm({
     title: `Открыть заново «${editor.title}»?`,
-    message: '重新打开后，人工编辑、AI 回写和候选审核将恢复。',
-    confirmLabel: '确认重新打开',
+    message: 'После повторного открытия ручное редактирование, запись от ИИ и проверка кандидатов возобновятся.',
+    confirmLabel: 'Подтвердить повторное открытие',
     onConfirm: async () => {
       const saved = await api(`documents/${encodeURIComponent(editor.id)}/reopen`, { method: 'POST' })
-      workspace.view.editor = { ...saved, tagsText: saved.tags.join(', '), dirty: false, isNew: false, saveState: '已重新打开' }
+      workspace.view.editor = { ...saved, tagsText: saved.tags.join(', '), dirty: false, isNew: false, saveState: 'Открыто заново' }
       await reloadDocumentWorkspace(workspace)
       renderShell()
-      showToast('文档已重新打开。')
+      showToast('Документ снова открыт.')
     },
   })
 }
@@ -2088,8 +2088,8 @@ function reopenDocument(workspace, editor) {
 function confirmDeleteDocument(workspace, editor) {
   openConfirm({
     title: `Удалить «${editor.title}»?`,
-    message: '文档和对应的召回知识会被永久删除，此操作无法撤销。',
-    confirmLabel: '永久删除', danger: true,
+    message: 'Документ и связанные с ним извлечённые знания будут удалены навсегда, это действие нельзя отменить.',
+    confirmLabel: 'Удалить навсегда', danger: true,
     onConfirm: async () => {
       await api(`entries/${encodeURIComponent(editor.id)}`, { method: 'DELETE' })
       workspace.view.documentId = ''
@@ -2099,7 +2099,7 @@ function confirmDeleteDocument(workspace, editor) {
       selectDefaultDocument(workspace)
       if (workspace.view.documentId) await loadDocumentEditor(workspace, workspace.view.documentId)
       renderShell()
-      showToast('文档已删除。')
+      showToast('Документ удалён.')
     },
   })
 }
@@ -2124,22 +2124,22 @@ function renderNotes() {
     },
   },
     state.notes.browserOpen ? element('button', {
-      type: 'button', class: 'notes-browser-scrim', 'aria-label': '关闭笔记目录',
+      type: 'button', class: 'notes-browser-scrim', 'aria-label': 'Закрыть каталог заметок',
       onClick: () => { state.notes.browserOpen = false; renderShell() },
     }) : null,
-    element('aside', { class: 'notes-browser', 'aria-label': '笔记目录' },
+    element('aside', { class: 'notes-browser', 'aria-label': 'Каталог заметок' },
       element('header', { class: 'notes-browser-header' },
-        element('div', {}, element('h2', {}, '目录'), element('span', {}, `${rootNodes.length} элементов в корне`)),
+        element('div', {}, element('h2', {}, 'Каталог'), element('span', {}, `${rootNodes.length} элементов в корне`)),
         element('div', { class: 'notes-browser-actions' },
-          actionButton('新建', () => openCreateNoteDocument(), 'primary small'),
-          actionButton('目录', () => openCreateNoteFolder(), 'small'),
-          actionButton('导入', () => fileInput.click(), 'ghost small'),
-          actionButton('会话指令', openNoteAgentGuide, 'ghost small'),
+          actionButton('Создать', () => openCreateNoteDocument(), 'primary small'),
+          actionButton('Каталог', () => openCreateNoteFolder(), 'small'),
+          actionButton('Импорт', () => fileInput.click(), 'ghost small'),
+          actionButton('Команда сессии', openNoteAgentGuide, 'ghost small'),
           fileInput,
         ),
       ),
       element('div', { class: 'notes-search' }, element('input', {
-        class: 'input', type: 'search', value: state.notes.query, placeholder: '搜索笔记文档', 'aria-label': '搜索笔记文档',
+        class: 'input', type: 'search', value: state.notes.query, placeholder: 'Поиск заметок и документов', 'aria-label': 'Поиск заметок и документов',
         onInput: event => scheduleNoteSearch(event.target.value),
       })),
       element('div', {
@@ -2152,45 +2152,45 @@ function renderNotes() {
     ),
     renderNoteContent(),
     element('div', { class: 'notes-drop-overlay', 'aria-hidden': 'true' },
-      element('strong', {}, '放开以导入当前目录'),
-      element('span', {}, '支持文件和完整目录，原有目录层级会被保留。')),
+      element('strong', {}, 'Отпустите, чтобы импортировать текущий каталог'),
+      element('span', {}, 'Поддерживаются файлы и целые каталоги, исходная структура каталогов сохраняется.')),
     renderNoteTransfer(),
   )
-  return element('section', { class: 'notes-page', 'aria-label': '笔记工作区' }, workspace)
+  return element('section', { class: 'notes-page', 'aria-label': 'Рабочая область заметок' }, workspace)
 }
 
 function openNoteAgentGuide() {
   const capabilityRows = [
-    ['笔记文档', '创建、追加或替换内容、重命名、移动、删除'],
-    ['笔记目录', '创建、重命名、移动、删除'],
+    ['Документ заметки', 'Создание, добавление или замена содержимого, переименование, перемещение, удаление'],
+    ['Каталог заметок', 'Создание, переименование, перемещение, удаление'],
   ].map(([label, detail]) => element('div', { class: 'notes-agent-capability' },
     element('strong', {}, label), element('span', {}, detail)))
   const examples = [
-    ['创建', '在笔记工作区的「发布资料」目录里，新建笔记文档「上线检查.md」，内容是：……'],
-    ['更新', '把笔记文档「发布资料/上线检查.md」追加以下内容：……'],
-    ['目录', '把笔记目录「发布资料」重命名为「发布归档」。'],
+    ['Создать', 'В каталоге «Материалы к релизу» рабочей области заметок создайте заметку-документ «Проверка перед релизом.md» со следующим содержимым: …'],
+    ['Обновить', 'Допишите в заметку-документ «Материалы к релизу/Проверка перед релизом.md» следующее: …'],
+    ['Каталог', 'Переименуйте каталог заметок «Материалы к релизу» в «Архив релизов».'],
   ].map(([label, text]) => element('li', {}, element('span', {}, label), element('code', {}, text)))
   const body = element('div', { class: 'notes-agent-guide' },
     element('section', { class: 'notes-agent-guide-rule' },
       element('span', { class: 'notes-agent-guide-index', 'aria-hidden': 'true' }, '01'),
       element('div', {},
-        element('h3', {}, '在当前消息里指定笔记文档'),
-        element('p', {}, '只要当前消息明确提到“笔记文档”“笔记目录”或“笔记工作区”，会话就可以按你的要求查看和维护；无需套用固定句式。为了避免误操作，删除仍需明确说出删除，授权也不会从上一轮延续。'))),
+        element('h3', {}, 'Укажите заметку или документ в текущем сообщении'),
+        element('p', {}, 'Если в текущем сообщении явно указаны «документ-заметка», «каталог заметок» или «рабочее пространство заметок», сессия может просматривать и обслуживать их по вашему запросу; фиксированная формулировка не нужна. Во избежание ошибок для удаления по-прежнему нужно явно сказать «удалить», и разрешение не переносится из предыдущего раунда.'))),
     element('section', { class: 'notes-agent-guide-rule' },
       element('span', { class: 'notes-agent-guide-index', 'aria-hidden': 'true' }, '02'),
       element('div', {},
-        element('h3', {}, '名称足够，重名时补全路径'),
-        element('p', {}, '不需要填写内部编号。会话会先浏览笔记目录定位目标；如果有重名，请写成“目录/子目录/文档名”。'))),
-    element('div', { class: 'notes-agent-capabilities', 'aria-label': '会话可执行的笔记操作' }, capabilityRows),
+        element('h3', {}, 'Названия достаточно, при совпадении дополните путь'),
+        element('p', {}, 'Внутренний номер указывать не нужно. Сессия сначала просмотрит каталог заметок, чтобы найти цель; при совпадении имён укажите «каталог/подкаталог/имя документа».'))),
+    element('div', { class: 'notes-agent-capabilities', 'aria-label': 'Операции с заметками, доступные сессии' }, capabilityRows),
     element('section', { class: 'notes-agent-examples' },
-      element('h3', {}, '可以直接这样说'),
+      element('h3', {}, 'Можно сказать прямо так'),
       element('ul', {}, examples)),
-    element('p', { class: 'notes-agent-guide-note' }, '只说“新建 Markdown”或“创建本地目录”仍不会获得笔记权限；在当前消息中带上“笔记文档”即可。'))
+    element('p', { class: 'notes-agent-guide-note' }, 'Фразы «создать Markdown» или «создать локальный каталог» сами по себе не дают прав на заметки; достаточно упомянуть «документ-заметка» в текущем сообщении.'))
   return openModal({
-    title: '让会话整理笔记',
-    description: '会话可以操作笔记工作区，但每次写入都需要当前用户消息明确授权。',
+    title: 'Поручить сессии разобрать заметки',
+    description: 'Сессия может работать с рабочим пространством заметок, но каждая запись требует явного разрешения в текущем сообщении пользователя.',
     body,
-    cancelLabel: '知道了',
+    cancelLabel: 'Понятно',
     className: 'notes-agent-guide-dialog',
   })
 }
@@ -2209,32 +2209,32 @@ async function loadNoteShares(signal) {
 async function refreshNoteShares() {
   await loadNoteShares()
   renderShell()
-  if (!state.notes.shareError) showToast('分享列表已刷新。')
+  if (!state.notes.shareError) showToast('Список общего доступа обновлён.')
 }
 
 function renderShares() {
-  return element('section', { class: 'shares-page', 'aria-label': '已分享笔记' },
+  return element('section', { class: 'shares-page', 'aria-label': 'Опубликованные заметки' },
     element('div', { class: 'section-heading shares-heading' },
-      element('div', {}, element('h2', {}, '分享空间'), element('p', {}, '管理本机生成的只读链接，或将别人分享的内容复制到你的笔记工作区。')),
+      element('div', {}, element('h2', {}, 'Общее пространство'), element('p', {}, 'Управляйте созданными на этом устройстве ссылками только для чтения или копируйте чужой общий контент в свою рабочую область заметок.')),
       element('div', { class: 'shares-heading-actions' },
-        actionButton('从分享导入', openImportNoteShare, 'primary small'),
-        actionButton('刷新', () => { void refreshNoteShares() }, 'ghost small'),
+        actionButton('Импортировать из общей папки', openImportNoteShare, 'primary small'),
+        actionButton('Обновить', () => { void refreshNoteShares() }, 'ghost small'),
       ),
     ),
     element('section', { class: 'panel shares-panel' },
       element('header', { class: 'panel-header shares-panel-header' },
-        element('div', {}, element('h3', {}, '本机已分享'), element('p', {}, `${state.notes.shares.length} шт. · ссылки синхронизируются при обновлении`)),
+        element('div', {}, element('h3', {}, 'Опубликовано с этого устройства'), element('p', {}, `${state.notes.shares.length} шт. · ссылки синхронизируются при обновлении`)),
       ),
       element('div', { class: 'shares-panel-body' },
     state.notes.shareError
-      ? element('div', { class: 'notes-share-error', role: 'alert' }, element('strong', {}, '分享列表加载失败'), element('p', {}, state.notes.shareError), actionButton('重试', () => { void refreshNoteShares() }, 'small'))
+      ? element('div', { class: 'notes-share-error', role: 'alert' }, element('strong', {}, 'Не удалось загрузить список общего доступа'), element('p', {}, state.notes.shareError), actionButton('Повторить', () => { void refreshNoteShares() }, 'small'))
       : state.notes.shares.length
         ? element('div', { class: 'notes-share-list' }, state.notes.shares.map(renderNoteShareRow))
         : element('div', { class: 'notes-folder-empty notes-share-empty' },
           element('span', { class: 'notes-share-empty-mark', 'aria-hidden': 'true' }),
-          element('h3', {}, '还没有分享内容'),
-          element('p', {}, '打开一篇笔记或目录，选择“分享”即可生成只读链接。'),
-          element('div', {}, actionButton('打开笔记文档', () => { void navigate('notes') }, 'primary small')),
+          element('h3', {}, 'Пока нет материалов общего доступа'),
+          element('p', {}, 'Откройте заметку или каталог и выберите «Поделиться», чтобы создать ссылку только для чтения.'),
+          element('div', {}, actionButton('Открыть заметку-документ', () => { void navigate('notes') }, 'primary small')),
         ),
       ),
     ),
@@ -2246,44 +2246,44 @@ function renderNoteShareRow(share) {
   return element('article', { class: 'notes-share-row' },
     element('button', { type: 'button', class: 'notes-share-main', onClick: () => { void openSharedNoteOriginal(share) } },
       renderNoteIcon(share.node, true),
-      element('span', {}, element('strong', {}, share.node.name), element('small', {}, share.node.kind === 'folder' ? '共享目录及其子项' : noteKindLabel(share.node))),
+      element('span', {}, element('strong', {}, share.node.name), element('small', {}, share.node.kind === 'folder' ? 'Общий каталог и его элементы' : noteKindLabel(share.node))),
     ),
     element('div', { class: 'notes-share-meta' },
-      element('span', {}, '分享于', element('time', { datetime: share.createdAt }, formatDate(share.createdAt))),
-      element('span', {}, '原内容更新后链接自动同步'),
+      element('span', {}, 'Опубликовано', element('time', { datetime: share.createdAt }, formatDate(share.createdAt))),
+      element('span', {}, 'Ссылка автоматически обновляется при изменении исходного содержимого'),
     ),
     element('div', { class: 'notes-share-actions' },
-      actionButton('打开原文', () => { void openSharedNoteOriginal(share) }, 'ghost small'),
-      actionButton('复制链接', () => copyText(url, '分享链接已复制。'), 'small'),
-      actionButton('管理', () => showNoteShareDialog(share), 'ghost small'),
+      actionButton('Открыть источник', () => { void openSharedNoteOriginal(share) }, 'ghost small'),
+      actionButton('Копировать ссылку', () => copyText(url, 'Ссылка для доступа скопирована.'), 'small'),
+      actionButton('Управление', () => showNoteShareDialog(share), 'ghost small'),
     ),
   )
 }
 
 function openImportNoteShare() {
-  const urlField = formField('分享链接', 'input', '', {
+  const urlField = formField('Ссылка для доступа', 'input', '', {
     type: 'url', required: true, inputmode: 'url', autocomplete: 'off',
     placeholder: 'https://example.com/knowledge-api/v1/shared/share_…',
   })
-  const destination = selectField('导入到', [{ value: '', label: '笔记文档（根目录）' }], '')
+  const destination = selectField('Импортировать в', [{ value: '', label: 'Документ заметки (корневой каталог)' }], '')
   destination.input.disabled = true
-  const inspectButton = actionButton('读取分享', () => { void inspect() }, 'small')
+  const inspectButton = actionButton('Прочитать общий доступ', () => { void inspect() }, 'small')
   const fieldError = element('p', { class: 'share-import-field-error', role: 'alert', hidden: true })
   const privateConfirmation = element('div', { class: 'share-import-note', hidden: true, role: 'status' })
   const preview = element('div', { class: 'share-import-preview', 'data-state': 'empty', 'aria-live': 'polite' },
     element('span', { class: 'share-import-preview-mark', 'aria-hidden': 'true' }, interfaceIcon('share-import')),
-    element('div', {}, element('strong', {}, '等待读取分享'), element('p', {}, '读取后会显示类型、文件数量与大小；导入前不会写入任何内容。')),
+    element('div', {}, element('strong', {}, 'Ожидание чтения общего доступа'), element('p', {}, 'После чтения отобразятся тип, количество файлов и размер; до импорта ничего не записывается.')),
   )
-  const destinationHint = element('span', { class: 'field-hint' }, '正在读取你的笔记目录…')
+  const destinationHint = element('span', { class: 'field-hint' }, 'Чтение вашего каталога заметок…')
   destination.wrapper.append(destinationHint)
   const inputRow = element('div', { class: 'share-import-url-row' }, urlField.input, inspectButton)
-  urlField.wrapper.replaceChildren(element('label', {}, '分享链接'), inputRow, fieldError)
+  urlField.wrapper.replaceChildren(element('label', {}, 'Ссылка для доступа'), inputRow, fieldError)
   const form = element('form', { class: 'share-import-form', onSubmit: event => { event.preventDefault(); void inspect() } },
     urlField.wrapper,
     privateConfirmation,
     preview,
     destination.wrapper,
-    element('p', { class: 'share-import-note' }, '导入会创建一份独立副本；之后对方更新或停止分享，都不会改动你已经导入的内容。'),
+    element('p', { class: 'share-import-note' }, 'Импорт создаёт отдельную копию; последующие обновления или прекращение общего доступа на стороне отправителя не изменят уже импортированное содержимое.'),
   )
   let inspectedUrl = ''
   let confirmedPrivateUrl = ''
@@ -2294,7 +2294,7 @@ function openImportNoteShare() {
     urlField.input.setAttribute('aria-invalid', String(Boolean(message)))
   }
   const renderPreview = manifest => {
-    const kind = manifest.share.kind === 'folder' ? '目录' : manifest.share.kind === 'document' ? 'Markdown 文档' : '文件'
+    const kind = manifest.share.kind === 'folder' ? 'Каталог' : manifest.share.kind === 'document' ? 'Документ Markdown' : 'Файл'
     preview.dataset.state = 'ready'
     preview.replaceChildren(
       renderNoteIcon({ kind: manifest.share.kind, name: manifest.share.name, mediaType: null }, true),
@@ -2302,7 +2302,7 @@ function openImportNoteShare() {
         element('strong', {}, manifest.share.name),
         element('p', {}, `${kind} · ${manifest.share.fileCount} файлов · ${formatBytes(manifest.share.totalSize)}`),
       ),
-      manifest.truncated ? badge('超过导入上限', 'danger') : badge('可以导入', 'success'),
+      manifest.truncated ? badge('Превышен лимит импорта', 'danger') : badge('Можно импортировать', 'success'),
     )
   }
   const inspect = async () => {
@@ -2313,7 +2313,7 @@ function openImportNoteShare() {
     privateConfirmation.hidden = true
     inspectButton.disabled = true
     inspectButton.setAttribute('aria-busy', 'true')
-    inspectButton.textContent = '正在读取…'
+    inspectButton.textContent = 'Чтение…'
     showFieldError('')
     preview.dataset.state = 'loading'
     try {
@@ -2326,7 +2326,7 @@ function openImportNoteShare() {
       preview.dataset.state = 'error'
       preview.replaceChildren(
         element('span', { class: 'share-import-preview-mark', 'aria-hidden': 'true' }, interfaceIcon('share-import')),
-        element('div', {}, element('strong', {}, '无法读取这个分享'), element('p', {}, '请检查链接是否完整、分享是否仍有效。')),
+        element('div', {}, element('strong', {}, 'Не удалось прочитать эту ссылку общего доступа'), element('p', {}, 'Проверьте, полная ли ссылка и действует ли ещё общий доступ.')),
       )
       showFieldError(friendlyError(error))
       if (error.code === 'PRIVATE_SHARE_CONFIRMATION_REQUIRED' && error.origin === new URL(requestedUrl).origin) {
@@ -2335,11 +2335,11 @@ function openImportNoteShare() {
         preview.dataset.state = 'empty'
         preview.replaceChildren(
           element('span', { class: 'share-import-preview-mark', 'aria-hidden': 'true' }, interfaceIcon('share-import')),
-          element('div', {}, element('strong', {}, '等待内网访问确认'), element('p', {}, '确认后读取分享清单，不会立即导入。')),
+          element('div', {}, element('strong', {}, 'Ожидание подтверждения доступа из внутренней сети'), element('p', {}, 'После подтверждения список общего доступа будет прочитан, импорт сразу не выполняется.')),
         )
         privateConfirmation.replaceChildren(
           element('p', {}, `Адрес ${error.origin} указывает на внутреннюю сеть. После подтверждения сервер DSH обратится к API этой ссылки — разрешайте только доверенные источники. Разрешение действует лишь для этого чтения и импорта и не сохраняется в белый список.`),
-          actionButton('允许本次内网分享并读取', () => { confirmedPrivateUrl = requestedUrl; void inspect() }, 'small'),
+          actionButton('Разрешить общий доступ и чтение в этой локальной сети', () => { confirmedPrivateUrl = requestedUrl; void inspect() }, 'small'),
         )
         privateConfirmation.hidden = false
       }
@@ -2348,7 +2348,7 @@ function openImportNoteShare() {
       inspectButton.disabled = false
       urlField.input.disabled = false
       inspectButton.removeAttribute('aria-busy')
-      inspectButton.textContent = '读取分享'
+      inspectButton.textContent = 'Прочитать общий доступ'
     }
   }
   urlField.input.addEventListener('input', () => {
@@ -2362,15 +2362,15 @@ function openImportNoteShare() {
   })
 
   openModal({
-    title: '从分享导入',
-    description: '把只读分享复制到你的笔记工作区',
+    title: 'Импортировать из общей папки',
+    description: 'Скопировать доступ только для чтения в вашу рабочую область заметок',
     body: form,
-    primaryLabel: '导入笔记',
+    primaryLabel: 'Импортировать заметку',
     className: 'share-import-dialog',
     onPrimary: async () => {
       const requestedUrl = urlField.input.value.trim()
       if (!requestedUrl || inspectedUrl !== requestedUrl) {
-        showFieldError('请先读取并确认分享内容。')
+        showFieldError('Сначала прочитайте и подтвердите содержимое общего доступа.')
         urlField.input.focus()
         return false
       }
@@ -2393,7 +2393,7 @@ function openImportNoteShare() {
   void loadShareImportDestinations().then(options => {
     destination.input.replaceChildren(...options.map(option => element('option', { value: option.value }, option.label)))
     destination.input.disabled = false
-    destinationHint.textContent = options.length > 1 ? `Доступно папок: ${options.length - 1}` : '当前会导入到笔记根目录'
+    destinationHint.textContent = options.length > 1 ? `Доступно папок: ${options.length - 1}` : 'Сейчас импорт идёт в корневой каталог заметок'
   }).catch(error => {
     destination.input.disabled = false
     destinationHint.textContent = `Не удалось прочитать каталог, импорт в корень: ${friendlyError(error)}`
@@ -2401,7 +2401,7 @@ function openImportNoteShare() {
 }
 
 async function loadShareImportDestinations() {
-  const options = [{ value: '', label: '笔记文档（根目录）' }]
+  const options = [{ value: '', label: 'Документ заметки (корневой каталог)' }]
   const queue = [{ id: null, path: '' }]
   while (queue.length && options.length <= 500) {
     const batch = queue.splice(0, 4)
@@ -2430,17 +2430,17 @@ function renderNoteTransfer() {
     element('div', { class: 'notes-transfer-heading' },
       element('span', { class: 'notes-transfer-mark', 'aria-hidden': 'true' }),
       element('strong', { class: 'notes-transfer-title' }, noteTransferTitle(transfer)),
-      dismissible ? actionButton('关闭', dismissNoteTransfer, 'ghost tiny notes-transfer-close', { 'aria-label': '关闭导入进度' }) : null,
+      dismissible ? actionButton('Закрыть', dismissNoteTransfer, 'ghost tiny notes-transfer-close', { 'aria-label': 'Закрыть ход импорта' }) : null,
     ),
     element('div', { class: 'notes-transfer-detail', title: transfer.currentName || '' }, noteTransferDetail(transfer)),
     element('div', {
       class: 'notes-transfer-track', role: 'progressbar',
-      'aria-label': '笔记导入进度', 'aria-valuemin': '0', 'aria-valuemax': '100',
+      'aria-label': 'Ход импорта заметок', 'aria-valuemin': '0', 'aria-valuemax': '100',
       'aria-valuenow': transfer.phase === 'scanning' ? undefined : String(noteTransferPercent(transfer)),
     }, element('span', { class: 'notes-transfer-fill' })),
     element('div', { class: 'notes-transfer-meta' },
       element('span', { class: 'notes-transfer-count' }, noteTransferCount(transfer)),
-      element('span', { class: 'notes-transfer-percent' }, transfer.phase === 'scanning' ? '正在整理' : `${noteTransferPercent(transfer)}%`),
+      element('span', { class: 'notes-transfer-percent' }, transfer.phase === 'scanning' ? 'Упорядочивание' : `${noteTransferPercent(transfer)}%`),
     ),
   )
 }
@@ -2449,7 +2449,7 @@ function renderNoteTreeBranch(parentId, depth = 0) {
   const key = parentId || 'root'
   const nodes = state.notes.children.get(key) || []
   if (!nodes.length && depth === 0) {
-    return element('div', { class: 'notes-tree-empty' }, element('strong', {}, '还没有笔记'), element('span', {}, '新建目录或文档开始整理。'))
+    return element('div', { class: 'notes-tree-empty' }, element('strong', {}, 'Пока нет заметок'), element('span', {}, 'Создайте каталог или документ, чтобы начать упорядочивание.'))
   }
   return element('div', { class: 'notes-tree-branch', role: depth ? 'group' : undefined }, nodes.map(node => {
     const selected = state.notes.selectedId === node.id
@@ -2479,22 +2479,22 @@ function renderNoteTreeBranch(parentId, depth = 0) {
         element('span', { class: 'notes-tree-name', title: node.name }, node.name),
       ),
       element('div', { class: 'notes-row-actions' },
-        actionButton('重命名', event => { event.stopPropagation(); openRenameNoteNode(node) }, 'ghost tiny'),
-        actionButton('复制', event => { event.stopPropagation(); void copyNoteNode(node) }, 'ghost tiny'),
-        actionButton('删除', event => { event.stopPropagation(); void confirmDeleteNoteNode(node) }, 'ghost tiny danger-text'),
+        actionButton('Переименовать', event => { event.stopPropagation(); openRenameNoteNode(node) }, 'ghost tiny'),
+        actionButton('Копировать', event => { event.stopPropagation(); void copyNoteNode(node) }, 'ghost tiny'),
+        actionButton('Удалить', event => { event.stopPropagation(); void confirmDeleteNoteNode(node) }, 'ghost tiny danger-text'),
       ),
     )
     const children = expanded
       ? state.notes.loadedFolders.has(node.id)
         ? renderNoteTreeBranch(node.id, depth + 1)
-        : element('div', { class: 'notes-tree-loading', role: 'status' }, '正在读取…')
+        : element('div', { class: 'notes-tree-loading', role: 'status' }, 'Чтение…')
       : null
     return element('div', { class: 'notes-tree-node' }, row, children)
   }))
 }
 
 function renderNoteSearchResults() {
-  if (!state.notes.searchResults.length) return element('div', { class: 'notes-tree-empty' }, '没有匹配的笔记文档。')
+  if (!state.notes.searchResults.length) return element('div', { class: 'notes-tree-empty' }, 'Нет подходящих документов-заметок.')
   return element('div', { class: 'notes-search-results' }, state.notes.searchResults.map(node => element('button', {
     type: 'button', class: 'notes-search-row',
     onClick: () => { void selectNoteNode(node) },
@@ -2513,8 +2513,8 @@ function renderNoteContent() {
 function renderNoteSelectionLoading(node) {
   return element('main', { class: `notes-content notes-selection-loading is-${node.kind}`, role: 'status', 'aria-label': `Открывается ${node.name}` },
     element('header', { class: 'notes-content-header' },
-      element('div', { class: 'notes-breadcrumb' }, element('span', {}, '笔记文档'), element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, node.name)),
-      element('div', { class: 'notes-content-title' }, element('div', {}, element('h2', {}, node.name), element('p', {}, node.kind === 'folder' ? '正在读取目录内容' : '正在按需读取文档内容'))),
+      element('div', { class: 'notes-breadcrumb' }, element('span', {}, 'Документ заметки'), element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, node.name)),
+      element('div', { class: 'notes-content-title' }, element('div', {}, element('h2', {}, node.name), element('p', {}, node.kind === 'folder' ? 'Чтение содержимого каталога' : 'Чтение содержимого документа по мере необходимости'))),
     ),
     element('div', { class: 'notes-selection-skeleton', 'aria-hidden': 'true' },
       element('div', { class: 'skeleton-line skeleton-paper-title' }),
@@ -2535,7 +2535,7 @@ function renderNoteFolderContent(folder) {
     children.length
       ? element('div', { class: 'notes-file-table' },
         element('div', { class: 'notes-file-columns', 'aria-hidden': 'true' },
-          element('span', {}, '名称'), element('span', {}, '更新时间'), element('span', {}, '大小'), element('span', {}, '操作')),
+          element('span', {}, 'Название'), element('span', {}, 'Время обновления'), element('span', {}, 'Размер'), element('span', {}, 'Действие')),
         element('div', { class: 'notes-file-list', role: 'list' }, children.map(node => element('div', {
         class: 'notes-file-row', role: 'listitem', draggable: 'true',
         onDragStart: event => { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('application/x-dsh-note-id', node.id) },
@@ -2545,21 +2545,21 @@ function renderNoteFolderContent(folder) {
           renderNoteIcon(node, true),
           element('span', {}, element('strong', {}, node.name), element('small', {}, noteKindLabel(node))),
         ),
-        element('time', { datetime: node.updatedAt, 'data-label': '更新' }, formatDate(node.updatedAt)),
-        element('span', { class: 'notes-file-size', 'data-label': node.kind === 'folder' ? '类型' : '大小' }, node.kind === 'folder' ? '目录' : formatBytes(node.size)),
+        element('time', { datetime: node.updatedAt, 'data-label': 'Обновить' }, formatDate(node.updatedAt)),
+        element('span', { class: 'notes-file-size', 'data-label': node.kind === 'folder' ? 'Тип' : 'Размер' }, node.kind === 'folder' ? 'Каталог' : formatBytes(node.size)),
         element('div', { class: 'notes-file-actions' },
           node.kind !== 'folder' ? noteDownloadButton(node, 'ghost tiny') : null,
-          actionButton(noteShareForNode(node.id) ? '分享中' : '分享', () => { void openNoteShare(node) }, 'ghost tiny'),
-          actionButton('重命名', () => openRenameNoteNode(node), 'ghost tiny'),
-          actionButton('复制', () => { void copyNoteNode(node) }, 'ghost tiny'),
-          actionButton('删除', () => { void confirmDeleteNoteNode(node) }, 'ghost tiny danger-text'),
+          actionButton(noteShareForNode(node.id) ? 'Публикация' : 'Поделиться', () => { void openNoteShare(node) }, 'ghost tiny'),
+          actionButton('Переименовать', () => openRenameNoteNode(node), 'ghost tiny'),
+          actionButton('Копировать', () => { void copyNoteNode(node) }, 'ghost tiny'),
+          actionButton('Удалить', () => { void confirmDeleteNoteNode(node) }, 'ghost tiny danger-text'),
         ),
         ))))
       : element('div', { class: 'notes-folder-empty' },
         element('span', { class: 'notes-empty-folder-mark', 'aria-hidden': 'true' }),
-        element('h3', {}, '这个目录还是空的'),
-        element('p', {}, '可以新建笔记文档、建立子目录，或把本地文件拖到这里。'),
-        element('div', {}, actionButton('新建文档', () => openCreateNoteDocument(parentId), 'primary small'), actionButton('新建目录', () => openCreateNoteFolder(parentId), 'small')),
+        element('h3', {}, 'Этот каталог пока пуст'),
+        element('p', {}, 'Здесь можно создать документ-заметку, подкаталог или перетащить локальные файлы.'),
+        element('div', {}, actionButton('Создать документ', () => openCreateNoteDocument(parentId), 'primary small'), actionButton('Создать каталог', () => openCreateNoteFolder(parentId), 'small')),
       ),
   )
 }
@@ -2567,17 +2567,17 @@ function renderNoteFolderContent(folder) {
 function renderNoteContentHeader(folder) {
   const path = folder ? [...state.notes.breadcrumbs] : []
   return element('header', { class: 'notes-content-header' },
-    element('nav', { class: 'notes-breadcrumb', 'aria-label': '当前位置' },
-      element('button', { type: 'button', onClick: () => { void openNoteRoot() } }, '笔记文档'),
+    element('nav', { class: 'notes-breadcrumb', 'aria-label': 'Текущее расположение' },
+      element('button', { type: 'button', onClick: () => { void openNoteRoot() } }, 'Документ заметки'),
       path.map(node => element('span', {}, element('span', { 'aria-hidden': 'true' }, '/'), element('button', { type: 'button', onClick: () => { void selectNoteNode(node) } }, node.name))),
     ),
     element('div', { class: 'notes-content-title' },
-      element('div', {}, element('h2', {}, folder?.name || '全部笔记'), element('p', {}, folder ? `${(state.notes.children.get(folder.id) || []).length} элементов` : '你的独立笔记与资料目录')),
+      element('div', {}, element('h2', {}, folder?.name || 'Все заметки'), element('p', {}, folder ? `${(state.notes.children.get(folder.id) || []).length} элементов` : 'Ваш отдельный каталог заметок и материалов')),
       element('div', { class: 'notes-content-actions' },
-        folder ? actionButton(noteShareForNode(folder.id) ? '分享中' : '分享目录', () => { void openNoteShare(folder) }, 'ghost small') : null,
-        actionButton('已分享', () => { void navigate('shares') }, 'ghost small'),
-        actionButton('新建文档', () => openCreateNoteDocument(folder?.id || null), 'primary small'),
-        actionButton('新建目录', () => openCreateNoteFolder(folder?.id || null), 'small'),
+        folder ? actionButton(noteShareForNode(folder.id) ? 'Публикация' : 'Общий каталог', () => { void openNoteShare(folder) }, 'ghost small') : null,
+        actionButton('Опубликовано', () => { void navigate('shares') }, 'ghost small'),
+        actionButton('Создать документ', () => openCreateNoteDocument(folder?.id || null), 'primary small'),
+        actionButton('Создать каталог', () => openCreateNoteFolder(folder?.id || null), 'small'),
       ),
     ),
   )
@@ -2592,12 +2592,12 @@ function renderEditableNote(node) {
   const title = editableNoteTitle(node)
   const editor = markdown
     ? element('div', { class: 'notes-live-editor', role: 'status', 'aria-label': `Открывается ${node.name}` },
-      element('div', { class: 'notes-editor-loading' }, '正在打开文档…'))
+      element('div', { class: 'notes-editor-loading' }, 'Открытие документа…'))
     : createPlainTextNoteEditor(node)
   const scrollHost = element('div', { class: 'notes-document-scroll', 'data-scroll-key': `notes-document:${node.id}` },
     element('h1', {
       class: 'notes-document-title', contenteditable: 'plaintext-only', spellcheck: 'false',
-      'aria-label': `Изменить заголовок ${node.name}`, title: '点击修改标题',
+      'aria-label': `Изменить заголовок ${node.name}`, title: 'Нажмите, чтобы изменить заголовок',
       onInput: () => { state.notes.titleDirty = true },
       onBlur: event => { void saveEditableNoteTitle(event.currentTarget, node) },
       onKeyDown: event => {
@@ -2607,7 +2607,7 @@ function renderEditableNote(node) {
     }, title),
     editor,
   )
-  const outlineHost = markdown ? element('aside', { id: 'dsh-note-outline', class: 'notes-editor-outline', 'aria-label': '文档大纲', 'aria-hidden': 'true' }) : null
+  const outlineHost = markdown ? element('aside', { id: 'dsh-note-outline', class: 'notes-editor-outline', 'aria-label': 'Структура документа', 'aria-hidden': 'true' }) : null
   const editorFrame = markdown
     ? element('div', { class: 'notes-editor-frame', 'data-outline-open': 'false', 'data-find-open': 'false' }, scrollHost, outlineHost)
     : scrollHost
@@ -2631,7 +2631,7 @@ async function saveEditableNoteTitle(editor, node) {
   if (!name) {
     editor.textContent = editableNoteTitle(node)
     state.notes.titleDirty = false
-    showToast('标题不能为空。', 'error')
+    showToast('Заголовок не может быть пустым.', 'error')
     return
   }
   if (name === node.name) {
@@ -2650,7 +2650,7 @@ async function saveEditableNoteTitle(editor, node) {
     await loadNoteChildren(updated.parentId, true).catch(() => {})
     const treeName = document.querySelector(`.notes-tree-item[data-note-id="${updated.id}"] .notes-tree-name`)
     if (treeName) treeName.textContent = updated.name
-    showToast('标题已更新。')
+    showToast('Заголовок обновлён.')
   } catch (error) {
     // Keep the user's title available to copy/retry, rather than silently losing it.
     showToast(friendlyError(error), 'error')
@@ -2662,7 +2662,7 @@ async function saveEditableNoteTitle(editor, node) {
 
 function createPlainTextNoteEditor(node) {
   return element('div', { class: 'notes-plain-editor', role: 'status', 'aria-label': `Открывается ${node.name}` },
-    element('div', { class: 'notes-editor-loading' }, '正在打开文档…'))
+    element('div', { class: 'notes-editor-loading' }, 'Открытие документа…'))
 }
 
 function readPlainTextEditor(editor) {
@@ -2708,9 +2708,9 @@ function mountPlainTextNoteEditor(host, node) {
     } catch (error) {
       if (!host.isConnected || request !== plainTextEditorMountRequest) return
       host.replaceChildren(element('div', { class: 'notes-editor-error', role: 'alert' },
-        element('strong', {}, '无法打开纯文本编辑器'),
+        element('strong', {}, 'Не удалось открыть редактор простого текста'),
         element('span', {}, friendlyError(error)),
-        actionButton('重试', () => { noteEditorLoader = null; host.replaceChildren(); mountPlainTextNoteEditor(host, node) }, 'small')))
+        actionButton('Повторить', () => { noteEditorLoader = null; host.replaceChildren(); mountPlainTextNoteEditor(host, node) }, 'small')))
     }
   })
 }
@@ -2743,9 +2743,9 @@ function mountMarkdownEditor(host, options) {
     } catch (error) {
       if (!host.isConnected || request !== markdownEditorMountRequest) return
       host.replaceChildren(element('div', { class: 'notes-editor-error', role: 'alert' },
-        element('strong', {}, '无法打开 Markdown 编辑器'),
+        element('strong', {}, 'Не удалось открыть редактор Markdown'),
         element('span', {}, friendlyError(error)),
-        actionButton('重试', () => { noteEditorLoader = null; host.replaceChildren(); mountMarkdownEditor(host, options) }, 'small')))
+        actionButton('Повторить', () => { noteEditorLoader = null; host.replaceChildren(); mountMarkdownEditor(host, options) }, 'small')))
     }
   })
 }
@@ -2769,8 +2769,8 @@ function loadMarkdownNoteEditor() {
     script.async = true
     script.onload = () => window.DshKnowledgeNoteEditor?.createMarkdownEditor
       ? resolve(window.DshKnowledgeNoteEditor)
-      : reject(new Error('Markdown 编辑器模块无效'))
-    script.onerror = () => { script.remove(); reject(new Error('Markdown 编辑器加载失败')) }
+      : reject(new Error('Недопустимый модуль редактора Markdown'))
+    script.onerror = () => { script.remove(); reject(new Error('Не удалось загрузить редактор Markdown')) }
     document.head.append(script)
   }).catch(error => {
     noteEditorLoader = null
@@ -2791,7 +2791,7 @@ function releaseNoteEditors() {
 function syncNoteEditorChrome() {
   const status = document.querySelector('[data-note-save-state]')
   if (status) {
-    status.textContent = state.notes.saving ? '正在保存…' : state.notes.dirty ? '未保存' : '已保存'
+    status.textContent = state.notes.saving ? 'Сохранение…' : state.notes.dirty ? 'Не сохранено' : 'Сохранено'
     status.dataset.dirty = String(state.notes.dirty)
   }
   const save = document.querySelector('[data-note-save]')
@@ -2799,8 +2799,8 @@ function syncNoteEditorChrome() {
 }
 
 function renderNoteDocumentBreadcrumb(node) {
-  return element('nav', { class: 'notes-breadcrumb', 'aria-label': '当前位置' },
-    element('button', { type: 'button', onClick: () => { void openNoteRoot() } }, '笔记文档'),
+  return element('nav', { class: 'notes-breadcrumb', 'aria-label': 'Текущее расположение' },
+    element('button', { type: 'button', onClick: () => { void openNoteRoot() } }, 'Документ заметки'),
     state.notes.breadcrumbs.map(parent => element('span', {}, element('span', { 'aria-hidden': 'true' }, '/'), element('button', { type: 'button', onClick: () => { void selectNoteNode(parent) } }, parent.name))),
     element('span', {}, element('span', { 'aria-hidden': 'true' }, '/'), element('strong', {}, node.name)),
   )
@@ -2818,8 +2818,8 @@ function renderNoteFile(node) {
     preview = element('div', { class: 'notes-inline-unavailable' },
       renderNoteIcon(node, true),
       element('h2', {}, node.name),
-      element('p', {}, '该格式不能在浏览器中直接编辑，可以下载后使用本地应用打开。'),
-      noteDownloadButton(node, 'primary small', '下载文件'),
+      element('p', {}, 'Этот формат нельзя редактировать прямо в браузере — скачайте файл и откройте его в локальном приложении.'),
+      noteDownloadButton(node, 'primary small', 'Скачать файл'),
     )
   }
   return element('main', { class: 'notes-content is-file' },
@@ -2833,11 +2833,11 @@ function renderNoteFileToolbar(node, options = {}) {
   return element('header', { class: 'notes-document-toolbar' },
     element('div', { class: 'notes-toolbar-leading' }, renderNoteDocumentBreadcrumb(node)),
     element('div', { class: 'notes-document-actions' },
-      options.editable ? element('span', { class: 'notes-save-state', role: 'status', 'data-note-save-state': '', 'data-dirty': String(state.notes.dirty) }, state.notes.dirty ? '未保存' : '已保存') : null,
+      options.editable ? element('span', { class: 'notes-save-state', role: 'status', 'data-note-save-state': '', 'data-dirty': String(state.notes.dirty) }, state.notes.dirty ? 'Не сохранено' : 'Сохранено') : null,
       options.enhanced ? actionButton([
-        interfaceIcon('outline', 'notes-toolbar-action-icon'), element('span', {}, '大纲'),
-      ], () => markdownEditorHandle?.toggleOutline(), 'ghost small notes-outline-action', { 'data-note-outline': '', 'aria-label': '打开标题大纲', title: '标题大纲', 'aria-controls': 'dsh-note-outline', 'aria-expanded': 'false', 'aria-pressed': 'false' }) : null,
-      options.editable ? actionButton('保存', () => { void saveNoteDocument() }, 'primary small', { 'data-note-save': '', disabled: !state.notes.dirty, 'aria-keyshortcuts': 'Control+S Meta+S' }) : null,
+        interfaceIcon('outline', 'notes-toolbar-action-icon'), element('span', {}, 'Структура'),
+      ], () => markdownEditorHandle?.toggleOutline(), 'ghost small notes-outline-action', { 'data-note-outline': '', 'aria-label': 'Открыть структуру заголовков', title: 'Структура заголовков', 'aria-controls': 'dsh-note-outline', 'aria-expanded': 'false', 'aria-pressed': 'false' }) : null,
+      options.editable ? actionButton('Сохранить', () => { void saveNoteDocument() }, 'primary small', { 'data-note-save': '', disabled: !state.notes.dirty, 'aria-keyshortcuts': 'Control+S Meta+S' }) : null,
       renderNoteFileOverflowMenu(node, options),
     ),
   )
@@ -2846,28 +2846,28 @@ function renderNoteFileToolbar(node, options = {}) {
 function renderNoteFileOverflowMenu(node, options) {
   return renderDocumentMenu(node.name, [
     [
-      ...(options.enhanced ? [{ label: '查找', icon: 'search', run: () => markdownEditorHandle?.openFind(), attributes: { 'data-note-find': '', 'aria-keyshortcuts': 'Control+F Meta+F' } }] : []),
-      ...(options.editable ? [{ label: '页面历史', icon: 'history', run: () => { void openNoteHistory(node) }, attributes: { 'data-note-history': '' } }] : []),
+      ...(options.enhanced ? [{ label: 'Найти', icon: 'search', run: () => markdownEditorHandle?.openFind(), attributes: { 'data-note-find': '', 'aria-keyshortcuts': 'Control+F Meta+F' } }] : []),
+      ...(options.editable ? [{ label: 'История страницы', icon: 'history', run: () => { void openNoteHistory(node) }, attributes: { 'data-note-history': '' } }] : []),
     ],
     [
-      { label: '下载', icon: 'download', run: event => { void downloadNoteFile(node, event.currentTarget) } },
-      { label: noteShareForNode(node.id) ? '管理分享' : '创建分享', icon: 'link', run: () => { void openNoteShare(node) } },
-      { label: '复制引用', icon: 'link', run: () => { void copyNoteReference(node) } },
+      { label: 'Скачать', icon: 'download', run: event => { void downloadNoteFile(node, event.currentTarget) } },
+      { label: noteShareForNode(node.id) ? 'Управление общим доступом' : 'Создать общий доступ', icon: 'link', run: () => { void openNoteShare(node) } },
+      { label: 'Копировать ссылку-цитату', icon: 'link', run: () => { void copyNoteReference(node) } },
     ],
     [
-      { label: '重命名', icon: 'rename', run: () => openRenameNoteNode(node) },
-      { label: '查看已分享', icon: 'outline', run: () => { void navigate('shares') } },
+      { label: 'Переименовать', icon: 'rename', run: () => openRenameNoteNode(node) },
+      { label: 'Показать опубликованные', icon: 'outline', run: () => { void navigate('shares') } },
     ],
   ])
 }
 
 function renderNoteFileStatusbar(node) {
-  return element('footer', { class: 'notes-document-statusbar', 'aria-label': '文档信息' },
+  return element('footer', { class: 'notes-document-statusbar', 'aria-label': 'Информация о документе' },
     element('div', { class: 'notes-file-info' },
-      noteInfoItem('编号', shortNoteId(node.id), node.id, 'id'),
-      noteInfoItem('格式', node.kind === 'document' ? 'Markdown' : node.mediaType || '未知'),
-      noteInfoItem('大小', formatBytes(node.size), '', 'size'),
-      noteInfoItem('更新', formatDate(node.updatedAt), '', 'updated'),
+      noteInfoItem('Номер', shortNoteId(node.id), node.id, 'id'),
+      noteInfoItem('Формат', node.kind === 'document' ? 'Markdown' : node.mediaType || 'Неизвестно'),
+      noteInfoItem('Размер', formatBytes(node.size), '', 'size'),
+      noteInfoItem('Обновить', formatDate(node.updatedAt), '', 'updated'),
     ),
   )
 }
@@ -2881,8 +2881,8 @@ function renderNoteIcon(node, large = false) {
 }
 
 function noteKindLabel(node) {
-  if (node.kind === 'folder') return '目录'
-  if (node.kind === 'document') return 'Markdown 笔记'
+  if (node.kind === 'folder') return 'Каталог'
+  if (node.kind === 'document') return 'Заметка Markdown'
   return `${node.mediaType || 'файл'}  ${formatBytes(node.size)}`
 }
 
@@ -2897,7 +2897,7 @@ function noteFilePreviewKind(node) {
 }
 
 async function selectNoteNode(node, options = {}) {
-  if (state.notes.titleDirty || state.notes.renaming) return showToast('请先保存标题；若要放弃标题修改，请在标题中按 Escape。', 'error')
+  if (state.notes.titleDirty || state.notes.renaming) return showToast('Сначала сохраните заголовок; чтобы отказаться от правок заголовка, нажмите Escape в поле заголовка.', 'error')
   if (state.notes.dirty && !await saveNoteDocument()) return
   const request = ++noteSelectionRequest
   releaseNoteAsset()
@@ -2981,7 +2981,7 @@ function findCachedNote(id) {
 }
 
 async function openNoteRoot() {
-  if (state.notes.titleDirty || state.notes.renaming) return showToast('请先保存标题；若要放弃标题修改，请在标题中按 Escape。', 'error')
+  if (state.notes.titleDirty || state.notes.renaming) return showToast('Сначала сохраните заголовок; чтобы отказаться от правок заголовка, нажмите Escape в поле заголовка.', 'error')
   if (state.notes.dirty && !await saveNoteDocument()) return
   noteSelectionRequest += 1
   clearNoteSelection()
@@ -3025,11 +3025,11 @@ function scheduleNoteSearch(value) {
 }
 
 function openCreateNoteFolder(parentId = state.notes.currentFolderId) {
-  const field = formField('目录名称', 'text', '', { maxlength: 255, placeholder: '例如：项目资料' })
+  const field = formField('Название каталога', 'text', '', { maxlength: 255, placeholder: 'Например: материалы проекта' })
   const form = element('form', { class: 'form-grid' }, field.wrapper)
   openSheet({
-    title: '新建目录', description: '目录可以继续包含子目录、笔记文档和任意文件。', body: form,
-    primaryLabel: '创建目录', onPrimary: async () => {
+    title: 'Создать каталог', description: 'Каталог может содержать подкаталоги, документы-заметки и любые файлы.', body: form,
+    primaryLabel: 'Создать каталог', onPrimary: async () => {
       const node = await api('notes/folders', { method: 'POST', body: { name: field.input.value, parentId } })
       await loadNoteChildren(parentId, true)
       if (parentId) state.notes.expandedFolders.add(parentId)
@@ -3041,11 +3041,11 @@ function openCreateNoteFolder(parentId = state.notes.currentFolderId) {
 }
 
 function openCreateNoteDocument(parentId = state.notes.currentFolderId) {
-  const field = formField('文档名称', 'text', '', { maxlength: 255, placeholder: '例如：部署记录' })
+  const field = formField('Название документа', 'text', '', { maxlength: 255, placeholder: 'Например: журнал развёртывания' })
   const form = element('form', { class: 'form-grid' }, field.wrapper)
   openSheet({
-    title: '新建笔记文档', description: '文档使用 Markdown 编辑，默认不会被 AI 检索或回写。', body: form,
-    primaryLabel: '创建并编辑', onPrimary: async () => {
+    title: 'Создать документ-заметку', description: 'Документ редактируется в Markdown и по умолчанию не извлекается и не записывается AI.', body: form,
+    primaryLabel: 'Создать и редактировать', onPrimary: async () => {
       const node = await api('notes/documents', { method: 'POST', body: { name: field.input.value, parentId } })
       await loadNoteChildren(parentId, true)
       if (parentId) state.notes.expandedFolders.add(parentId)
@@ -3057,15 +3057,15 @@ function openCreateNoteDocument(parentId = state.notes.currentFolderId) {
 }
 
 function openRenameNoteNode(node) {
-  const field = formField('名称', 'text', node.name, { maxlength: 255 })
+  const field = formField('Название', 'text', node.name, { maxlength: 255 })
   openSheet({
-    title: '重命名', description: '知识文档中的 @ 引用使用稳定编号，不会因改名失效。', body: element('form', { class: 'form-grid' }, field.wrapper),
-    primaryLabel: '保存名称', onPrimary: async () => {
+    title: 'Переименовать', description: 'Ссылки @ в документах базы знаний используют стабильные номера и не ломаются при переименовании.', body: element('form', { class: 'form-grid' }, field.wrapper),
+    primaryLabel: 'Сохранить имя', onPrimary: async () => {
       const updated = await api(`notes/${encodeURIComponent(node.id)}`, { method: 'PATCH', body: { name: field.input.value } })
       await loadNoteChildren(node.parentId, true)
       if (state.notes.selectedId === node.id) await selectNoteNode(updated)
       else renderShell()
-      showToast('名称已更新。')
+      showToast('Название обновлено.')
       return true
     },
   })
@@ -3097,14 +3097,14 @@ async function dropNoteNode(event, parentId) {
     await Promise.all([loadNoteChildren(node.parentId, true), loadNoteChildren(parentId, true)])
     if (state.notes.selectedId === id) state.notes.selectedNode = await api(`notes/${encodeURIComponent(id)}`)
     renderShell()
-    showToast('已移动到目标目录。')
+    showToast('Перемещено в целевой каталог.')
   } catch (error) { showToast(friendlyError(error), 'error') }
 }
 
 async function uploadNoteFiles(files, parentId) {
   const summary = createNoteImportSummary()
   const plans = files.flatMap(file => createNoteFilePlan(file, summary))
-  if (!plans.length) return showToast('没有可上传的文件，单文件上限为 64 MiB。', 'error')
+  if (!plans.length) return showToast('Нет файлов для загрузки, лимит одного файла — 64 MiB.', 'error')
   const transfer = beginNoteTransfer('uploading')
   if (!transfer) return
   prepareNoteTransfer(transfer, summary)
@@ -3136,7 +3136,7 @@ async function importDroppedNotes(dataTransfer, parentId) {
     }
     if (!plans.length) {
       dismissNoteTransfer()
-      showToast('没有可上传的内容，单文件上限为 64 MiB。', 'error')
+      showToast('Нет содержимого для загрузки, лимит одного файла — 64 MiB.', 'error')
       return
     }
     prepareNoteTransfer(transfer, summary)
@@ -3246,7 +3246,7 @@ async function uploadNoteFile(file, parentId, onProgress) {
 
 function beginNoteTransfer(phase) {
   if (state.notes.transfer && ['scanning', 'uploading'].includes(state.notes.transfer.phase)) {
-    showToast('已有导入任务正在进行，请稍候。', 'error')
+    showToast('Уже выполняется задача импорта, подождите.', 'error')
     return null
   }
   const transfer = {
@@ -3332,7 +3332,7 @@ function syncNoteTransferPanel() {
     detail.title = transfer.currentName || ''
   }
   if (count) count.textContent = noteTransferCount(transfer)
-  if (percentLabel) percentLabel.textContent = transfer.phase === 'scanning' ? '正在整理' : `${percent}%`
+  if (percentLabel) percentLabel.textContent = transfer.phase === 'scanning' ? 'Упорядочивание' : `${percent}%`
   if (progress) {
     if (transfer.phase === 'scanning') progress.removeAttribute('aria-valuenow')
     else progress.setAttribute('aria-valuenow', String(percent))
@@ -3348,17 +3348,17 @@ function noteTransferPercent(transfer) {
 }
 
 function noteTransferTitle(transfer) {
-  if (transfer.phase === 'scanning') return '正在整理导入内容'
-  if (transfer.phase === 'complete') return '导入完成'
-  if (transfer.phase === 'error') return '导入未完成'
-  return '正在导入笔记'
+  if (transfer.phase === 'scanning') return 'Упорядочивание импортированного содержимого'
+  if (transfer.phase === 'complete') return 'Импорт завершён'
+  if (transfer.phase === 'error') return 'Импорт не завершён'
+  return 'Импорт заметок'
 }
 
 function noteTransferDetail(transfer) {
-  if (transfer.phase === 'error') return transfer.error || '导入过程中发生错误'
+  if (transfer.phase === 'error') return transfer.error || 'Во время импорта произошла ошибка'
   if (transfer.phase === 'complete') return `Записано: ${transfer.files} файлов, ${transfer.folders} папок`
-  if (transfer.phase === 'scanning') return transfer.currentName || '正在读取文件和目录…'
-  return transfer.currentName || '准备写入…'
+  if (transfer.phase === 'scanning') return transfer.currentName || 'Чтение файлов и каталогов…'
+  return transfer.currentName || 'Подготовка к записи…'
 }
 
 function noteTransferCount(transfer) {
@@ -3376,7 +3376,7 @@ function showNoteImportResult(summary) {
 }
 
 async function saveNoteDocument() {
-  if (state.notes.titleDirty || state.notes.renaming) { showToast('请先完成标题修改，或在标题中按 Escape 放弃。', 'error'); return false }
+  if (state.notes.titleDirty || state.notes.renaming) { showToast('Сначала завершите правку заголовка или нажмите Escape в поле заголовка, чтобы отказаться.', 'error'); return false }
   const node = state.notes.selectedNode
   if (!node || !node.editable || !state.notes.dirty) return true
   if (state.notes.saving) return false
@@ -3398,7 +3398,7 @@ async function saveNoteDocument() {
     if (size) size.textContent = formatBytes(updated.size)
     if (updatedAt) updatedAt.textContent = formatDate(updated.updatedAt)
     syncNoteEditorChrome()
-    showToast('文件已保存。')
+    showToast('Файл сохранён.')
     return !state.notes.dirty
   } catch (error) {
     showToast(friendlyError(error), 'error')
@@ -3414,10 +3414,10 @@ async function openNoteHistory(node) {
   if (state.notes.selectedNode?.id === node.id && state.notes.dirty && !await saveNoteDocument()) return
   try {
     const current = state.notes.selectedNode?.id === node.id ? state.notes.selectedNode : await api(`notes/${encodeURIComponent(node.id)}`)
-    if (!current?.editable) throw new Error('只有可编辑的笔记文档支持页面历史。')
+    if (!current?.editable) throw new Error('История страниц доступна только для редактируемых документов-заметок.')
     const versions = await api(`notes/${encodeURIComponent(node.id)}/versions?limit=100`)
     if (!versions.length) {
-      showToast('这个文档还没有可查看的保存记录。')
+      showToast('У этого документа пока нет сохранённых записей для просмотра.')
       return
     }
     let modal
@@ -3454,9 +3454,9 @@ async function openNoteHistory(node) {
     })
     modal = openModal({
       title: `${current.name} · история страницы`,
-      description: '每次内容保存都会形成不可变快照；恢复历史不会删除当前版本。',
+      description: 'Каждое сохранение содержимого создаёт неизменяемый снимок; восстановление истории не удаляет текущую версию.',
       body: view.element,
-      cancelLabel: '关闭',
+      cancelLabel: 'Закрыть',
       onClose: () => view.destroy(),
     })
     modal.dialog.classList.add('note-history-dialog')
@@ -3467,7 +3467,7 @@ async function openNoteHistory(node) {
 }
 
 function renderHistoricalNotePreview(content, markdown) {
-  if (!markdown) return element('pre', { class: 'note-history-plain-preview', role: 'document' }, content || '（空文档）')
+  if (!markdown) return element('pre', { class: 'note-history-plain-preview', role: 'document' }, content || '(пустой документ)')
   const rendered = renderMarkdownPreview(content).cloneNode(true)
   rendered.classList.add('note-history-markdown-preview')
   rendered.querySelectorAll('a').forEach(link => {
@@ -3479,10 +3479,10 @@ function renderHistoricalNotePreview(content, markdown) {
   return rendered
 }
 
-function renderNoteHistoryDiff(historical, current, heading = '历史版本 → 当前版本') {
+function renderNoteHistoryDiff(historical, current, heading = 'Прошлая версия → текущая версия') {
   const diff = window.DshKnowledgeReview.createLineDiff(historical, current)
   const lines = window.DshKnowledgeReview.compactDiffLines(diff.lines, 3)
-  return element('section', { class: 'note-history-diff', 'aria-label': '历史版本与当前版本的逐行差异' },
+  return element('section', { class: 'note-history-diff', 'aria-label': 'Построчные различия между прошлой и текущей версиями' },
     element('div', { class: 'note-history-diff-summary' },
       element('strong', {}, heading),
       element('div', { class: 'diff-summary', 'aria-label': `Добавлено ${diff.additions} строк, удалено ${diff.deletions}` },
@@ -3490,20 +3490,20 @@ function renderNoteHistoryDiff(historical, current, heading = '历史版本 → 
         element('span', { class: 'diff-stat deletions' }, `-${diff.deletions}`),
       ),
     ),
-    diff.simplified ? element('div', { class: 'diff-notice' }, '内容较长，已使用有界的简化差异视图。') : null,
+    diff.simplified ? element('div', { class: 'diff-notice' }, 'Содержимое большое, показан ограниченный упрощённый вид различий.') : null,
     element('div', { class: 'diff-viewer', role: 'table' },
       element('div', { class: 'diff-column-headings', role: 'row' },
-        element('span', { role: 'columnheader' }, '旧'),
-        element('span', { role: 'columnheader' }, '新'),
+        element('span', { role: 'columnheader' }, 'Старый'),
+        element('span', { role: 'columnheader' }, 'Новый'),
         element('span', { 'aria-hidden': 'true' }),
-        element('span', { role: 'columnheader' }, '正文'),
+        element('span', { role: 'columnheader' }, 'Текст'),
       ),
-      lines.length ? lines.map(renderDiffLine) : element('div', { class: 'diff-empty' }, '所选版本与当前内容相同。'),
+      lines.length ? lines.map(renderDiffLine) : element('div', { class: 'diff-empty' }, 'Выбранная версия совпадает с текущим содержимым.'),
     ),
   )
 }
 
-function noteDownloadButton(node, variant = 'ghost small', label = '下载', attributes = {}) {
+function noteDownloadButton(node, variant = 'ghost small', label = 'Скачать', attributes = {}) {
   return actionButton(label, event => { void downloadNoteFile(node, event.currentTarget) }, variant, {
     'aria-label': `Скачать ${node.name}`,
     title: `Скачать ${node.name}`,
@@ -3516,7 +3516,7 @@ async function downloadNoteFile(node, button) {
   if (button) {
     button.disabled = true
     button.setAttribute('aria-busy', 'true')
-    button.textContent = '下载中'
+    button.textContent = 'Скачивание'
   }
   try {
     if (state.notes.selectedNode?.id === node.id && state.notes.dirty && !await saveNoteDocument()) return
@@ -3539,8 +3539,8 @@ async function downloadNoteFile(node, button) {
 }
 
 async function copyNoteReference(node) {
-  try { await navigator.clipboard.writeText(noteReference(node)); showToast('笔记引用已复制。') }
-  catch { showToast('复制失败，请手动复制文档编号。', 'error') }
+  try { await navigator.clipboard.writeText(noteReference(node)); showToast('Ссылка на заметку скопирована.') }
+  catch { showToast('Не удалось скопировать, скопируйте номер документа вручную.', 'error') }
 }
 
 function noteShareForNode(noteId) {
@@ -3574,19 +3574,19 @@ function showNoteShareDialog(share) {
   }), { value: url })
   let modal
   const body = element('div', { class: 'notes-share-dialog-body' },
-    element('div', { class: 'notes-share-dialog-kind' }, renderNoteIcon(share.node, true), element('span', {}, element('strong', {}, share.node.name), element('small', {}, share.node.kind === 'folder' ? '目录与当前子项均可只读访问' : '只读文档链接'))),
-    element('label', { class: 'notes-share-link-label' }, element('span', {}, '分享链接'), element('div', { class: 'notes-share-link-row' }, input, actionButton('复制', () => copyText(url, '分享链接已复制。'), 'primary small'))),
-    element('p', { class: 'notes-share-dialog-note' }, '链接中的内容会随原笔记更新。任何获得链接的人都可以访问；停止分享后链接立即失效。'),
+    element('div', { class: 'notes-share-dialog-kind' }, renderNoteIcon(share.node, true), element('span', {}, element('strong', {}, share.node.name), element('small', {}, share.node.kind === 'folder' ? 'Каталог и текущие дочерние элементы доступны только для чтения' : 'Ссылка на документ только для чтения'))),
+    element('label', { class: 'notes-share-link-label' }, element('span', {}, 'Ссылка для доступа'), element('div', { class: 'notes-share-link-row' }, input, actionButton('Копировать', () => copyText(url, 'Ссылка для доступа скопирована.'), 'primary small'))),
+    element('p', { class: 'notes-share-dialog-note' }, 'Содержимое по ссылке обновляется вместе с исходной заметкой. Доступ получит любой, у кого есть ссылка; после остановки общего доступа ссылка сразу перестанет работать.'),
     element('div', { class: 'notes-share-dialog-danger' },
-      element('span', {}, element('strong', {}, '停止分享'), element('small', {}, '不会删除原文档或目录。')),
-      actionButton('停止分享', () => confirmRemoveNoteShare(share, () => modal?.close(true)), 'danger small'),
+      element('span', {}, element('strong', {}, 'Остановить общий доступ'), element('small', {}, 'Исходный документ или каталог не удаляется.')),
+      actionButton('Остановить общий доступ', () => confirmRemoveNoteShare(share, () => modal?.close(true)), 'danger small'),
     ),
   )
   modal = openModal({
-    title: '分享笔记',
-    description: '生成独立的只读访问链接',
+    title: 'Поделиться заметкой',
+    description: 'Создать отдельную ссылку доступа только для чтения',
     body,
-    cancelLabel: '完成',
+    cancelLabel: 'Готово',
     className: 'notes-share-dialog',
   })
 }
@@ -3594,15 +3594,15 @@ function showNoteShareDialog(share) {
 function confirmRemoveNoteShare(share, afterRemove) {
   openConfirm({
     title: `Прекратить доступ к «${share.node.name}»?`,
-    message: '现有分享链接会立即失效，原笔记内容不会被删除。',
-    confirmLabel: '停止分享',
+    message: 'Действующие ссылки общего доступа сразу перестанут работать, содержимое исходной заметки не будет удалено.',
+    confirmLabel: 'Остановить общий доступ',
     danger: true,
     onConfirm: async () => {
       await api(`notes/${encodeURIComponent(share.noteId)}/share`, { method: 'DELETE' })
       state.notes.shares = state.notes.shares.filter(item => item.noteId !== share.noteId)
       afterRemove?.()
       renderShell()
-      showToast('已停止分享。')
+      showToast('Общий доступ остановлен.')
     },
   })
 }
@@ -3619,21 +3619,21 @@ async function confirmDeleteNoteNode(node) {
     if (references.length) {
       const names = references.slice(0, 4).map(item => `“${item.documentTitle}”`).join('、')
       return openModal({
-        title: '仍被知识文档引用', description: node.name,
+        title: 'Всё ещё используется документами базы знаний', description: node.name,
         body: element('p', {}, `${names}${references.length > 4 ? `и ещё ${references.length} документов` : ''} всё ещё ссылаются на это. Сначала уберите ссылки, потом удаляйте.`),
-        cancelLabel: '知道了',
+        cancelLabel: 'Понятно',
       })
     }
     openConfirm({
       title: `Удалить «${node.name}»?`,
-      message: node.kind === 'folder' ? '目录及其全部子目录和文件会被永久删除。' : '该文档会被永久删除，此操作无法撤销。',
-      confirmLabel: '永久删除', danger: true,
+      message: node.kind === 'folder' ? 'Каталог и все его подкаталоги и файлы будут удалены навсегда.' : 'Этот документ будет удалён безвозвратно, отменить это нельзя.',
+      confirmLabel: 'Удалить навсегда', danger: true,
       onConfirm: async () => {
         await api(`notes/${encodeURIComponent(node.id)}`, { method: 'DELETE' })
         await loadNoteShares()
         await loadNoteChildren(node.parentId, true)
         if (state.notes.selectedId === node.id || state.notes.breadcrumbs.some(parent => parent.id === node.id)) clearNoteSelection()
-        renderShell(); showToast('已删除。')
+        renderShell(); showToast('Удалено.')
       },
     })
   } catch (error) { showToast(friendlyError(error), 'error') }
@@ -3714,25 +3714,25 @@ function formatBytes(value) {
 }
 
 function renderCandidates() {
-  const statuses = [['pending', '待审核'], ['approved', '已通过'], ['rejected', '已拒绝']]
+  const statuses = [['pending', 'На проверке'], ['approved', 'Принято'], ['rejected', 'Отклонено']]
   const pendingCount = state.stats?.candidates.pending ?? state.candidates.filter(candidate => candidate.status === 'pending').length
   return element('section', { class: 'candidate-page', 'aria-labelledby': 'candidates-heading' },
     element('div', { class: 'section-heading' },
-      element('div', {}, element('h2', { id: 'candidates-heading' }, 'AI 提取候选'), element('p', {}, '审核写入、模型推断、低置信度结果和冲突项会在这里等待确认；只有高置信度且证据明确的结果才能直接写入。')),
+      element('div', {}, element('h2', { id: 'candidates-heading' }, 'Кандидаты от ИИ'), element('p', {}, 'Запись с проверкой, выводы модели, результаты с низкой уверенностью и конфликты ожидают здесь подтверждения; напрямую записываются только результаты с высокой уверенностью и явными доказательствами.')),
       element('div', { class: 'candidate-heading-actions' },
-        state.candidateStatus === 'pending' ? actionButton(state.candidateBatchRunning ? '正在通过…' : '一键通过', openBulkApprove, 'primary', {
+        state.candidateStatus === 'pending' ? actionButton(state.candidateBatchRunning ? 'Выполняется через…' : 'Одобрить всё', openBulkApprove, 'primary', {
           disabled: state.candidateBatchRunning || pendingCount === 0,
-          title: pendingCount === 0 ? '当前没有待审核候选' : '分批通过新增与可安全合并项，冲突项会保留',
+          title: pendingCount === 0 ? 'Сейчас нет кандидатов на проверку' : 'Новые и безопасно объединяемые элементы одобряются партиями, конфликтные остаются',
           'aria-busy': String(state.candidateBatchRunning),
         }) : null,
-        element('div', { class: 'tabs', role: 'tablist', 'aria-label': '候选状态' }, statuses.map(([value, label]) => element('button', {
+        element('div', { class: 'tabs', role: 'tablist', 'aria-label': 'Статус кандидата' }, statuses.map(([value, label]) => element('button', {
           type: 'button', role: 'tab', class: 'tab', 'aria-selected': String(state.candidateStatus === value),
           onClick: async () => { state.candidateStatus = value; await navigate('candidates') },
         }, label, state.stats ? ` ${state.stats.candidates[value]}` : ''))),
       ),
     ),
     state.candidates.length ? element('div', { class: 'candidate-list' }, state.candidates.map(renderCandidateCard))
-      : emptyState(`Нет кандидатов: ${STATUS_LABELS[state.candidateStatus]}`, state.candidateStatus === 'pending' ? '新的对话结束后，插件会在后台判断是否产生候选。' : '切换其他状态查看历史记录。'),
+      : emptyState(`Нет кандидатов: ${STATUS_LABELS[state.candidateStatus]}`, state.candidateStatus === 'pending' ? 'После завершения нового диалога плагин в фоне определит, появились ли кандидаты.' : 'Переключите другой статус, чтобы увидеть историю.'),
   )
 }
 
@@ -3749,7 +3749,7 @@ function renderCandidateCard(candidate) {
         element('div', {},
           badge(knowledgeBaseName(candidate.draft.knowledgeBaseId)), ' ',
           badge(ACTION_LABELS[candidate.action], candidate.action === 'conflict' ? 'warning' : 'accent'), ' ',
-          candidate.change?.kind === 'finalize' ? badge(candidate.change.state === 'resolved' ? '标记已解决' : '标记收集完成', 'warning') : candidate.change?.kind === 'revise' ? badge('原文修订', 'warning') : candidate.change?.kind === 'append' ? badge('内容补充') : null, ' ',
+          candidate.change?.kind === 'finalize' ? badge(candidate.change.state === 'resolved' ? 'Отметить как решённое' : 'Отметить сбор завершённым', 'warning') : candidate.change?.kind === 'revise' ? badge('Правка текста', 'warning') : candidate.change?.kind === 'append' ? badge('Дополнение содержимого') : null, ' ',
           badge(TYPE_LABELS[candidate.draft.type]), ' ',
           candidate.draft.source?.evidence ? badge(EVIDENCE_LABELS[candidate.draft.source.evidence] || candidate.draft.source.evidence) : null),
         element('h3', {}, candidate.draft.title),
@@ -3760,18 +3760,18 @@ function renderCandidateCard(candidate) {
       renderCandidateDiff(candidate, target),
       element('div', { class: 'candidate-reason' },
         element('section', {},
-          element('strong', {}, '写入位置'),
+          element('strong', {}, 'Место записи'),
           element('span', { class: 'candidate-target' }, candidate.action === 'create'
             ? `Создать «${candidate.draft.title}»`
             : target ? `${candidate.change?.kind === 'group' ? 'Смена группы: ' : candidate.change?.kind === 'finalize' ? 'Завершить документ' : candidate.change?.kind === 'revise' ? 'Исправить' : 'Дополнить'}«${target.title}»` : `Цель ${candidate.targetId || 'недоступна'}`),
         ),
         renderCandidateMetadataChanges(candidate, target),
         element('section', {},
-          element('strong', {}, '模型判断依据'),
-          element('p', {}, candidate.reason || '未提供判断说明'),
+          element('strong', {}, 'Основание решения модели'),
+          element('p', {}, candidate.reason || 'Пояснение к решению не указано'),
         ),
         candidate.reviewNote ? element('section', {},
-          element('strong', {}, '审核备注'),
+          element('strong', {}, 'Примечание проверки'),
           element('p', {}, candidate.reviewNote),
         ) : null,
       ),
@@ -3779,14 +3779,14 @@ function renderCandidateCard(candidate) {
     element('div', { class: 'candidate-footer' },
       element('small', {}, `${scopeLabel(candidate.draft.scope)} · уверенность ${Math.round(candidate.draft.confidence * 100)}%${candidate.targetId ? ` · цель ${candidate.targetId}` : ''} · ${formatDate(candidate.createdAt)}`),
       pending ? element('div', { class: 'candidate-actions' },
-        actionButton('拒绝', () => reviewCandidate(candidate, 'reject'), 'danger small'),
+        actionButton('Отклонить', () => reviewCandidate(candidate, 'reject'), 'danger small'),
         ['finalize', 'group'].includes(candidate.change?.kind) ? null : actionButton(action.editLabel, () => openEntryEditor(undefined, candidate), 'small', {
           disabled: !targetAvailable,
-          title: targetAvailable ? action.editLabel : '目标文档不可用，无法安全编辑合并结果',
+          title: targetAvailable ? action.editLabel : 'Целевой документ недоступен, безопасно править объединённый результат нельзя',
         }),
         action.manualOnly ? null : actionButton(action.label, () => reviewCandidate(candidate, 'approve', action.resolution), 'primary small', {
           disabled: !targetAvailable,
-          title: targetAvailable ? action.label : '目标文档不可用，刷新后再审核',
+          title: targetAvailable ? action.label : 'Целевой документ недоступен: обновите и проверьте заново',
         }),
       ) : null,
     ),
@@ -3796,33 +3796,33 @@ function renderCandidateCard(candidate) {
 function renderCandidateDiff(candidate, target) {
   if (candidate.change?.kind === 'group') {
     return element('section', { class: 'candidate-change' },
-      element('strong', {}, '调整文档分组'),
+      element('strong', {}, 'Изменить группу документа'),
       element('p', {}, `${target?.group || 'без группы'} → ${candidate.change.group}`),
-      element('p', {}, '只修改分组，正文、标签、路径和完成状态保持不变。'),
-      target && target.version !== candidate.change.baseVersion ? element('p', { role: 'alert' }, '文档版本已变化，请拒绝后重新提交分组调整。') : null,
+      element('p', {}, 'Меняется только группа; текст, теги, путь и статус завершения остаются прежними.'),
+      target && target.version !== candidate.change.baseVersion ? element('p', { role: 'alert' }, 'Версия документа изменилась: отклоните и отправьте изменение группы заново.') : null,
     )
   }
   if (candidate.change?.kind === 'finalize') {
-    return element('section', { class: 'candidate-change', 'aria-label': '文档结束预览' },
+    return element('section', { class: 'candidate-change', 'aria-label': 'Предпросмотр закрытия документа' },
       element('strong', {}, `${target?.title || candidate.draft.title} · ${candidate.change.state === 'resolved' ? 'отметить решённым' : 'отметить завершённым'}`),
       element('p', {}, `Базовая версия: ${candidate.change.baseVersion} · текущая: ${target?.version ?? 'недоступна'}`),
       element('p', {}, `Подтверждение пользователя: ${candidate.change.confirmation}`),
       element('p', {}, `Вывод: ${candidate.change.note}`),
       target && candidate.status === 'pending' && (target.documentState !== 'open' || target.version !== candidate.change.baseVersion)
-        ? element('p', { role: 'alert' }, '文档已变化，请拒绝此候选后重新读取并确认。') : null,
-      element('p', {}, '正文保持不变，整篇将停止回写；需要继续补充时可在文档中重新打开。'),
+        ? element('p', { role: 'alert' }, 'Документ изменился: отклоните этот кандидат, затем прочитайте заново и подтвердите.') : null,
+      element('p', {}, 'Текст остаётся без изменений, запись целиком остановится; чтобы продолжить дополнять, снова откройте его в документе.'),
     )
   }
   if (candidate.action !== 'create' && !target) {
     return element('section', { class: 'candidate-change candidate-change-unavailable', role: 'alert' },
-      element('strong', {}, '无法生成变更预览'),
-      element('p', {}, '目标文档暂时不可用。为避免盲目覆盖，刷新并确认当前版本后再审核。'),
+      element('strong', {}, 'Не удалось создать предпросмотр изменений'),
+      element('p', {}, 'Целевой документ временно недоступен. Чтобы не перезаписать вслепую, обновите и подтвердите текущую версию, затем проверьте.'),
     )
   }
   const review = window.DshKnowledgeReview.createReviewChange(candidate.action, target?.body || '', candidate.draft.body, candidate.change?.kind)
   const title = candidate.action === 'create'
-    ? '新文档内容'
-    : candidate.action === 'conflict' ? '冲突处理预览' : candidate.change?.kind === 'revise' ? '原文修订预览' : '内容补充预览'
+    ? 'Содержимое нового документа'
+    : candidate.action === 'conflict' ? 'Предпросмотр обработки конфликтов' : candidate.change?.kind === 'revise' ? 'Предпросмотр правки текста' : 'Предпросмотр дополнения содержимого'
   const targetLabel = candidate.action === 'create'
     ? candidate.draft.title
     : `${target.title} · текущая версия ${target.version}`
@@ -3835,17 +3835,17 @@ function renderCandidateDiff(candidate, target) {
         element('span', { class: 'diff-stat unchanged' }, `${review.diff.unchanged} без изменений`),
       ),
     ),
-    review.diff.simplified ? element('div', { class: 'diff-notice' }, '文档变更较大，已使用简化差异视图。合并内容不受影响。') : null,
+    review.diff.simplified ? element('div', { class: 'diff-notice' }, 'Документ сильно изменился, используется упрощённый вид различий. На объединённое содержимое это не влияет.') : null,
     element('div', { class: 'diff-viewer', role: 'table', 'aria-label': `${title} — построчные различия` },
       element('div', { class: 'diff-column-headings', role: 'row' },
-        element('span', { role: 'columnheader' }, '旧'),
-        element('span', { role: 'columnheader' }, '新'),
+        element('span', { role: 'columnheader' }, 'Старый'),
+        element('span', { role: 'columnheader' }, 'Новый'),
         element('span', { 'aria-hidden': 'true' }),
-        element('span', { role: 'columnheader' }, '正文'),
+        element('span', { role: 'columnheader' }, 'Текст'),
       ),
       review.displayLines.length
         ? review.displayLines.map(renderDiffLine)
-        : element('div', { class: 'diff-empty' }, '正文为空，没有可写入的差异。'),
+        : element('div', { class: 'diff-empty' }, 'Текст пуст, записывать нечего.'),
     ),
   )
 }
@@ -3883,24 +3883,24 @@ function renderCandidateMetadataChanges(candidate, target) {
   }
   if (!changes.length) return null
   return element('section', { class: 'candidate-metadata' },
-    element('strong', {}, '属性变化'),
+    element('strong', {}, 'Изменение свойств'),
     element('ul', {}, changes.map(change => element('li', {}, change))),
   )
 }
 
 function candidatePrimaryAction(candidate) {
-  if (candidate.change?.kind === 'group') return { label: '确认调整分组', manualOnly: candidate.action === 'conflict' }
-  if (candidate.change?.kind === 'finalize') return { label: candidate.change.state === 'resolved' ? '确认标记已解决' : '确认收集完成', manualOnly: candidate.action === 'conflict' }
-  if (candidate.action === 'create') return { label: '写入新文档', editLabel: '编辑后写入' }
+  if (candidate.change?.kind === 'group') return { label: 'Подтвердить изменение группы', manualOnly: candidate.action === 'conflict' }
+  if (candidate.change?.kind === 'finalize') return { label: candidate.change.state === 'resolved' ? 'Подтвердить отметку «решено»' : 'Подтвердить завершение сбора', manualOnly: candidate.action === 'conflict' }
+  if (candidate.action === 'create') return { label: 'Записать в новый документ', editLabel: 'Записать после редактирования' }
   if (candidate.action === 'conflict' && candidate.change?.kind !== 'revise') {
-    return { label: '需要手动解决', editLabel: '手动解决', resolution: 'merge', manualOnly: true }
+    return { label: 'Требуется решить вручную', editLabel: 'Решить вручную', resolution: 'merge', manualOnly: true }
   }
   if (candidate.action === 'conflict') return {
-    label: candidate.change?.kind === 'revise' ? '应用冲突修订' : '确认补充',
-    editLabel: '手动解决', resolution: 'merge',
+    label: candidate.change?.kind === 'revise' ? 'Применить конфликтную правку' : 'Подтвердить дополнение',
+    editLabel: 'Решить вручную', resolution: 'merge',
   }
-  if (candidate.change?.kind === 'revise') return { label: '应用修订', editLabel: '编辑修订结果' }
-  return { label: '补充到文档', editLabel: '编辑后补充' }
+  if (candidate.change?.kind === 'revise') return { label: 'Применить правку', editLabel: 'Редактировать результат правки' }
+  return { label: 'Дополнить документ', editLabel: 'Дополнить после редактирования' }
 }
 
 function renderTokens() {
@@ -3908,27 +3908,27 @@ function renderTokens() {
   return element('section', { 'aria-labelledby': 'tokens-heading' },
     element('div', { class: 'api-access-card' },
       element('div', { class: 'api-access-heading' },
-        element('div', {}, element('strong', {}, '远程知识库 API'), element('p', {}, state.service.publicApiEnabled
-          ? '其他 DSH 客户端可以使用下面的地址和客户端令牌连接。'
-          : '当前仅能在本机管理；开启后其他 DSH 客户端才能连接。')),
-        badge(state.service.publicApiEnabled ? '已开放' : '未开放', state.service.publicApiEnabled ? 'success' : 'warning'),
+        element('div', {}, element('strong', {}, 'API удалённой базы знаний'), element('p', {}, state.service.publicApiEnabled
+          ? 'Другие клиенты DSH могут подключиться по указанному ниже адресу и токену клиента.'
+          : 'Сейчас управление возможно только на этом устройстве; другие клиенты DSH смогут подключиться после включения.')),
+        badge(state.service.publicApiEnabled ? 'Открыто' : 'Закрыто', state.service.publicApiEnabled ? 'success' : 'warning'),
       ),
-      element('label', { class: 'api-address-label', for: 'knowledge-public-api-address' }, '客户端填写的服务器地址'),
+      element('label', { class: 'api-address-label', for: 'knowledge-public-api-address' }, 'Адрес сервера, указанный клиентом'),
       element('div', { class: 'api-address-row' },
         Object.assign(element('input', { id: 'knowledge-public-api-address', class: 'input', readonly: true, value: apiAddress }), { value: apiAddress }),
-        actionButton('复制地址', () => copyText(apiAddress, 'API 地址已复制。'), 'small'),
+        actionButton('Копировать адрес', () => copyText(apiAddress, 'Адрес API скопирован.'), 'small'),
       ),
       element('div', { class: 'api-access-actions' },
-        element('small', {}, state.service.publicApiEnabled ? '关闭后已有客户端会立即无法连接，本地管理不受影响。' : '开启远程 API 后，请为每台客户端创建独立令牌。'),
-        actionButton(state.service.publicApiEnabled ? '关闭远程 API' : '开启远程 API', togglePublicApi, state.service.publicApiEnabled ? 'danger small' : 'primary small'),
+        element('small', {}, state.service.publicApiEnabled ? 'После отключения существующие клиенты сразу потеряют связь; локальное управление не затронуто.' : 'После включения удалённого API создайте отдельный токен для каждого клиента.'),
+        actionButton(state.service.publicApiEnabled ? 'Отключить удалённый API' : 'Включить удалённый API', togglePublicApi, state.service.publicApiEnabled ? 'danger small' : 'primary small'),
       ),
     ),
     element('div', { class: 'section-heading' },
-      element('div', {}, element('h2', { id: 'tokens-heading' }, '客户端访问令牌'), element('p', {}, '给其他 DSH 客户端分配最小必要权限；原始令牌只显示一次。')),
-      actionButton('+ 创建令牌', openTokenCreator, 'primary'),
+      element('div', {}, element('h2', { id: 'tokens-heading' }, 'Токен доступа клиента'), element('p', {}, 'Выдавайте другим клиентам DSH минимально необходимые права; исходный токен показывается только один раз.')),
+      actionButton('+ Создать токен', openTokenCreator, 'primary'),
     ),
     element('div', { class: 'panel' }, element('div', { class: 'panel-body' },
-      state.tokens.length ? element('div', { class: 'token-list' }, state.tokens.map(renderTokenRow)) : compactEmpty('还没有访问令牌'),
+      state.tokens.length ? element('div', { class: 'token-list' }, state.tokens.map(renderTokenRow)) : compactEmpty('Пока нет токенов доступа'),
     )),
   )
 }
@@ -3937,31 +3937,31 @@ function renderTokenRow(token) {
   const revoked = Boolean(token.revokedAt)
   return element('article', { class: 'token-row' },
     element('div', {},
-      element('strong', {}, token.name, ' ', revoked ? badge('已撤销', 'danger') : badge('有效', 'success')),
+      element('strong', {}, token.name, ' ', revoked ? badge('Отозвано', 'danger') : badge('Действительно', 'success')),
       element('div', { class: 'permissions' }, token.permissions.map(permission => badge(permission))),
       element('small', {}, `Создан ${formatDate(token.createdAt)}${token.lastUsedAt ? ` · последнее использование ${formatDate(token.lastUsedAt)}` : ' · ещё не использовался'}`),
     ),
     revoked
-      ? actionButton('永久删除', () => confirmDeleteToken(token), 'danger small')
-      : actionButton('撤销', () => confirmRevokeToken(token), 'danger small'),
+      ? actionButton('Удалить навсегда', () => confirmDeleteToken(token), 'danger small')
+      : actionButton('Отозвать', () => confirmRevokeToken(token), 'danger small'),
   )
 }
 
 async function copyText(value, successMessage) {
-  try { await navigator.clipboard.writeText(value); showToast(successMessage) } catch { showToast('复制失败，请手动选择内容。', 'error') }
+  try { await navigator.clipboard.writeText(value); showToast(successMessage) } catch { showToast('Не удалось скопировать, выберите содержимое вручную.', 'error') }
 }
 
 function togglePublicApi() {
   const enabling = !state.service.publicApiEnabled
   openConfirm({
-    title: enabling ? '开启远程知识库 API？' : '关闭远程知识库 API？',
+    title: enabling ? 'Включить удалённый API базы знаний?' : 'Отключить удалённый API базы знаний?',
     message: enabling
-      ? '开启后，持有有效令牌的其他 DSH 客户端可以连接这台中央知识库。'
-      : '关闭后，所有远程客户端会立即断开；本地知识库和管理台不受影响。',
-    confirmLabel: enabling ? '确认开启' : '确认关闭', danger: !enabling,
+      ? 'После включения другие клиенты DSH с действующим токеном смогут подключиться к этой центральной базе знаний.'
+      : 'После отключения все удалённые клиенты сразу отключатся; локальная база знаний и панель управления не затронуты.',
+    confirmLabel: enabling ? 'Подтвердить включение' : 'Подтвердить закрытие', danger: !enabling,
     onConfirm: async () => {
       state.service = await api('service', { method: 'PUT', body: { publicApiEnabled: enabling } })
-      showToast(enabling ? '远程 API 已开启。' : '远程 API 已关闭。')
+      showToast(enabling ? 'Удалённый API включён.' : 'Удалённый API отключён.')
       renderShell()
     },
   })
@@ -3978,7 +3978,7 @@ function selectControl(label, options, current, onChange) {
 }
 
 function knowledgeBaseName(id) {
-  return state.knowledgeBases.find(base => base.id === id)?.name || id || '默认知识库'
+  return state.knowledgeBases.find(base => base.id === id)?.name || id || 'База знаний по умолчанию'
 }
 
 function parseTags(value) {
@@ -3989,17 +3989,17 @@ async function openKnowledgeBaseEditor(base) {
   await loadModelCatalog()
   const source = base || { name: '', description: '', defaultTags: [], extractionInstructions: '', writebackPolicy: 'conservative' }
   const form = element('form', { class: 'form-grid' })
-  const name = formField('名称', 'input', source.name, { required: true, maxlength: 100, placeholder: '例如：项目规范' })
-  const group = formField('所属分组', 'input', source.group || '', { id: 'knowledge-base-group', maxlength: 64, placeholder: '留空为未分组，也可输入新分组名称', list: 'knowledge-base-group-options' })
+  const name = formField('Название', 'input', source.name, { required: true, maxlength: 100, placeholder: 'Например: стандарты проекта' })
+  const group = formField('Группа', 'input', source.group || '', { id: 'knowledge-base-group', maxlength: 64, placeholder: 'Пусто — без группы; можно ввести название новой группы', list: 'knowledge-base-group-options' })
   group.wrapper.querySelector('label').htmlFor = group.input.id
   const groupOptions = element('datalist', { id: 'knowledge-base-group-options' },
     [...new Set(state.knowledgeBases.map(item => item.group).filter(Boolean))].sort().map(value => element('option', { value })))
-  const description = formField('回写匹配描述', 'textarea', source.description, { maxlength: 2000, placeholder: '描述什么样的对话才属于这个库。例如：只记录 dsh-knowledge 项目的架构决策和部署规范' })
-  const tags = formField('默认标签', 'input', source.defaultTags.join(', '), { placeholder: 'project-rule, backend' })
-  const instructions = formField('提取要求', 'textarea', source.extractionInstructions, { maxlength: 4000, placeholder: '例如：只收录已确认、可跨会话复用的项目约定' })
-  const policy = selectField('回写策略', [
-    { value: 'conservative', label: '严谨（高置信度直写）' },
-    { value: 'proactive', label: '主动（更积极沉淀）' },
+  const description = formField('Запись по совпадению с описанием', 'textarea', source.description, { maxlength: 2000, placeholder: 'Опишите, какие диалоги относятся к этой базе. Например: записывать только архитектурные решения и правила развёртывания проекта dsh-knowledge' })
+  const tags = formField('Теги по умолчанию', 'input', source.defaultTags.join(', '), { placeholder: 'project-rule, backend' })
+  const instructions = formField('Требования извлечения', 'textarea', source.extractionInstructions, { maxlength: 4000, placeholder: 'Например: включать только подтверждённые проектные договорённости, пригодные для повторного использования между сессиями' })
+  const policy = selectField('Стратегия записи', [
+    { value: 'conservative', label: 'Строгий (прямая запись при высокой уверенности)' },
+    { value: 'proactive', label: 'Активный (охотнее сохраняет знания)' },
   ], source.writebackPolicy || 'conservative')
   const dedicatedModel = element('input', {
     type: 'checkbox',
@@ -4008,8 +4008,8 @@ async function openKnowledgeBaseEditor(base) {
   const route = modelRouteFields(source.writebackProvider || '', source.writebackModel || '')
   const routeToggle = element('label', { class: 'check-option span-2' }, dedicatedModel,
     element('span', {},
-      element('strong', {}, '这个知识库使用专用回写模型'),
-      element('small', {}, '未设置时先使用本机覆盖；本机也未设置时跟随当前会话模型。'),
+      element('strong', {}, 'Эта база знаний использует отдельную модель для записи'),
+      element('small', {}, 'Если не задано, сначала используется локальная переопределяющая настройка; если и она не задана — модель текущей сессии.'),
     ))
   const syncRouteAvailability = () => {
     route.provider.input.disabled = route.model.input.disabled = !dedicatedModel.checked
@@ -4023,10 +4023,10 @@ async function openKnowledgeBaseEditor(base) {
     routeToggle, route.provider.wrapper, route.model.wrapper,
   )
   openSheet({
-    title: base ? '编辑知识库' : '创建知识库',
-    description: '匹配描述先判断对话是否属于该库；提取要求再规定应该收录什么。',
+    title: base ? 'Редактировать базу знаний' : 'Создать базу знаний',
+    description: 'Описание соответствия сначала определяет, относится ли диалог к этой базе; требования к отбору затем задают, что нужно включать.',
     body: form,
-    primaryLabel: base ? '保存修改' : '创建',
+    primaryLabel: base ? 'Сохранить изменения' : 'Создать',
     onPrimary: async () => {
       if (!form.reportValidity()) return false
       const draft = {
@@ -4043,7 +4043,7 @@ async function openKnowledgeBaseEditor(base) {
       }
       if (base) await api(`knowledge-bases/${encodeURIComponent(base.id)}`, { method: 'PUT', body: { draft } })
       else await api('knowledge-bases', { method: 'POST', body: { draft } })
-      showToast(base ? '知识库已更新。' : '知识库已创建，现在可以挂载到项目或会话。')
+      showToast(base ? 'База знаний обновлена.' : 'База знаний создана, теперь её можно подключить к проекту или сессии.')
       await navigate('bases')
       return true
     },
@@ -4057,19 +4057,19 @@ function openBulkMountEditor() {
   const bases = sortKnowledgeBasesByGroup(state.knowledgeBases.filter(base => base.status === 'active' && manager.selectedIds.has(base.id)))
   if (!targetId || bases.length === 0) return
   const recall = element('input', { type: 'checkbox', checked: true })
-  const writeMode = selectField('写入方式', [
-    { value: 'none', label: '仅召回（不提取、不回写）' },
-    { value: 'audit', label: '审核写入（推荐）' },
-    { value: 'direct', label: '直接写入（普通结果自动生效；冲突仍待审）' },
+  const writeMode = selectField('Способ записи', [
+    { value: 'none', label: 'Только извлечение (без отбора и записи)' },
+    { value: 'audit', label: 'Запись с проверкой (рекомендуется)' },
+    { value: 'direct', label: 'Прямая запись (обычные результаты применяются автоматически; конфликты ждут проверки)' },
   ], 'audit')
-  const includeTags = formField('必须包含的标签', 'input', '', { placeholder: '可选，逗号分隔' })
-  const excludeTags = formField('排除标签', 'input', '', { placeholder: '可选，逗号分隔' })
+  const includeTags = formField('Обязательные теги', 'input', '', { placeholder: 'Необязательно, через запятую' })
+  const excludeTags = formField('Исключаемые теги', 'input', '', { placeholder: 'Необязательно, через запятую' })
   const form = element('form', { class: 'form-grid' },
     element('div', { class: 'selection-summary span-2' },
       element('strong', {}, `Будет подключено баз: ${bases.length}`),
       element('p', {}, bases.slice(0, 8).map(knowledgeBasePathLabel).join('、'), bases.length > 8 ? ` и ещё ${bases.length}` : ''),
     ),
-    element('label', { class: 'check-option' }, recall, element('span', {}, element('strong', {}, '开启召回'), element('small', {}, '回答前检索所选知识库。'))),
+    element('label', { class: 'check-option' }, recall, element('span', {}, element('strong', {}, 'Включить извлечение'), element('small', {}, 'Перед ответом искать в выбранной базе знаний.'))),
     writeMode.wrapper,
     includeTags.wrapper,
     excludeTags.wrapper,
@@ -4083,7 +4083,7 @@ function openBulkMountEditor() {
       const include = parseTags(includeTags.input.value)
       const exclude = parseTags(excludeTags.input.value)
       if (include.some(tag => exclude.includes(tag))) {
-        showToast('同一标签不能同时包含和排除。', 'error')
+        showToast('Один и тот же тег нельзя одновременно включить и исключить.', 'error')
         return false
       }
       await api('mounts/bulk', { method: 'POST', body: {
@@ -4116,7 +4116,7 @@ async function bulkRemoveMounts() {
     && mount.targetId === targetId
     && manager.selectedIds.has(mount.knowledgeBaseId))
   if (explicit.length === 0) {
-    showToast(manager.targetKind === 'session' ? '所选知识库当前没有会话覆盖，无需恢复。' : '所选知识库当前没有项目挂载。')
+    showToast(manager.targetKind === 'session' ? 'У выбранной базы знаний нет переопределений сеанса, восстанавливать нечего.' : 'У выбранной базы знаний нет подключений проекта.')
     return
   }
   try {
@@ -4135,17 +4135,17 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
   }
   const enabled = element('input', { type: 'checkbox', checked: source.enabled })
   const recall = element('input', { type: 'checkbox', checked: source.recallEnabled })
-  const writeMode = selectField('写入方式', [
-    { value: 'none', label: '仅召回（不提取、不回写）' },
-    { value: 'audit', label: '审核写入（先进待审核）' },
-    { value: 'direct', label: '直接写入（普通结果自动生效；冲突仍待审）' },
+  const writeMode = selectField('Способ записи', [
+    { value: 'none', label: 'Только извлечение (без отбора и записи)' },
+    { value: 'audit', label: 'Запись с проверкой (сначала в очередь проверки)' },
+    { value: 'direct', label: 'Прямая запись (обычные результаты применяются автоматически; конфликты ждут проверки)' },
   ], source.writeMode)
-  const includeTags = formField('必须包含的标签', 'input', source.includeTags.join(', '), { placeholder: '例如：project-rule' })
-  const excludeTags = formField('排除标签', 'input', source.excludeTags.join(', '), { placeholder: '例如：personal, temporary' })
-  const instructions = formField('本挂载的额外提取要求', 'textarea', source.extractionInstructions, { maxlength: 4000, placeholder: '可以比知识库默认规则更严格' })
+  const includeTags = formField('Обязательные теги', 'input', source.includeTags.join(', '), { placeholder: 'Например: project-rule' })
+  const excludeTags = formField('Исключаемые теги', 'input', source.excludeTags.join(', '), { placeholder: 'Например: personal, temporary' })
+  const instructions = formField('Дополнительные требования извлечения для этого подключения', 'textarea', source.extractionInstructions, { maxlength: 4000, placeholder: 'Может быть строже правил базы знаний по умолчанию' })
   const form = element('form', { class: 'form-grid' },
-    element('label', { class: 'check-option span-2' }, enabled, element('span', {}, element('strong', {}, '启用这个挂载'), element('small', {}, '关闭后，当前范围不召回、不提取、不回写。'))),
-    element('label', { class: 'check-option' }, recall, element('span', {}, element('strong', {}, '开启召回'), element('small', {}, '回答前只检索这个库。'))),
+    element('label', { class: 'check-option span-2' }, enabled, element('span', {}, element('strong', {}, 'Включить это подключение'), element('small', {}, 'После отключения в текущей области нет извлечения, отбора и записи.'))),
+    element('label', { class: 'check-option' }, recall, element('span', {}, element('strong', {}, 'Включить извлечение'), element('small', {}, 'Перед ответом искать только в этой базе.'))),
     writeMode.wrapper,
     includeTags.wrapper,
     excludeTags.wrapper,
@@ -4153,16 +4153,16 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
   )
   instructions.wrapper.classList.add('span-2')
   if (targetKind === 'session' && !explicit && inherited) {
-    form.prepend(element('div', { class: 'context-warning span-2' }, '此会话目前继承项目配置。保存后会创建独立的会话覆盖。'))
+    form.prepend(element('div', { class: 'context-warning span-2' }, 'Сейчас эта сессия наследует настройки проекта. После сохранения будет создана отдельная переопределяющая настройка сессии.'))
   }
   if (explicit) {
     form.append(element('div', { class: 'mount-delete span-2' },
-      element('span', { class: 'field-hint' }, targetKind === 'session' ? '删除会话覆盖后，将恢复继承项目配置。' : '删除后，该项目不再挂载此库。'),
-      actionButton('删除当前配置', async () => {
+      element('span', { class: 'field-hint' }, targetKind === 'session' ? 'После удаления переопределения сессии снова наследуется конфигурация проекта.' : 'После удаления проект больше не подключает эту базу.'),
+      actionButton('Удалить текущую конфигурацию', async () => {
         try {
           await api(`mounts/${encodeURIComponent(explicit.id)}`, { method: 'DELETE' })
           document.querySelector('.dialog-backdrop')?.remove()
-          showToast(targetKind === 'session' ? '会话覆盖已删除，已恢复项目继承。' : '项目挂载已删除。')
+          showToast(targetKind === 'session' ? 'Переопределение сессии удалено, восстановлено наследование проекта.' : 'Подключение проекта удалено.')
           await navigate('bases')
         } catch (error) { showToast(friendlyError(error), 'error') }
       }, 'danger small'),
@@ -4177,12 +4177,12 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
     title: `${targetKind === 'project' ? 'Проект' : 'Сессия'} · ${knowledgeBasePathLabel(base)}`,
     description: targetId,
     body: form,
-    primaryLabel: '保存挂载',
+    primaryLabel: 'Сохранить подключение',
     onPrimary: async () => {
       const include = parseTags(includeTags.input.value)
       const exclude = parseTags(excludeTags.input.value)
       if (include.some(tag => exclude.includes(tag))) {
-        showToast('同一标签不能同时包含和排除。', 'error')
+        showToast('Один и тот же тег нельзя одновременно включить и исключить.', 'error')
         return false
       }
       await api('mounts', { method: 'POST', body: { draft: {
@@ -4194,7 +4194,7 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
         excludeTags: exclude,
         extractionInstructions: instructions.input.value.trim(),
       } } })
-      showToast(enabled.checked ? '挂载设置已保存。' : '已在当前范围关闭这个知识库。')
+      showToast(enabled.checked ? 'Настройки подключения сохранены.' : 'Эта база знаний закрыта в текущей области.')
       await navigate('bases')
       return true
     },
@@ -4204,11 +4204,11 @@ function openMountEditor(base, targetKind, targetId, explicit, inherited) {
 function confirmArchiveKnowledgeBase(base) {
   openConfirm({
     title: `Архивировать «${base.name}»?`,
-    message: '归档后所有挂载会自动关闭，其中的知识仍保留，但不再参与召回与回写。',
-    confirmLabel: '确认归档', danger: true,
+    message: 'После архивации все подключения закроются автоматически, знания сохранятся, но больше не будут участвовать в извлечении и записи.',
+    confirmLabel: 'Подтвердить архивацию', danger: true,
     onConfirm: async () => {
       await api(`knowledge-bases/${encodeURIComponent(base.id)}/archive`, { method: 'POST' })
-      showToast('知识库已归档，相关挂载已关闭。')
+      showToast('База знаний заархивирована, связанные подключения закрыты.')
       await navigate('bases')
     },
   })
@@ -4217,37 +4217,37 @@ function confirmArchiveKnowledgeBase(base) {
 function confirmRestoreKnowledgeBase(base) {
   openConfirm({
     title: `Восстановить «${base.name}»?`,
-    message: '恢复后知识库可再次挂载；之前归档时关闭的挂载不会自动重开。',
-    confirmLabel: '确认恢复', danger: false,
+    message: 'После восстановления базу знаний можно снова подключить; подключения, закрытые при архивации, автоматически не откроются.',
+    confirmLabel: 'Подтвердить восстановление', danger: false,
     onConfirm: async () => {
       await api(`knowledge-bases/${encodeURIComponent(base.id)}/restore`, { method: 'POST' })
-      showToast('知识库已恢复，可以重新配置挂载。')
+      showToast('База знаний восстановлена, подключения можно настроить заново.')
       await navigate('bases')
     },
   })
 }
 
 function confirmDeleteKnowledgeBase(base) {
-  const confirmation = formField('输入知识库名称确认', 'input', '', {
+  const confirmation = formField('Введите название базы знаний для подтверждения', 'input', '', {
     required: true, autocomplete: 'off', placeholder: base.name,
     'aria-describedby': 'delete-base-warning',
   })
   const form = element('form', {},
     element('div', { id: 'delete-base-warning', class: 'context-warning' },
-      '此操作无法撤销。知识库中的全部知识、版本历史、候选、挂载和生成文档都会永久删除。'),
+      'Это действие нельзя отменить. Все знания, история версий, кандидаты, подключения и созданные документы в базе знаний будут удалены навсегда.'),
     confirmation.wrapper,
   )
   confirmation.wrapper.classList.add('delete-base-confirmation')
   openModal({
     title: `Удалить навсегда «${base.name}»?`,
-    description: '只有已归档知识库可以永久删除。',
+    description: 'Безвозвратно удалить можно только архивную базу знаний.',
     body: form,
-    primaryLabel: '永久删除',
+    primaryLabel: 'Удалить навсегда',
     primaryVariant: 'danger',
     onPrimary: async () => {
       if (!form.reportValidity()) return false
       if (confirmation.input.value.trim() !== base.name) {
-        showToast('输入的知识库名称不匹配。', 'error')
+        showToast('Введённое название базы знаний не совпадает.', 'error')
         confirmation.input.select()
         return false
       }
@@ -4263,7 +4263,7 @@ function confirmDeleteKnowledgeBase(base) {
         state.knowledgeBaseView = 'libraries'
       }
       if (state.entryFilters.knowledgeBaseId === base.id) state.entryFilters.knowledgeBaseId = ''
-      showToast('知识库及其全部关联数据已永久删除。')
+      showToast('База знаний и все связанные данные удалены навсегда.')
       await navigate('bases')
       return true
     },
@@ -4282,12 +4282,12 @@ function openEntryEditor(entry, candidate) {
     title: '', body: '', type: 'fact', tags: [], scope: { kind: 'global' }, confidence: .8,
   }
   const form = element('form', { class: 'form-grid' })
-  const title = formField('标题', 'input', source.title, { required: true, maxlength: 200, placeholder: '一句话说明这条知识' })
-  const body = formField('正文', 'textarea', source.body, { required: true, maxlength: 50000, placeholder: '写下可在未来对话中复用的内容' })
-  const type = selectField('类型', TYPES.map(value => ({ value, label: TYPE_LABELS[value] })), source.type)
+  const title = formField('Заголовок', 'input', source.title, { required: true, maxlength: 200, placeholder: 'Опишите эту запись одной фразой' })
+  const body = formField('Текст', 'textarea', source.body, { required: true, maxlength: 50000, placeholder: 'Запишите то, что можно будет использовать в будущих диалогах' })
+  const type = selectField('Тип', TYPES.map(value => ({ value, label: TYPE_LABELS[value] })), source.type)
   const activeBases = state.knowledgeBases.filter(base => base.status === 'active')
   const selectedBaseId = source.knowledgeBaseId || activeBases[0]?.id || 'default'
-  const knowledgeBase = selectField('所属知识库', activeBases.map(base => ({ value: base.id, label: base.name })), selectedBaseId)
+  const knowledgeBase = selectField('База знаний', activeBases.map(base => ({ value: base.id, label: base.name })), selectedBaseId)
   const requiresGroup = !entry && (!candidate || candidate.action === 'create')
   let groupField = createDocumentGroupField({ element, api, baseId: selectedBaseId, value: candidateTarget?.group ?? source.group ?? '', required: requiresGroup })
   const groupSlot = element('div', { class: 'span-2' }, groupField.wrapper)
@@ -4295,9 +4295,9 @@ function openEntryEditor(entry, candidate) {
     groupField = createDocumentGroupField({ element, api, baseId: knowledgeBase.input.value, value: groupField.value(), required: requiresGroup })
     groupSlot.replaceChildren(groupField.wrapper)
   })
-  const scope = selectField('范围', [{ value: 'global', label: '全局' }, { value: 'project', label: '项目' }], source.scope.kind)
-  const project = formField('项目 ID / 路径', 'input', source.scope.kind === 'project' ? source.scope.id : '', { placeholder: '/workspace/project' })
-  const tags = formField('标签', 'input', source.tags.join(', '), { placeholder: 'docker, deployment' })
+  const scope = selectField('Область', [{ value: 'global', label: 'Глобально' }, { value: 'project', label: 'Проект' }], source.scope.kind)
+  const project = formField('ID проекта / путь', 'input', source.scope.kind === 'project' ? source.scope.id : '', { placeholder: '/workspace/project' })
+  const tags = formField('Теги', 'input', source.tags.join(', '), { placeholder: 'docker, deployment' })
   const confidenceInput = element('input', { type: 'range', min: 0, max: 1, step: .01, value: source.confidence })
   const confidenceValue = element('span', { class: 'range-value' }, `${Math.round(source.confidence * 100)}%`)
   confidenceInput.addEventListener('input', () => { confidenceValue.textContent = `${Math.round(Number(confidenceInput.value) * 100)}%` })
@@ -4312,26 +4312,26 @@ function openEntryEditor(entry, candidate) {
     groupSlot,
     scope.wrapper,
     scopeProjectField,
-    element('div', { class: 'field span-2' }, element('label', {}, '置信度'), element('div', { class: 'range-row' }, confidenceInput, confidenceValue)),
+    element('div', { class: 'field span-2' }, element('label', {}, 'Уверенность'), element('div', { class: 'range-row' }, confidenceInput, confidenceValue)),
     body.wrapper,
     tags.wrapper,
   )
   body.wrapper.classList.add('span-2')
   tags.wrapper.classList.add('span-2')
   const modeTitle = candidate
-    ? candidate.action === 'create' ? '编辑新文档' : '编辑最终文档'
-    : entry ? '编辑知识文档' : '新建知识文档'
+    ? candidate.action === 'create' ? 'Редактировать новый документ' : 'Редактировать итоговый документ'
+    : entry ? 'Редактировать документ базы знаний' : 'Создать документ знаний'
   const candidateDescription = candidate?.action === 'create'
-    ? '确认后将创建文档并立即参与后续召回。'
-    : '正文是审核后的最终版本；可以直接修改、删除过时内容。若原文已变化，会要求重新打开后处理。'
+    ? 'После подтверждения документ будет создан и сразу начнёт участвовать в извлечении.'
+    : 'Текст — итоговая версия после проверки; можно сразу править и удалять устаревшее. Если исходник изменился, потребуется открыть заново и разобрать.'
   const primaryLabel = candidate
-    ? candidate.action === 'create' ? '写入新文档' : '保存最终版本'
-    : '保存文档'
-  const modal = openSheet({ title: modeTitle, description: candidate ? candidateDescription : '文档保存后会立即参与后续召回。', body: form, primaryLabel, onPrimary: async () => {
+    ? candidate.action === 'create' ? 'Записать в новый документ' : 'Сохранить итоговую версию'
+    : 'Сохранить документ'
+  const modal = openSheet({ title: modeTitle, description: candidate ? candidateDescription : 'После сохранения документ сразу участвует в последующем извлечении.', body: form, primaryLabel, onPrimary: async () => {
     if (!form.reportValidity()) return false
     await groupField.ready
     groupField.validate()
-    if (requiresGroup && (!groupField.value() || groupField.value() === '未分组')) throw new Error('新文档必须选择分组。')
+    if (requiresGroup && (!groupField.value() || groupField.value() === 'без группы')) throw new Error('Для нового документа нужно выбрать группу.')
     const draft = {
       knowledgeBaseId: knowledgeBase.input.value,
       group: groupField.value(),
@@ -4350,7 +4350,7 @@ function openEntryEditor(entry, candidate) {
     })
     else if (entry) await api(`entries/${encodeURIComponent(entry.id)}`, { method: 'PUT', body: { draft } })
     else await api('entries', { method: 'POST', body: { draft } })
-    showToast(candidate ? candidate.action === 'create' ? '新文档已写入。' : '文档修订已保存。' : '知识已保存。')
+    showToast(candidate ? candidate.action === 'create' ? 'Новый документ записан.' : 'Ревизия документа сохранена.' : 'Знания сохранены.')
     state.stats = null
     await navigate(candidate ? 'candidates' : state.view)
     return true
@@ -4384,8 +4384,8 @@ function modelRouteFields(currentProvider, currentModel) {
   if (currentProvider && !providers.some(item => item.id === currentProvider)) {
     providers.push({ id: currentProvider, name: `${currentProvider} (текущая настройка)`, models: [] })
   }
-  const provider = selectField('模型提供方', providers.map(item => ({ value: item.id, label: item.name || item.id })), currentProvider || providers[0]?.id || '')
-  const model = selectField('回写模型', [], '')
+  const provider = selectField('Поставщик модели', providers.map(item => ({ value: item.id, label: item.name || item.id })), currentProvider || providers[0]?.id || '')
+  const model = selectField('Модель записи', [], '')
   const refreshModels = preferred => {
     const selected = providers.find(item => item.id === provider.input.value)
     const models = [...(selected?.models || [])]
@@ -4403,26 +4403,26 @@ function modelRouteFields(currentProvider, currentModel) {
 async function reviewCandidate(candidate, decision, resolution) {
   const approve = decision === 'approve'
   const action = candidatePrimaryAction(candidate)
-  const title = approve ? `${action.label}？` : '拒绝这条候选？'
+  const title = approve ? `${action.label}？` : 'Отклонить этого кандидата?'
   const message = !approve
-    ? '拒绝后会保留审核记录，但不会进入知识库。'
+    ? 'После отклонения запись проверки сохранится, но в базу знаний ничего не попадёт.'
     : candidate.change?.kind === 'group'
       ? `Документ будет только помещён в «${candidate.change.group}» — текст и статус не изменятся.`
     : candidate.change?.kind === 'finalize'
-      ? '确认后整篇文档将结束并停止回写，正文保持不变。如需继续补充，可在文档中重新打开；版本变化时本次确认不会生效。'
+      ? 'После подтверждения весь документ будет завершён и запись остановится, текст останется без изменений. Чтобы продолжить дополнять, откройте документ заново; при смене версии это подтверждение не сработает.'
     : candidate.action === 'create'
-      ? '确认后将创建新文档，并立即参与后续对话召回。'
+      ? 'После подтверждения будет создан новый документ, который сразу начнёт участвовать в извлечении для следующих диалогов.'
       : candidate.action === 'conflict'
         ? candidate.change?.kind === 'revise'
-          ? '确认后会按预览替换或删除原文。请重点核对红色删除行和绿色新增行。'
-          : '确认后会保留当前文档，并补充候选内容。'
+          ? 'После подтверждения исходный текст будет заменён или удалён согласно превью. Внимательно проверьте красные удалённые и зелёные добавленные строки.'
+          : 'После подтверждения текущий документ сохранится и будет дополнен содержимым кандидата.'
         : candidate.change?.kind === 'revise'
           ? 'После подтверждения текст будет исправлен по предпросмотру; посторонние параллельные дополнения сохранятся, а изменения в той же области станут конфликтами.'
           : 'После подтверждения документ будет дополнен по предпросмотру; при противоречиях появятся конфликты.'
   openConfirm({
     title,
     message,
-    confirmLabel: approve ? action.label : '确认拒绝', danger: !approve,
+    confirmLabel: approve ? action.label : 'Подтвердить отклонение', danger: !approve,
     onConfirm: async () => {
       const reviewed = await api(`candidates/${encodeURIComponent(candidate.id)}/review`, {
         method: 'POST', body: { decision, ...(resolution ? { resolution } : {}) },
@@ -4433,7 +4433,7 @@ async function reviewCandidate(candidate, decision, resolution) {
         await navigate('candidates')
         return
       }
-      showToast(approve ? candidate.change?.kind === 'finalize' ? (candidate.change.state === 'resolved' ? '文档已标记解决。' : '文档已标记收集完成。') : candidate.action === 'create' ? '新文档已写入。' : candidate.change?.kind === 'revise' ? '原文已修订。' : '内容已补充。' : '候选已拒绝。')
+      showToast(approve ? candidate.change?.kind === 'finalize' ? (candidate.change.state === 'resolved' ? 'Документ отмечен как решённый.' : 'Документ отмечен как полностью собранный.') : candidate.action === 'create' ? 'Новый документ записан.' : candidate.change?.kind === 'revise' ? 'Текст изменён.' : 'Содержимое дополнено.' : 'Кандидат отклонён.')
       state.stats = null
       await navigate('candidates')
     },
@@ -4444,37 +4444,37 @@ function openBulkApprove() {
   if (state.candidateBatchRunning) return
   const pendingCount = state.stats?.candidates.pending ?? state.candidates.length
   const summary = element('strong', {}, `К обработке ${pendingCount} кандидатов на проверке`)
-  const detail = element('p', {}, '开始后会按创建时间分批处理，并实时显示结果。')
+  const detail = element('p', {}, 'После запуска обработка пойдёт партиями по времени создания, результаты будут показываться сразу.')
   const metrics = element('div', { class: 'bulk-review-metrics' })
   const status = element('div', {
     class: 'bulk-review-status', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', hidden: true,
   }, summary, detail, metrics)
   const body = element('div', { class: 'bulk-review-confirm' },
-    element('p', {}, '将分批通过待审核中的新增与可安全合并项。冲突项、目标不可用项，以及审核期间发生变化的候选会保留，供你逐条处理。'),
+    element('p', {}, 'Новые и безопасно объединяемые элементы из очереди проверки будут приняты партиями. Конфликты, элементы с недоступной целью и кандидаты, изменившиеся во время проверки, останутся для обработки по одному.'),
     element('div', { class: 'bulk-review-safety' },
-      element('strong', {}, '不会自动处理冲突'),
-      element('span', {}, '同一文档的候选会按时间顺序写入，避免并发覆盖。'),
+      element('strong', {}, 'Конфликты не обрабатываются автоматически'),
+      element('span', {}, 'Кандидаты одного документа записываются по порядку времени, чтобы избежать параллельной перезаписи.'),
     ),
     status,
   )
   openModal({
-    title: '一键通过待审核候选？',
-    description: '适合集中处理积压候选；操作完成后无法批量撤销。',
+    title: 'Одобрить все кандидаты на проверке?',
+    description: 'Подходит для массовой обработки накопившихся кандидатов; после завершения отменить всё сразу нельзя.',
     body,
-    primaryLabel: '开始一键通过',
+    primaryLabel: 'Начать приём в один клик',
     onPrimary: async () => {
       state.candidateBatchRunning = true
       status.hidden = false
       const excluded = new Set()
       const totals = { approved: 0, deferred: 0, failed: 0, selected: 0, remainingReviewable: pendingCount, remainingManual: 0 }
-      const updateProgress = (message = '正在按顺序审核候选…') => {
+      const updateProgress = (message = 'Последовательная проверка кандидатов…') => {
         summary.textContent = message
         detail.textContent = `Проверено ${totals.selected}; не более 25 за раз.`
         metrics.replaceChildren(
-          bulkReviewMetric('已通过', totals.approved, 'success'),
-          bulkReviewMetric('转为冲突', totals.deferred, 'warning'),
-          bulkReviewMetric('失败保留', totals.failed, totals.failed ? 'danger' : ''),
-          bulkReviewMetric('剩余可处理', totals.remainingReviewable),
+          bulkReviewMetric('Принято', totals.approved, 'success'),
+          bulkReviewMetric('Отметить как конфликт', totals.deferred, 'warning'),
+          bulkReviewMetric('При ошибке сохранить', totals.failed, totals.failed ? 'danger' : ''),
+          bulkReviewMetric('Осталось обработать', totals.remainingReviewable),
         )
       }
       updateProgress()
@@ -4492,13 +4492,13 @@ function openBulkApprove() {
           result.failed.forEach(item => excluded.add(item.id))
           updateProgress()
           if (result.remainingReviewable === 0) break
-          if (result.selected === 0) throw new Error('批量审核没有继续推进；剩余候选已保留，请刷新后重试。')
+          if (result.selected === 0) throw new Error('Пакетная проверка не продолжилась; оставшиеся кандидаты сохранены, обновите страницу и повторите.')
         }
-        if (totals.remainingReviewable > 0) throw new Error('待审核候选过多，本次处理已达到安全上限，请再次执行。')
-        summary.textContent = totals.approved > 0 ? `Одобрено кандидатов: ${totals.approved}` : '没有可自动通过的候选'
+        if (totals.remainingReviewable > 0) throw new Error('Кандидатов на проверку слишком много, достигнут безопасный предел обработки. Запустите ещё раз.')
+        summary.textContent = totals.approved > 0 ? `Одобрено кандидатов: ${totals.approved}` : 'Нет кандидатов для автоматического принятия'
         detail.textContent = totals.remainingManual > 0
           ? `Осталось ${totals.remainingManual} конфликтов или ошибок — подтвердите по одному.`
-          : '待审核队列已处理完成。'
+          : 'Очередь проверки обработана полностью.'
         state.stats = null
         await loadCandidates()
         state.candidateBatchRunning = false
@@ -4523,18 +4523,18 @@ function bulkReviewMetric(label, value, variant = '') {
 }
 
 function confirmArchive(entry) {
-  openConfirm({ title: '归档这条知识？', message: '归档后它不会再参与召回，版本历史仍会保留。', confirmLabel: '确认归档', danger: true, onConfirm: async () => {
+  openConfirm({ title: 'Архивировать это знание?', message: 'После архивации он больше не участвует в извлечении, история версий сохранится.', confirmLabel: 'Подтвердить архивацию', danger: true, onConfirm: async () => {
     await api(`entries/${encodeURIComponent(entry.id)}/archive`, { method: 'POST' })
-    showToast('知识已归档。')
+    showToast('Знания заархивированы.')
     state.stats = null
     await navigate('entries')
   } })
 }
 
 function confirmDelete(entry) {
-  openConfirm({ title: '彻底删除这条知识？', message: '知识正文和全部版本历史都会永久删除，此操作无法撤销。', confirmLabel: '永久删除', danger: true, onConfirm: async () => {
+  openConfirm({ title: 'Удалить это знание безвозвратно?', message: 'Текст документа и вся история версий будут удалены безвозвратно, отменить это нельзя.', confirmLabel: 'Удалить навсегда', danger: true, onConfirm: async () => {
     await api(`entries/${encodeURIComponent(entry.id)}`, { method: 'DELETE' })
-    showToast('知识已彻底删除。')
+    showToast('Знания окончательно удалены.')
     state.stats = null
     await navigate('entries')
   } })
@@ -4547,24 +4547,24 @@ async function openHistory(entry) {
       element('div', { class: 'history-line' }, element('span', { class: 'history-dot', 'aria-hidden': 'true' })),
       element('div', { class: 'history-content' }, element('strong', {}, `v${version.version} · ${CHANGE_LABELS[version.changeKind]}`), element('small', {}, formatDate(version.createdAt)), element('p', {}, version.snapshot.body)),
     )))
-    openModal({ title: `${entry.title} · история версий`, description: '每次修改都会保留不可变快照。', body: content, cancelLabel: '关闭' })
+    openModal({ title: `${entry.title} · история версий`, description: 'При каждом изменении сохраняется неизменяемый снимок.', body: content, cancelLabel: 'Закрыть' })
   } catch (error) { showToast(friendlyError(error), 'error') }
 }
 
 function openTokenCreator() {
-  const name = formField('令牌名称', 'input', '', { required: true, maxlength: 100, placeholder: '例如：办公室电脑' })
+  const name = formField('Имя токена', 'input', '', { required: true, maxlength: 100, placeholder: 'Например: офисный компьютер' })
   const permissions = ['read', 'propose', 'write', 'admin']
   const checkboxes = permissions.map((permission, index) => {
     const input = element('input', { type: 'checkbox', value: permission, checked: index === 0 })
     return { permission, input, node: element('label', { class: 'check-option' }, input, permission) }
   })
   const body = element('form', { class: 'form-grid' }, name.wrapper,
-    element('div', { class: 'field span-2' }, element('label', {}, '权限'), element('div', { class: 'check-grid' }, checkboxes.map(item => item.node)), element('span', { class: 'field-hint' }, '普通客户端建议只授予 read + propose。write 是当前中央服务的全局写权限，同时允许直接写入、管理知识库、挂载和笔记；仅在确实需要时授予。')))
+    element('div', { class: 'field span-2' }, element('label', {}, 'Права'), element('div', { class: 'check-grid' }, checkboxes.map(item => item.node)), element('span', { class: 'field-hint' }, 'Обычному клиенту рекомендуется выдавать только read + propose. write — это глобальное право записи текущего центрального сервиса, оно также разрешает прямую запись, управление базами знаний, подключения и заметки; выдавайте только при реальной необходимости.')))
   name.wrapper.classList.add('span-2')
-  openModal({ title: '创建客户端令牌', description: '原始令牌只会在创建成功后显示一次。', body, primaryLabel: '创建令牌', onPrimary: async () => {
+  openModal({ title: 'Создать токен клиента', description: 'Исходный токен показывается только один раз после успешного создания.', body, primaryLabel: 'Создать токен', onPrimary: async () => {
     if (!body.reportValidity()) return false
     const selected = checkboxes.filter(item => item.input.checked).map(item => item.permission)
-    if (!selected.length) { showToast('请至少选择一项权限。', 'error'); return false }
+    if (!selected.length) { showToast('Выберите хотя бы одно право.', 'error'); return false }
     const created = await api('tokens', { method: 'POST', body: { name: name.input.value.trim(), permissions: selected } })
     await loadTokens()
     renderShell()
@@ -4576,25 +4576,25 @@ function openTokenCreator() {
 
 function showSecret(token) {
   const code = element('code', {}, token)
-  const content = element('div', { class: 'secret-box' }, element('strong', {}, '请立即复制并妥善保存'), element('p', {}, '关闭此窗口后，服务端无法再次显示原始令牌。'), element('div', { class: 'secret-value' }, code, actionButton('复制', async () => {
-    try { await navigator.clipboard.writeText(token); showToast('令牌已复制。') } catch { showToast('复制失败，请手动选择令牌。', 'error') }
+  const content = element('div', { class: 'secret-box' }, element('strong', {}, 'Скопируйте сейчас и надёжно сохраните'), element('p', {}, 'После закрытия этого окна сервер больше не сможет показать исходный токен.'), element('div', { class: 'secret-value' }, code, actionButton('Копировать', async () => {
+    try { await navigator.clipboard.writeText(token); showToast('Токен скопирован.') } catch { showToast('Не удалось скопировать, выберите токен вручную.', 'error') }
   }, 'small')))
-  openModal({ title: '令牌创建成功', body: content, cancelLabel: '我已保存' })
+  openModal({ title: 'Токен создан', body: content, cancelLabel: 'Я сохранил' })
 }
 
 function confirmRevokeToken(token) {
-  openConfirm({ title: `Отозвать «${token.name}»?`, message: '使用此令牌的客户端会立即失去访问权限，此操作不可撤销。', confirmLabel: '确认撤销', danger: true, onConfirm: async () => {
+  openConfirm({ title: `Отозвать «${token.name}»?`, message: 'Клиенты с этим токеном сразу потеряют доступ — действие необратимо.', confirmLabel: 'Подтвердить отзыв', danger: true, onConfirm: async () => {
     await api(`tokens/${encodeURIComponent(token.id)}`, { method: 'DELETE' })
-    showToast('令牌已撤销。')
+    showToast('Токен отозван.')
     await loadTokens()
     renderShell()
   } })
 }
 
 function confirmDeleteToken(token) {
-  openConfirm({ title: `Удалить навсегда «${token.name}»?`, message: '这条已撤销令牌记录会被永久删除，此操作无法撤销。', confirmLabel: '永久删除', danger: true, onConfirm: async () => {
+  openConfirm({ title: `Удалить навсегда «${token.name}»?`, message: 'Эта запись об отозванном токене будет удалена безвозвратно, отменить это нельзя.', confirmLabel: 'Удалить навсегда', danger: true, onConfirm: async () => {
     await api(`tokens/${encodeURIComponent(token.id)}`, { method: 'DELETE' })
-    showToast('已撤销令牌已永久删除。')
+    showToast('Отозванный токен удалён безвозвратно.')
     await loadTokens()
     renderShell()
   } })
@@ -4605,14 +4605,14 @@ function formatDate(value) {
 }
 
 function scopeLabel(scope) {
-  return scope.kind === 'global' ? '全局' : `Проект · ${scope.id}`
+  return scope.kind === 'global' ? 'Глобально' : `Проект · ${scope.id}`
 }
 
 function friendlyError(error) {
-  if (error.status === 403) return '当前令牌没有执行此操作所需的权限。'
-  if (error.status === 409) return error.message || '内容已发生变化，请刷新后重试。'
-  if (error.name === 'AbortError') return '请求已取消。'
-  return error.message || '操作失败，请稍后重试。'
+  if (error.status === 403) return 'У текущего токена нет прав для этой операции.'
+  if (error.status === 409) return error.message || 'Содержимое изменилось, обновите страницу и повторите.'
+  if (error.name === 'AbortError') return 'Запрос отменён.'
+  return error.message || 'Не удалось выполнить действие, повторите позже.'
 }
 
 let documentSyncState = { key: '', status: '' }
@@ -4638,7 +4638,7 @@ function currentSyncTarget() {
 
 async function readNoteSnapshot(id, signal) {
   const node = await api(`notes/${encodeURIComponent(id)}`, { signal })
-  if (!node.editable) throw new Error('该文件不再支持文本编辑')
+  if (!node.editable) throw new Error('Этот файл больше не поддерживает редактирование текста')
   const blob = await binaryRequest(`notes/${encodeURIComponent(id)}/versions/${node.version}/content`, { responseType: 'blob', signal })
   return { node, content: await blob.text() }
 }
@@ -4660,7 +4660,7 @@ function applySyncSnapshot(target, snapshot, draft) {
   } else {
     const entry = snapshot.entry
     Object.assign(target.identity, entry, { noteReferences: snapshot.noteReferences, tagsText: entry.tags.join(', '), dirty: !!draft,
-      ...(draft ? { title: draft.title, body: draft.content } : {}), saveState: draft ? '未保存' : '已同步' })
+      ...(draft ? { title: draft.title, body: draft.content } : {}), saveState: draft ? 'Не сохранено' : 'Синхронизировано' })
     const items = documentWorkspaceDocuments(target.workspace)
     setDocumentWorkspaceDocuments(target.workspace, items.map(item => item.id === target.id ? { ...item, title: target.identity.title, version: entry.version, updatedAt: entry.updatedAt } : item))
   }
@@ -4674,18 +4674,18 @@ function renderDocumentSyncNotice() {
   const host = document.querySelector('.note-editor-toolbar, .notes-document-toolbar')
   let notice = host?.querySelector('.document-sync-notice')
   if (!target || !status) { notice?.remove(); return }
-  const labels = { changed: '文档有新版本，当前内容已保留', missing: '文档已删除或不可访问，草稿仍保留', offline: '同步暂不可用，将自动重试', synced: '已同步最新版本' }
+  const labels = { changed: 'У документа есть новая версия, текущее содержимое сохранено', missing: 'Документ удалён или недоступен, черновик сохранён', offline: 'Синхронизация временно недоступна, будет выполнена повторная попытка', synced: 'Синхронизирована последняя версия' }
   if (notice?.dataset.status === status) return
   if (!notice) { notice = element('div', { class: 'document-sync-notice' }); host?.append(notice) }
   notice.dataset.status = status
   notice.replaceChildren(element('span', { role: 'status' }, labels[status] || ''))
-  if (status === 'changed') notice.append(actionButton('查看并处理', () => { void openDocumentSyncConflict() }, 'small'))
+  if (status === 'changed') notice.append(actionButton('Просмотреть и обработать', () => { void openDocumentSyncConflict() }, 'small'))
 }
 
 async function openDocumentSyncConflict() {
   const target = currentSyncTarget()
   if (!target || syncConflictLoading) return
-  if (target.kind === 'note' && (state.notes.titleDirty || state.notes.renaming)) return showToast('标题修改尚未保存，请先复制保留；在标题中按 Escape 可恢复原标题，再处理文档新版本。', 'error')
+  if (target.kind === 'note' && (state.notes.titleDirty || state.notes.renaming)) return showToast('Изменение заголовка не сохранено — сначала скопируйте его; нажмите Escape в заголовке, чтобы вернуть прежний, и затем разберите новую версию документа.', 'error')
   syncConflictLoading = true
   try {
     const snapshot = await readSyncSnapshot(target, AbortSignal.timeout(10000))
@@ -4696,9 +4696,9 @@ async function openDocumentSyncConflict() {
       : { title: snapshot.entry.title, content: snapshot.entry.body }
     const { openSyncConflict } = await import(moduleUrl('document-sync-ui'))
     const stillCurrent = () => {
-      if (currentSyncTarget()?.identity !== target.identity) throw new Error('当前文档已切换，请重新打开差异')
+      if (currentSyncTarget()?.identity !== target.identity) throw new Error('Текущий документ переключён, откройте различия заново')
       if ((target.kind === 'note' ? state.notes.draft : target.identity.body) !== local.content
-        || (target.kind === 'knowledge' && target.identity.title !== local.title)) throw new Error('本地草稿已有新修改，请关闭后重新查看差异')
+        || (target.kind === 'knowledge' && target.identity.title !== local.title)) throw new Error('В локальном черновике есть новые правки: закройте и посмотрите различия заново')
     }
     openSyncConflict({ element, actionButton, openModal, openConfirm, renderDiff: renderNoteHistoryDiff, local, remote,
       allowTitle: target.kind === 'knowledge',

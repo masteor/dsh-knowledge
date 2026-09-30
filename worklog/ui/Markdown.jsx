@@ -3,7 +3,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 
 export function Markdown({ text, onEvidence }) {
-  const html = useMemo(() => DOMPurify.sanitize(marked.parse(text.replace(/\[依据:([^\]]+)\]/g, (_, id) => `[查看依据](#worklog-source-${encodeURIComponent(id)})`), { async: false }), {
+  const html = useMemo(() => DOMPurify.sanitize(marked.parse(text.replace(/\[依据:([^\]]+)\]/g, (_, id) => `[Показать основание](#worklog-source-${encodeURIComponent(id)})`), { async: false }), {
     FORBID_TAGS: ['img', 'video', 'audio', 'iframe', 'style', 'input', 'form'],
     FORBID_ATTR: ['style'],
   }), [text])

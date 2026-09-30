@@ -101,7 +101,7 @@ export function migrateKnowledgeDatabase(db: DatabaseSync, notes: NoteStore): vo
     INSERT INTO knowledge_bases(
       id,name,description,default_tags_json,extraction_instructions,status,created_at,updated_at
     ) VALUES(
-      'default','默认知识库','','[]','仅收录可跨会话复用、且与当前挂载范围相关的知识。','active',datetime('now'),datetime('now')
+      'default','База знаний по умолчанию','','[]','Сохраняются только знания, пригодные для повторного использования между сессиями и относящиеся к текущей области подключения.','active',datetime('now'),datetime('now')
     );
     ALTER TABLE knowledge_entries ADD COLUMN knowledge_base_id TEXT NOT NULL DEFAULT 'default';
     CREATE INDEX knowledge_entries_base_status ON knowledge_entries(knowledge_base_id, status, updated_at DESC);

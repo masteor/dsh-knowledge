@@ -149,8 +149,8 @@ test('closure review shows state and conclusion with existing components, and st
   const api = runInNewContext(declarations + '; ({ renderCandidateDiff, candidatePrimaryAction })', context)
   const candidate = { status: 'pending', action: 'update', draft, change: { kind: 'finalize', baseVersion: 1, ...request } }
   const fresh = api.renderCandidateDiff(candidate, { ...draft, version: 1, documentState: 'open' })
-  assert.match(JSON.stringify(fresh), /标记已解决/)
-  assert.match(JSON.stringify(fresh), /正文保持不变/)
+  assert.match(JSON.stringify(fresh), /отметить решённым/)
+  assert.match(JSON.stringify(fresh), /текст не изменяется|Текст не измен/)
   assert.match(JSON.stringify(fresh), /验证通过/)
   assert.doesNotMatch(JSON.stringify(fresh), /diff-viewer/)
   assert.match(JSON.stringify(api.renderCandidateDiff(candidate, { ...draft, version: 2, documentState: 'open' })), /文档已变化/)

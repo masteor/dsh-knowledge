@@ -3,13 +3,13 @@ import { fail } from './domain.js'
 export function destination(connection) {
   if (connection.backend !== 'remote') return null
   const url = new URL(connection.remoteUrl)
-  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) throw fail('中央知识库地址无效')
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) throw fail('Неверный адрес центральной базы знаний')
   return url.href.replace(/\/+$/, '')
 }
 
 export async function requestCentral(connection, method, path, data, query = new URLSearchParams(), signal) {
   const base = destination(connection)
-  if (!base || !connection.remoteToken) throw fail('请先配置中央知识库连接', 409)
+  if (!base || !connection.remoteToken) throw fail('Сначала настройте подключение к центральной базе знаний', 409)
   const controller = new AbortController(), abort = () => controller.abort()
   if (signal?.aborted) controller.abort()
   signal?.addEventListener('abort', abort, { once: true })
@@ -23,18 +23,18 @@ export async function requestCentral(connection, method, path, data, query = new
     const chunks = []; let size = 0
     for await (const chunk of response.body || []) {
       size += chunk.length
-      if (size > 10 * 1024 * 1024) { controller.abort(); throw fail('中央日报响应过大', 502) }
+      if (size > 10 * 1024 * 1024) { controller.abort(); throw fail('Слишком большой ответ центрального журнала', 502) }
       chunks.push(Buffer.from(chunk))
     }
-    if (response.status >= 300 && response.status < 400) throw fail('中央日报接口发生重定向，请检查知识库地址；未转发凭据', 502)
-    if (response.status === 404) throw fail('中央知识库尚未支持统一日报，请先升级中央插件', 502)
-    if (response.status === 401 || response.status === 403) throw fail('中央日报授权不足或已失效，请检查知识库令牌权限', response.status)
+    if (response.status >= 300 && response.status < 400) throw fail('Интерфейс центрального журнала вернул перенаправление, проверьте адрес базы знаний; учётные данные не переданы', 502)
+    if (response.status === 404) throw fail('Центральная база знаний пока не поддерживает единый журнал, сначала обновите плагин центра', 502)
+    if (response.status === 401 || response.status === 403) throw fail('Недостаточно прав центрального журнала или они истекли, проверьте права токена базы знаний', response.status)
     let value
-    try { value = JSON.parse(Buffer.concat(chunks).toString()) } catch { throw fail('中央日报未返回有效 JSON，请检查中央服务', 502) }
-    if (!response.ok) throw fail(typeof value.error === 'string' ? value.error.slice(0, 500) : '中央日报请求失败', response.status)
+    try { value = JSON.parse(Buffer.concat(chunks).toString()) } catch { throw fail('Центральный журнал не вернул корректный JSON, проверьте службу центра', 502) }
+    if (!response.ok) throw fail(typeof value.error === 'string' ? value.error.slice(0, 500) : 'Запрос к центральному журналу не удался', response.status)
     return value
   } catch (e) {
     if (e.status) throw e
-    throw fail('中央日报连接失败或超时；本地待上传素材仍保留，可稍后重试', 502)
+    throw fail('Не удалось подключиться к центральному журналу или истёк тайм-аут; локальные материалы для загрузки сохранены, повторите позже', 502)
   } finally { clearTimeout(timeout); signal?.removeEventListener('abort', abort) }
 }

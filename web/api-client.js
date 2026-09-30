@@ -13,7 +13,7 @@ export function createApiClient({ apiBase, authMode, getToken }) {
   const endpoint = path => `${apiBase}/${path.replace(/^\/+/, '')}`
 
   async function responseError(response) {
-    let message = `请求失败（HTTP ${response.status}）`
+    let message = `Запрос не удался (HTTP ${response.status})`
     try {
       const payload = await response.json()
       if (payload?.error) message = payload.error
@@ -25,10 +25,10 @@ export function createApiClient({ apiBase, authMode, getToken }) {
     const text = await response.text()
     let payload
     if (text) {
-      try { payload = JSON.parse(text) } catch { throw new Error('服务返回了无法识别的数据') }
+      try { payload = JSON.parse(text) } catch { throw new Error('Сервер вернул нераспознанные данные') }
     }
     if (!response.ok) {
-      const error = new Error(payload?.error || `请求失败（HTTP ${response.status}）`)
+      const error = new Error(payload?.error || `Запрос не удался (HTTP ${response.status})`)
       error.status = response.status
       error.code = payload?.code
       error.origin = payload?.origin
@@ -75,18 +75,18 @@ export function createApiClient({ apiBase, authMode, getToken }) {
         let payload
         if (request.responseText) {
           try { payload = JSON.parse(request.responseText) }
-          catch { return reject(new Error('服务返回了无法识别的数据')) }
+          catch { return reject(new Error('Сервер вернул нераспознанные данные')) }
         }
         if (request.status < 200 || request.status >= 300) {
-          const error = new Error(payload?.error || `请求失败（HTTP ${request.status}）`)
+          const error = new Error(payload?.error || `Запрос не удался (HTTP ${request.status})`)
           error.status = request.status
           reject(error)
           return
         }
         resolve(payload)
       })
-      request.addEventListener('error', () => reject(new Error('上传连接中断，请检查网络后重试')))
-      request.addEventListener('abort', () => reject(new DOMException('上传已取消', 'AbortError')))
+      request.addEventListener('error', () => reject(new Error('Соединение прервано, проверьте сеть и повторите')))
+      request.addEventListener('abort', () => reject(new DOMException('Загрузка отменена', 'AbortError')))
       request.send(body)
     })
   }

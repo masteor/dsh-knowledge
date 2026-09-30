@@ -517,7 +517,13 @@ export class LocalKnowledgeProvider implements KnowledgeProvider {
       if (base === undefined || base.status !== 'active') continue
       output.push({ ...mount, base, ...inheritedFrom === undefined ? {} : { inheritedFrom } })
     }
-    return output.sort((left, right) => left.base.name.localeCompare(right.base.name, 'zh-CN'))
+    // Сортировка по имени базы. Локаль выбирается по фактическому языку имени:
+    // при китайской локали русское название встаёт в неожиданном порядке,
+    // а китайское — при русской. Поэтому локаль определяется по первой букве имени.
+    const collatorFor = (name: string): string => /[\u4e00-\u9fff]/.test(name) ? 'zh-CN' : 'ru-RU'
+    return output.sort((left, right) => collatorFor(left.base.name) === collatorFor(right.base.name)
+      ? left.base.name.localeCompare(right.base.name, collatorFor(left.base.name))
+      : left.base.name.localeCompare(right.base.name, 'en'))
   }
 
   async stats(): Promise<KnowledgeStats> {

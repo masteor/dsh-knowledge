@@ -6,26 +6,26 @@ export function dayOf(time, timezone) {
   return `${pick('year')}-${pick('month')}-${pick('day')}`
 }
 export function validDay(day) {
-  if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isFinite(Date.parse(day)) || new Date(day).toISOString().slice(0, 10) !== day) throw fail('日期无效')
+  if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isFinite(Date.parse(day)) || new Date(day).toISOString().slice(0, 10) !== day) throw fail('Недействительная дата')
   return day
 }
 export function settings(value) {
-  if (!value || typeof value.enabled !== 'boolean' || typeof value.timezone !== 'string') throw fail('采集设置无效')
-  try { dayOf(Date.now(), value.timezone) } catch { throw fail('请输入有效的 IANA 时区，例如 Asia/Shanghai') }
+  if (!value || typeof value.enabled !== 'boolean' || typeof value.timezone !== 'string') throw fail('Недопустимые настройки сбора')
+  try { dayOf(Date.now(), value.timezone) } catch { throw fail('Введите корректный часовой пояс IANA, например Asia/Shanghai') }
   for (const key of ['projects', 'excludedSessions']) {
-    if (!Array.isArray(value[key]) || value[key].length > 1000 || value[key].some(v => typeof v !== 'string' || !v.trim() || v.length > 4096)) throw fail('项目或会话范围无效')
+    if (!Array.isArray(value[key]) || value[key].length > 1000 || value[key].some(v => typeof v !== 'string' || !v.trim() || v.length > 4096)) throw fail('Недопустимая область проекта или сессии')
   }
   const provider = value.provider ?? '', model = value.model ?? ''
   const scope = value.scope ?? 'selected'
   const scheduleEnabled = value.scheduleEnabled === undefined ? false : value.scheduleEnabled
   const scheduleTime = value.scheduleTime === undefined ? '23:00' : value.scheduleTime
-  if (typeof scheduleEnabled !== 'boolean' || typeof scheduleTime !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(scheduleTime)) throw fail('每日整理时间无效，请选择 00:00–23:59')
-  if (!['all', 'selected'].includes(scope)) throw fail('采集范围无效')
-  if (typeof provider !== 'string' || typeof model !== 'string' || provider.length > 256 || model.length > 256 || !!provider.trim() !== !!model.trim()) throw fail('服务商与模型 ID 必须同时填写或同时留空')
+  if (typeof scheduleEnabled !== 'boolean' || typeof scheduleTime !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(scheduleTime)) throw fail('Недопустимое время ежедневной обработки, выберите 00:00–23:59')
+  if (!['all', 'selected'].includes(scope)) throw fail('Недопустимая область сбора')
+  if (typeof provider !== 'string' || typeof model !== 'string' || provider.length > 256 || model.length > 256 || !!provider.trim() !== !!model.trim()) throw fail('Провайдер и ID модели нужно заполнить вместе или оставить пустыми вместе')
   return { enabled: value.enabled, scope, timezone: value.timezone, projects: [...new Set(value.projects.map(p => p.trim()))], excludedSessions: [...new Set(value.excludedSessions)], provider: provider.trim(), model: model.trim(), scheduleEnabled, scheduleTime }
 }
 export function text(value, max = 100000) {
-  if (typeof value !== 'string' || !value.trim() || value.length > max) throw fail(`请输入内容，最多 ${max} 字符`)
+  if (typeof value !== 'string' || !value.trim() || value.length > max) throw fail(`Введите содержимое, не более ${max} символов`)
   return value.trim()
 }
 export function capture(session, turn, config, now = Date.now()) {

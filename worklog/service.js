@@ -19,8 +19,8 @@ export class JournalService {
     else this.store.insert({ ...record, sourceId: this.store.originId() })
   }
   async serveCentral(method, path, data, query) {
-    if (this.current().paused) throw fail('知识库连接正在切换，请稍后重试', 409)
-    if (this.current().backend !== 'local') throw fail('当前节点不是中央日报服务，请连接本地模式的中央知识库', 409)
+    if (this.current().paused) throw fail('Подключение к базе знаний переключается, повторите попытку позже', 409)
+    if (this.current().backend !== 'local') throw fail('Текущий узел не является центральной службой журнала. Подключите центральную базу знаний в локальном режиме', 409)
     const value = await this.central(method, path, data, query)
     if (method === 'GET' && path === '/state') return { ...value, config: pick(value.config, sharedKeys), projects: [] }
     return value
@@ -34,7 +34,7 @@ export class JournalService {
       localReports: this.store.db.prepare('SELECT count(*) AS n FROM reports').get().n }
   }
   async browser(method, path, data = {}, query = new URLSearchParams()) {
-    if (this.current().paused) throw fail('知识库连接正在切换，请稍后重试', 409)
+    if (this.current().paused) throw fail('Подключение к базе знаний переключается, повторите попытку позже', 409)
     const connection = { ...this.current() }, target = destination(connection)
     if (method === 'GET' && path === '/collector-state') return this.collectorState()
     if (method === 'POST' && path === '/capture-settings') {
@@ -43,18 +43,18 @@ export class JournalService {
     }
     if (method === 'POST' && path === '/retry-sync') { if (target) this.outbox.retry(target); return this.collectorState() }
     if (method === 'POST' && path === '/migrate') {
-      if (!target || data.confirm !== true) throw fail('请确认迁移到当前中央知识库', 409)
+      if (!target || data.confirm !== true) throw fail('Подтвердите перенос в текущую центральную базу знаний', 409)
       // Confirm capability before creating a potentially large migration queue.
       const permission = await this.request(connection, 'GET', '/state')
-      if (!permission.canManage) throw fail('迁移历史日报需要中央管理员令牌；普通来源上传需要写入权限', 403)
+      if (!permission.canManage) throw fail('Для переноса исторических журналов нужен токен администратора центра; для обычной загрузки источников нужны права на запись', 403)
       this.outbox.migrate(target)
       return this.collectorState()
     }
     // Browser cannot bypass migration confirmation via central ingestion routes.
-    if (['/ingest', '/archive', '/identity'].includes(path)) throw fail('日报接口不存在', 404)
+    if (['/ingest', '/archive', '/identity'].includes(path)) throw fail('Интерфейс журнала не существует', 404)
     if (!target) {
       if (method === 'POST' && path === '/settings') {
-        if (data.sharedRevision !== undefined && data.sharedRevision !== sharedRevision(this.store.config())) throw fail('中央配置已更新，请重新打开采集设置后重试', 409)
+        if (data.sharedRevision !== undefined && data.sharedRevision !== sharedRevision(this.store.config())) throw fail('Конфигурация центра обновлена, откройте настройки сбора заново и повторите', 409)
         return this.store.configure(data)
       }
       const value = await this.central(method, path, data, query)

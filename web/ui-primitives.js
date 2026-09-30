@@ -37,7 +37,7 @@ function vectorElement(tag, attributes = {}, ...children) {
 }
 
 export function paneToggleButton(pane, visible, onClick, label) {
-  const action = `${visible ? '隐藏' : '显示'}${label}`
+  const action = `${visible ? 'Скрыть' : 'Показать'} ${label}`
   return element('button', {
     type: 'button', class: 'pane-toggle-button', 'data-pane': pane,
     'aria-label': action, 'aria-pressed': String(visible), title: action, onClick,
@@ -76,7 +76,7 @@ export function createToastPresenter(region) {
   return (message, kind = '') => {
     const toast = element('div', { class: `toast ${kind}`.trim(), role: kind === 'error' ? 'alert' : 'status' },
       element('span', {}, message),
-      kind === 'error' ? actionButton('关闭', () => toast.remove(), 'ghost small toast-close', { 'aria-label': '关闭错误提示' }) : null,
+      kind === 'error' ? actionButton('Закрыть', () => toast.remove(), 'ghost small toast-close', { 'aria-label': 'Закрыть сообщение об ошибке' }) : null,
     )
     region.append(toast)
     if (kind !== 'error') window.setTimeout(() => toast.remove(), 4200)

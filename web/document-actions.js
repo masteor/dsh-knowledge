@@ -8,7 +8,7 @@ export function createDocumentMenuPresenter({ element, actionButton, interfaceIc
     let events
     const details = element('details', { class: 'notes-document-more' })
     const summary = element('summary', {
-      class: 'button ghost small', title: '更多操作', 'aria-label': `${label}的更多操作`,
+      class: 'button ghost small', title: 'Дополнительные действия', 'aria-label': `Дополнительные действия: ${label}`,
       'aria-haspopup': 'menu', 'aria-expanded': 'false',
       onClick: event => { event.preventDefault(); setOpen(!details.open) },
     }, interfaceIcon('more', 'notes-document-more-icon'))
@@ -20,7 +20,7 @@ export function createDocumentMenuPresenter({ element, actionButton, interfaceIc
       openMenus.delete(close)
       if (restoreFocus && summary.isConnected) summary.focus()
     }
-    const menu = element('div', { class: 'notes-document-more-menu', role: 'menu', 'aria-label': `${label}的更多操作` },
+    const menu = element('div', { class: 'notes-document-more-menu', role: 'menu', 'aria-label': `Дополнительные действия: ${label}` },
       actions.flatMap((group, index) => [
         index ? element('div', { class: 'notes-document-menu-divider', role: 'separator' }) : null,
         ...group.map(action => actionButton([

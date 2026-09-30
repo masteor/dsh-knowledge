@@ -10,7 +10,7 @@ export function createDialogPresenter({ element, actionButton, interfaceIcon, sh
     return openModal({ ...options, presentation: 'sheet' })
   }
 
-  function openModal({ title, description = '', body, primaryLabel, primaryVariant = 'primary', onPrimary, cancelLabel = '取消', presentation = 'modal', className = '', onClose }) {
+  function openModal({ title, description = '', body, primaryLabel, primaryVariant = 'primary', onPrimary, cancelLabel = 'Отмена', presentation = 'modal', className = '', onClose }) {
     const previouslyFocused = document.activeElement
     const isSheet = presentation === 'sheet'
     const titleId = `knowledge-dialog-title-${++sequence}`
@@ -22,7 +22,7 @@ export function createDialogPresenter({ element, actionButton, interfaceIcon, sh
     const close = (explicit = false) => {
       if (busy || closed) return
       if (!explicit && formDirty) {
-        showToast('表单有未保存的修改，请先保存，或使用“取消”放弃修改。', 'error')
+        showToast('В форме есть несохранённые правки — сохраните их или нажмите «Отмена».', 'error')
         return
       }
       document.removeEventListener('keydown', onKeyDown)
@@ -32,7 +32,7 @@ export function createDialogPresenter({ element, actionButton, interfaceIcon, sh
       onClose?.()
       if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus()
     }
-    const closeButton = actionButton(interfaceIcon('close'), () => close(), 'ghost', { 'aria-label': '关闭对话框' })
+    const closeButton = actionButton(interfaceIcon('close'), () => close(), 'ghost', { 'aria-label': 'Закрыть окно' })
     const cancel = actionButton(cancelLabel, () => close(true))
     const primary = primaryLabel ? actionButton(primaryLabel, async () => {
       if (busy) return
@@ -40,7 +40,7 @@ export function createDialogPresenter({ element, actionButton, interfaceIcon, sh
       primary.disabled = true
       cancel.disabled = true
       const original = primary.textContent
-      primary.textContent = '正在处理…'
+      primary.textContent = 'Обработка…'
       try {
         const shouldClose = await onPrimary()
         busy = false

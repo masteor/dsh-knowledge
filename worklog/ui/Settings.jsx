@@ -6,44 +6,44 @@ export function Settings({ state, save, saveCapture, busy, currentProject = '' }
   const [project, setProject] = useState('')
   const projects = [...new Set([currentProject, ...state.projects, ...config.projects].filter(Boolean))]
   return <form onSubmit={e => { e.preventDefault(); save(config) }}>
-    <h3>本机采集</h3>
-    <p>{state.remote ? '当前 DSH 实例按本地项目路径采集，并上传至已连接的中央知识库；断网时暂存补传。' : '当前节点保存并整理日报；其他 DSH 实例连接此中央知识库后可上传来源。'}只采集启用后的新对话，不自动发送渠道消息。</p>
-    <label className="wl-check"><input type="checkbox" checked={config.enabled} onChange={e => set({ ...config, enabled: e.target.checked })} />启用工作素材采集</label>
-    {state.remote && <p className="wl-muted">关闭采集只停止新增素材，不会取消已经授权采集的待上传记录，也不会删除中央记录。</p>}
-    <h3>采集项目</h3>
-    <div className="wl-actions" role="group" aria-label="采集范围">
-      <button type="button" aria-pressed={config.scope === 'all'} onClick={() => set({ ...config, scope: 'all' })}>全部项目</button>
-      <button type="button" aria-pressed={config.scope !== 'all'} onClick={() => set({ ...config, scope: 'selected' })}>选择项目</button>
+    <h3>Локальный сбор</h3>
+    <p>{state.remote ? 'Текущий экземпляр DSH собирает данные по путям локальных проектов и загружает их в подключённую центральную базу знаний; без сети данные копятся и досылаются позже.' : 'Текущий узел хранит и обрабатывает журнал; другие экземпляры DSH после подключения к этой центральной базе знаний смогут загружать источники.'}Собираются только новые диалоги после включения; сообщения в каналы автоматически не отправляются.</p>
+    <label className="wl-check"><input type="checkbox" checked={config.enabled} onChange={e => set({ ...config, enabled: e.target.checked })} />Включить сбор рабочих материалов</label>
+    {state.remote && <p className="wl-muted">Отключение сбора лишь останавливает добавление новых материалов: оно не отменяет уже разрешённые к сбору записи, ожидающие загрузки, и не удаляет записи на центре.</p>}
+    <h3>Проекты сбора</h3>
+    <div className="wl-actions" role="group" aria-label="Область сбора">
+      <button type="button" aria-pressed={config.scope === 'all'} onClick={() => set({ ...config, scope: 'all' })}>Все проекты</button>
+      <button type="button" aria-pressed={config.scope !== 'all'} onClick={() => set({ ...config, scope: 'selected' })}>Выберите проект</button>
     </div>
-    {config.scope === 'all' ? <p className="wl-muted">包含当前及未来项目的新对话，仍排除下方指定的会话。保存并开启采集后生效。</p> : <>
-    <p className="wl-muted">从当前及已记录的项目选择，也可手写路径；不选项目则不采集。</p>
-    {currentProject && <button type="button" onClick={() => set({ ...config, projects: [...new Set([...config.projects, currentProject])] })}>添加当前项目</button>}
+    {config.scope === 'all' ? <p className="wl-muted">Включает новые диалоги текущих и будущих проектов, указанные ниже сессии по-прежнему исключены. Вступает в силу после сохранения и включения сбора.</p> : <>
+    <p className="wl-muted">Выберите из текущих и уже записанных проектов, путь можно ввести вручную; если проект не выбран, сбор не ведётся.</p>
+    {currentProject && <button type="button" onClick={() => set({ ...config, projects: [...new Set([...config.projects, currentProject])] })}>Добавить текущий проект</button>}
     <div className="wl-projects">
     {projects.map(id => <label className="wl-check" key={id}><input type="checkbox" checked={config.projects.includes(id)} onChange={e => set({ ...config, projects: e.target.checked ? [...config.projects, id] : config.projects.filter(p => p !== id) })} /><span title={id}>{id}</span></label>)}
     </div>
-    <label>添加项目路径<input value={project} onChange={e => setProject(e.target.value)} placeholder="例如 /workspace/my-project" /></label>
-    <button type="button" disabled={!project.trim()} onClick={() => { set({ ...config, projects: [...new Set([...config.projects, project.trim()])] }); setProject('') }}>添加项目</button>
+    <label>Добавить путь к проекту<input value={project} onChange={e => setProject(e.target.value)} placeholder="например /workspace/my-project" /></label>
+    <button type="button" disabled={!project.trim()} onClick={() => { set({ ...config, projects: [...new Set([...config.projects, project.trim()])] }); setProject('') }}>Добавить проект</button>
     </>}
-    <label>排除会话（每行一个会话 ID）<textarea rows={3} value={config.excludedSessions.join('\n')} onChange={e => set({ ...config, excludedSessions: e.target.value.split('\n').filter(Boolean) })} /></label>
-    {state.remote && saveCapture && <button type="button" disabled={busy} onClick={() => saveCapture(config)}>仅保存本机采集</button>}
-    <h3>中央整理</h3>
-    <p className="wl-muted">时区、模型与定时任务由中央统一管理。所有连接此中央的实例查看同一份日报；不会在本机额外调用模型整理。</p>
-    {state.remote && !state.canManage && <p className="wl-muted">当前令牌没有管理员权限，中央配置仅可查看；本机采集仍可修改。</p>}
-    {state.centralUnavailable ? <p role="status">中央暂不可用，中央配置不能读取或修改；本机采集仍可单独保存。</p> : <fieldset className="wl-central-settings" disabled={state.remote && !state.canManage}>
-    <label>日期时区<input value={config.timezone} onChange={e => set({ ...config, timezone: e.target.value })} placeholder="Asia/Shanghai" /></label>
-    <p className="wl-muted">以中央接收时的时区归档来源；更改时区不移动已有日报。</p>
+    <label>Исключить сессии (по одному ID сессии в строке)<textarea rows={3} value={config.excludedSessions.join('\n')} onChange={e => set({ ...config, excludedSessions: e.target.value.split('\n').filter(Boolean) })} /></label>
+    {state.remote && saveCapture && <button type="button" disabled={busy} onClick={() => saveCapture(config)}>Сохранить только локальный сбор</button>}
+    <h3>Обработка на центре</h3>
+    <p className="wl-muted">Часовой пояс, модель и задания по расписанию управляются централизованно. Все экземпляры, подключённые к этому центру, видят один и тот же журнал; локально модель для обработки не вызывается.</p>
+    {state.remote && !state.canManage && <p className="wl-muted">У текущего токена нет прав администратора: центральные настройки доступны только для просмотра; локальный сбор по-прежнему можно изменять.</p>}
+    {state.centralUnavailable ? <p role="status">Центр временно недоступен, конфигурацию центра нельзя прочитать или изменить; локальный сбор по-прежнему можно сохранить отдельно.</p> : <fieldset className="wl-central-settings" disabled={state.remote && !state.canManage}>
+    <label>Часовой пояс даты<input value={config.timezone} onChange={e => set({ ...config, timezone: e.target.value })} placeholder="Asia/Shanghai" /></label>
+    <p className="wl-muted">Источники архивируются по часовому поясу момента получения на центре; смена часового пояса не переносит существующие журналы.</p>
     <ModelPicker central={state.remote} provider={config.provider} model={config.model} onChange={(provider, model) => set({ ...config, provider, model })} />
-    <section aria-label="定时整理设置">
-      <h3>定时整理</h3>
-      <label className="wl-check"><input type="checkbox" checked={config.scheduleEnabled ?? false} onChange={e => set({ ...config, scheduleEnabled: e.target.checked })} />每日定时整理</label>
+    <section aria-label="Настройки обработки по расписанию">
+      <h3>Обработка по расписанию</h3>
+      <label className="wl-check"><input type="checkbox" checked={config.scheduleEnabled ?? false} onChange={e => set({ ...config, scheduleEnabled: e.target.checked })} />Ежедневная обработка по расписанию</label>
       {config.scheduleEnabled && <>
-        <label>每日整理时间<input type="time" required step="60" value={config.scheduleTime ?? '23:00'} onChange={e => set({ ...config, scheduleTime: e.target.value })} aria-describedby="wl-schedule-help" /></label>
-        <p id="wl-schedule-help" className="wl-muted">按上方时区 {config.timezone}，整理当天截至执行时已有的素材。保存后从下一个设定时间开始；由服务端执行，无需打开页面。会调用所选模型。</p>
-        <p className="wl-muted">重启后只补最近一次错过的日期，不批量回填历史。无新素材或正文有手工修改时跳过；当天到点后新增的素材请手动整理。关闭定时不会取消已入队任务。</p>
+        <label>Время ежедневной обработки<input type="time" required step="60" value={config.scheduleTime ?? '23:00'} onChange={e => set({ ...config, scheduleTime: e.target.value })} aria-describedby="wl-schedule-help" /></label>
+        <p id="wl-schedule-help" className="wl-muted">По часовому поясу выше {config.timezone}，Обрабатывает материалы за текущий день на момент запуска. После сохранения отсчёт идёт от следующего заданного времени; выполняется на сервере, открывать страницу не нужно. Вызывает выбранную модель.</p>
+        <p className="wl-muted">После перезапуска восполняется только последняя пропущенная дата, история массово не заполняется. При отсутствии новых материалов или при ручных правках текста обработка пропускается; материалы, добавленные после наступления времени в тот же день, обрабатывайте вручную. Отключение расписания не отменяет уже поставленные в очередь задачи.</p>
       </>}
-      {state.scheduleLast && <p className="wl-muted" role="status">最近定时检查 · {state.scheduleLast.day}：{state.scheduleLast.message}{state.scheduleLast.status === 'failed' && ' 请修正设置后，在对应日期点击整理日报重试。'}</p>}
+      {state.scheduleLast && <p className="wl-muted" role="status">Последняя проверка по расписанию · {state.scheduleLast.day}：{state.scheduleLast.message}{state.scheduleLast.status === 'failed' && ' Исправьте настройки и повторите попытку, нажав «Обработать журнал» на нужной дате.'}</p>}
     </section>
     </fieldset>}
-    {!state.centralUnavailable && <footer><button disabled={busy} className="wl-primary">{busy ? '保存中…' : '保存设置'}</button></footer>}
+    {!state.centralUnavailable && <footer><button disabled={busy} className="wl-primary">{busy ? 'Сохранение…' : 'Сохранить настройки'}</button></footer>}
   </form>
 }

@@ -100,7 +100,7 @@ export function apply(ctx: ClientContext): void {
     name: 'settings.plugins.tab',
     id: 'knowledge',
     order: 20,
-    label: () => '知识库',
+    label: () => 'База знаний',
   }, KnowledgeConnectionCard))
 
   ctx.slots.inject('conversation.chat.turnTail', () => ctx.slots.register({
@@ -137,18 +137,18 @@ function KnowledgeWritebackStatus({
     }
   }, [sessionId, turn])
   if (state === undefined) return <div ref={container}>
-    {readError && <div className="dsh-knowledge-writeback-notice" role="status">{readError}<button type="button" onClick={() => workspace.openDocument({ view: 'writeback', sessionId })}>管理回写</button></div>}
+    {readError && <div className="dsh-knowledge-writeback-notice" role="status">{readError}<button type="button" onClick={() => workspace.openDocument({ view: 'writeback', sessionId })}>Управление записью</button></div>}
   </div>
   const retry = (): void => client.current?.retry()
   const destinations = state.destinations ?? []
-  const summary = state.summary.replace(/^知识库回写\s*·\s*/u, '')
+  const summary = state.summary.replace(/^Запись в базу знаний\s*·\s*/u, '')
   return <div ref={container} className="dsh-knowledge-writeback-notice" data-status={state.status}>
     <div className="dsh-knowledge-writeback-summary" role="status" aria-atomic="true">
-      <span>知识库回写</span><strong>@lemoncat7/dsh-knowledge</strong><span title={state.error}>{summary}</span>
-      {state.status === 'failed' && state.retryable && <button type="button" disabled={retrying} onClick={() => { void retry() }}>{retrying ? '重试中…' : '重试'}</button>}
-      {state.status !== 'completed' && <button type="button" onClick={() => workspace.openDocument({ view: 'writeback', sessionId })}>管理回写</button>}
+      <span>Запись в базу знаний</span><strong>@lemoncat7/dsh-knowledge</strong><span title={state.error}>{summary}</span>
+      {state.status === 'failed' && state.retryable && <button type="button" disabled={retrying} onClick={() => { void retry() }}>{retrying ? 'Повтор…' : 'Повторить'}</button>}
+      {state.status !== 'completed' && <button type="button" onClick={() => workspace.openDocument({ view: 'writeback', sessionId })}>Управление записью</button>}
     </div>
-    {destinations.length > 0 && <ul className="dsh-knowledge-writeback-destinations" aria-label="回写目标">
+    {destinations.length > 0 && <ul className="dsh-knowledge-writeback-destinations" aria-label="Цель записи">
       {destinations.map((destination, index) => <li key={`${destination.knowledgeBaseId}:${destination.documentId ?? destination.documentTitle}:${index}`}>
         <span className="dsh-knowledge-writeback-base">{destination.knowledgeBaseName}</span>
         <span className="dsh-knowledge-writeback-separator" aria-hidden="true">/</span>
@@ -156,12 +156,12 @@ function KnowledgeWritebackStatus({
           ? <button
             type="button"
             className="dsh-knowledge-writeback-document"
-            title={`打开 ${destination.documentPath ?? destination.documentTitle}`}
-            aria-label={`在知识库中打开 ${destination.documentTitle}`}
+            title={`Открыть ${destination.documentPath ?? destination.documentTitle}`}
+            aria-label={`Открыть в базе знаний: ${destination.documentTitle}`}
             onClick={() => { workspace.openDocument({ knowledgeBaseId: destination.knowledgeBaseId, documentId: destination.documentId! }) }}
           ><strong>{destination.documentPath ?? destination.documentTitle}</strong></button>
-          : <strong title={destination.documentTitle}>{`拟新建：${destination.documentTitle}`}</strong>}
-        <small data-disposition={destination.disposition}>{destination.disposition === 'written' ? (destination.documentState === 'resolved' ? '已解决' : destination.documentState === 'complete' ? '已完成' : '已写入') : (destination.documentState ? '待审核 · 标记' + (destination.documentState === 'resolved' ? '解决' : '完成') : '待审核')}</small>
+          : <strong title={destination.documentTitle}>{`Будет создано: ${destination.documentTitle}`}</strong>}
+        <small data-disposition={destination.disposition}>{destination.disposition === 'written' ? (destination.documentState === 'resolved' ? 'решено' : destination.documentState === 'complete' ? 'завершено' : 'записано') : (destination.documentState ? 'на проверке · отметить' + (destination.documentState === 'resolved' ? 'решить' : 'завершить') : 'на проверке')}</small>
       </li>)}
     </ul>}
     {state.status === 'failed' && state.error && <p className="dsh-knowledge-writeback-error" role="alert">{state.error}</p>}
@@ -257,10 +257,10 @@ function KnowledgeConnectionCard() {
   const timeoutNumber = Number(timeout)
   const urlError = backend === 'remote' ? validateRemoteUrl(remoteUrl) : undefined
   const tokenError = backend === 'remote' && !current?.tokenConfigured && remoteToken.trim().length === 0
-    ? '首次连接必须填写客户端令牌。'
-    : remoteToken.length > 0 && remoteToken.trim().length < 24 ? '令牌至少需要 24 个字符。' : undefined
+    ? 'При первом подключении нужно указать клиентский токен.'
+    : remoteToken.length > 0 && remoteToken.trim().length < 24 ? 'Токен должен содержать минимум 24 символа.' : undefined
   const timeoutError = !Number.isInteger(timeoutNumber) || timeoutNumber < 100 || timeoutNumber > 120000
-    ? '超时必须是 100 到 120000 毫秒之间的整数。'
+    ? 'Таймаут должен быть целым числом от 100 до 120000 мс.'
     : undefined
   const invalid = urlError !== undefined || tokenError !== undefined || timeoutError !== undefined
 
@@ -293,7 +293,7 @@ function KnowledgeConnectionCard() {
       setDirty(false)
       setMessage({
         kind: 'success',
-        text: backend === 'remote' ? '已验证并切换至远程知识库。' : '已切换至本地知识库。',
+        text: backend === 'remote' ? 'Проверено и переключено на удалённую базу знаний.' : 'Переключено на локальную базу знаний.',
       })
     } catch (error) {
       setMessage({ kind: 'error', text: connectionErrorMessage(error) })
@@ -305,46 +305,46 @@ function KnowledgeConnectionCard() {
   return (
     <li className={`dsh-plugin-settings dsh-knowledge-settings-card${open ? ' dsh-knowledge-settings-card--open' : ''}`}>
       <button type="button" className="dsh-knowledge-settings-header" aria-expanded={open} onClick={() => { setOpen(value => !value) }}>
-        <span><strong>知识库连接</strong><small>选择本机知识库，或连接一台中央 DSH 知识库</small></span>
-        <span className="dsh-knowledge-settings-summary">{loadState === 'loading' ? '读取中' : loadState === 'error' ? '连接入口' : current?.backend === 'remote' ? '远程' : '本地'}<i aria-hidden="true" /></span>
+        <span><strong>Подключение базы знаний</strong><small>Выберите локальную базу знаний или подключитесь к центральной базе DSH</small></span>
+        <span className="dsh-knowledge-settings-summary">{loadState === 'loading' ? 'Чтение' : loadState === 'error' ? 'Точка подключения' : current?.backend === 'remote' ? 'Удалённо' : 'Локально'}<i aria-hidden="true" /></span>
       </button>
       {open && <div className="dsh-knowledge-settings-body">
-        {loadState === 'loading' ? <p className="dsh-knowledge-settings-note" role="status">正在读取连接配置…</p>
+        {loadState === 'loading' ? <p className="dsh-knowledge-settings-note" role="status">Чтение настроек подключения…</p>
           : loadState === 'error' ? <div className="dsh-knowledge-settings-load-error" role="alert">
             <p>{loadError}</p>
-            <button type="button" onClick={() => { void load() }}>重新读取</button>
+            <button type="button" onClick={() => { void load() }}>Перечитать</button>
           </div> : <>
           <fieldset className="dsh-knowledge-source-picker">
-            <legend>知识库来源</legend>
+            <legend>Источник базы знаний</legend>
             <label className={backend === 'local' ? 'is-selected' : ''}>
               <input type="radio" name="dsh-knowledge-backend" checked={backend === 'local'} onChange={() => edit(() => { setBackend('local') })} />
-              <span><strong>本地</strong><small>数据保存在当前 DSH 的 SQLite 中</small></span>
+              <span><strong>Локально</strong><small>Данные хранятся в SQLite текущего DSH</small></span>
             </label>
             <label className={`${backend === 'remote' ? 'is-selected' : ''}${!current?.canSwitchRemote ? ' is-disabled' : ''}`}>
               <input type="radio" name="dsh-knowledge-backend" checked={backend === 'remote'} disabled={!current?.canSwitchRemote} onChange={() => edit(() => { setBackend('remote') })} />
-              <span><strong>远程</strong><small>召回和回写统一使用中央知识库</small></span>
+              <span><strong>Удалённо</strong><small>Извлечение и запись идут через центральную базу знаний</small></span>
             </label>
           </fieldset>
-          {!current?.canSwitchRemote && <p className="dsh-knowledge-settings-note">当前实例是中央知识库服务，不能再切换到另一台远程服务。</p>}
+          {!current?.canSwitchRemote && <p className="dsh-knowledge-settings-note">Этот экземпляр сам является центральной службой баз знаний — переключиться на другую удалённую службу нельзя.</p>}
           {backend === 'remote' && <div className="dsh-knowledge-remote-fields">
-            <label htmlFor="dsh-knowledge-remote-url">服务器地址
+            <label htmlFor="dsh-knowledge-remote-url">Адрес сервера
               <input id="dsh-knowledge-remote-url" type="url" value={remoteUrl} placeholder="https://example.com/knowledge-api/v1" autoComplete="url" onChange={event => edit(() => { setRemoteUrl(event.target.value) })} aria-invalid={urlError !== undefined} aria-describedby={urlError ? 'dsh-knowledge-url-error' : undefined} />
               {urlError && <small id="dsh-knowledge-url-error" className="dsh-knowledge-field-error">{urlError}</small>}
             </label>
-            <label htmlFor="dsh-knowledge-remote-token">客户端令牌
-              <input id="dsh-knowledge-remote-token" type="password" value={remoteToken} placeholder={current?.tokenConfigured ? '已保存；留空则保持不变' : '粘贴客户端令牌'} autoComplete="new-password" onChange={event => edit(() => { setRemoteToken(event.target.value) })} aria-invalid={tokenError !== undefined} aria-describedby="dsh-knowledge-token-help" />
-              <small id="dsh-knowledge-token-help" className={tokenError ? 'dsh-knowledge-field-error' : undefined}>{tokenError ?? (current?.tokenConfigured ? '令牌已安全保存，页面无法读取；输入新令牌可覆盖。' : '令牌保存后不可读取，只能覆盖。')}</small>
+            <label htmlFor="dsh-knowledge-remote-token">Клиентский токен
+              <input id="dsh-knowledge-remote-token" type="password" value={remoteToken} placeholder={current?.tokenConfigured ? 'Сохранён; оставьте пустым, чтобы не менять' : 'Вставьте клиентский токен'} autoComplete="new-password" onChange={event => edit(() => { setRemoteToken(event.target.value) })} aria-invalid={tokenError !== undefined} aria-describedby="dsh-knowledge-token-help" />
+              <small id="dsh-knowledge-token-help" className={tokenError ? 'dsh-knowledge-field-error' : undefined}>{tokenError ?? (current?.tokenConfigured ? 'Токен сохранён безопасно и недоступен странице; введите новый, чтобы заменить.' : 'Токен нельзя прочитать после сохранения — только заменить.')}</small>
             </label>
           </div>}
-          <label className="dsh-knowledge-timeout-field" htmlFor="dsh-knowledge-timeout">请求超时（毫秒）
+          <label className="dsh-knowledge-timeout-field" htmlFor="dsh-knowledge-timeout">Таймаут запроса (мс)
             <input id="dsh-knowledge-timeout" type="number" min="100" max="120000" step="100" value={timeout} onChange={event => edit(() => { setTimeoutValue(event.target.value) })} aria-invalid={timeoutError !== undefined} />
             {timeoutError && <small className="dsh-knowledge-field-error">{timeoutError}</small>}
           </label>
-          {!current?.writable && <p className="dsh-knowledge-settings-note">当前插件没有配置持久化路径，无法保存连接。</p>}
+          {!current?.writable && <p className="dsh-knowledge-settings-note">У плагина не задан путь для хранения данных — подключение не сохранить.</p>}
           {message && <p className={`dsh-knowledge-settings-message is-${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'} aria-live="polite">{message.text}</p>}
           <div className="dsh-knowledge-settings-actions">
-            <button type="button" onClick={reset} disabled={!dirty || saving}>放弃更改</button>
-            <button type="button" className="is-primary" onClick={() => { void save() }} disabled={!dirty || invalid || saving || !current?.writable}>{saving ? '正在验证…' : '验证并连接'}</button>
+            <button type="button" onClick={reset} disabled={!dirty || saving}>Отменить изменения</button>
+            <button type="button" className="is-primary" onClick={() => { void save() }} disabled={!dirty || invalid || saving || !current?.writable}>{saving ? 'Проверка…' : 'Проверить и подключить'}</button>
           </div>
         </>}
       </div>}
@@ -356,15 +356,15 @@ function validateRemoteUrl(value: string): string | undefined {
   try {
     const url = new URL(value.trim())
     const loopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '::1'
-    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) return '远程知识库必须使用 HTTPS。'
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) return 'Для удалённой базы знаний требуется HTTPS.'
     return undefined
-  } catch { return '请输入完整的知识库 API 地址。' }
+  } catch { return 'Укажите полный адрес API базы знаний.' }
 }
 
 function connectionErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
-  if (message.includes('Failed to fetch')) return '无法访问插件连接接口，请确认插件服务已加载。'
-  return message || '连接配置操作失败，请检查地址、令牌和 DSH 日志。'
+  if (message.includes('Failed to fetch')) return 'API подключения плагина недоступен: убедитесь, что служба плагина загружена.'
+  return message || 'Не удалось выполнить операцию с подключением: проверьте адрес, токен и журнал DSH.'
 }
 
 async function requestConnection(
@@ -382,10 +382,10 @@ async function requestConnection(
   if (!response.ok) {
     const message = payload !== null && typeof payload === 'object' && typeof (payload as { error?: unknown }).error === 'string'
       ? (payload as { error: string }).error
-      : `连接接口返回 HTTP ${response.status}`
+      : `API подключения вернул HTTP ${response.status}`
     throw new Error(message)
   }
-  if (!isConnectionView(payload)) throw new Error('插件连接接口返回了无效数据。')
+  if (!isConnectionView(payload)) throw new Error('API подключения плагина вернул некорректные данные.')
   cachedConnectionView = payload
   return payload
 }
@@ -421,25 +421,25 @@ function KnowledgeLauncher({ wide, useSessions, workspace, activity, docked }: S
   }, [activity, currentSessionId])
 
   return (
-    <div className={`dsh-knowledge-launcher${wide ? '' : ' dsh-knowledge-launcher--rail'}`} role="group" aria-label="知识库入口">
+    <div className={`dsh-knowledge-launcher${wide ? '' : ' dsh-knowledge-launcher--rail'}`} role="group" aria-label="Вход в базу знаний">
     {wide && <button
       type="button"
       className={`dsh-knowledge-trigger${wide ? '' : ' dsh-knowledge-trigger--rail'}${open ? ' is-active' : ''}`}
-      aria-label={open ? '返回对话' : '打开知识库工作区'}
+      aria-label={open ? 'Вернуться к диалогу' : 'Открыть рабочую область базы знаний'}
       aria-pressed={open}
-      title={open ? '返回对话' : '打开知识库工作区'}
+      title={open ? 'Вернуться к диалогу' : 'Открыть рабочую область базы знаний'}
       onClick={() => workspace.toggle()}
     >
       <IconDataOutline16 size={wide ? 16 : 18} />
-      {wide && <span>知识库</span>}
+      {wide && <span>База знаний</span>}
     </button>}
     <button
       type="button"
       className={`dsh-knowledge-trigger dsh-knowledge-panel-trigger${activityOpen ? ' is-active' : ''}`}
-      aria-label={activityOpen ? '收起会话知识库' : '展开会话知识库'}
+      aria-label={activityOpen ? 'Свернуть базу знаний сессии' : 'Развернуть базу знаний сессии'}
       aria-expanded={activityOpen}
       disabled={currentSessionId === undefined}
-      title={currentSessionId === undefined ? '进入会话后可展开知识侧栏' : activityOpen ? '收起会话知识库' : '展开会话知识库'}
+      title={currentSessionId === undefined ? 'Панель знаний доступна внутри сессии' : activityOpen ? 'Свернуть базу знаний сессии' : 'Развернуть базу знаний сессии'}
       onClick={() => { if (currentSessionId !== undefined) activity.toggle(currentSessionId) }}
     >
       <IconPanelLeftOutline16 size={16} className="dsh-knowledge-panel-right-icon" />
@@ -537,23 +537,23 @@ function KnowledgeWorkspace({
     <section className="dsh-knowledge-workspace" data-knowledge-surface="workspace" aria-labelledby="dsh-knowledge-workspace-title">
       <header className="dsh-knowledge-workspace-header">
         <div>
-          <button type="button" data-knowledge-workspace-close onClick={workspace.close} aria-label="返回会话" title="返回会话"><IconChevronLeftOutline14 size={15} /></button>
+          <button type="button" data-knowledge-workspace-close onClick={workspace.close} aria-label="Вернуться к сессии" title="Вернуться к сессии"><IconChevronLeftOutline14 size={15} /></button>
           <IconDataOutline16 size={18} />
-          <span><h2 id="dsh-knowledge-workspace-title">知识库</h2><p>文档、审核、挂载与访问管理</p></span>
+          <span><h2 id="dsh-knowledge-workspace-title">База знаний</h2><p>Документы, проверка, подключения и управление доступом</p></span>
         </div>
       </header>
       {panelState === 'ready' && knowledgeUrl !== undefined
-        ? <iframe ref={frame} className="dsh-knowledge-frame" src={knowledgeUrl} title="知识库管理台" onLoad={sendTheme} />
+        ? <iframe ref={frame} className="dsh-knowledge-frame" src={knowledgeUrl} title="Консоль управления базами знаний" onLoad={sendTheme} />
         : <div className="dsh-knowledge-panel-state" role={panelState === 'error' ? 'alert' : 'status'} aria-live="polite">
           <span className="dsh-knowledge-panel-state-icon" aria-hidden="true">{panelState === 'loading' ? '···' : panelState === 'error' ? '!' : '—'}</span>
           <div>
-            <h3>{panelState === 'loading' ? '正在打开知识库…' : panelState === 'error' ? '暂时无法打开知识库' : '这台 DSH 未启用知识库管理台'}</h3>
+            <h3>{panelState === 'loading' ? 'Открытие базы знаний…' : panelState === 'error' ? 'Не удалось открыть базу знаний' : 'В этом DSH консоль управления базами знаний не включена'}</h3>
             <p>{panelState === 'loading'
-              ? '正在确认当前实例是否提供管理页面。'
+              ? 'Проверяем, предоставляет ли этот экземпляр страницу управления.'
               : panelState === 'error'
                 ? panelError
-                : '本地召回和回写仍可使用。当前 profile 已显式关闭 exposeWeb；重新启用后即可在这里管理。使用远程知识库时，请前往中央 DSH 的知识库管理台。'}</p>
-            {panelState === 'error' && <button type="button" onClick={() => { void loadManagement() }}>重试</button>}
+                : 'Локальное извлечение и запись продолжают работать. В текущем профиле exposeWeb явно отключён; включите его, чтобы управлять отсюда. При удалённой базе знаний используйте консоль управления центрального DSH.'}</p>
+            {panelState === 'error' && <button type="button" onClick={() => { void loadManagement() }}>Повторить</button>}
           </div>
         </div>}
     </section>

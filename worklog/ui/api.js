@@ -6,8 +6,8 @@ export async function api(path, data, signal) {
   })
   const raw = await response.text()
   let result
-  try { result = JSON.parse(raw) } catch { throw new Error(`工作记录接口返回 HTTP ${response.status}，请检查插件与远程访问路由。`) }
-  if (!response.ok) throw new Error(result.error || `请求失败 (${response.status})`)
+  try { result = JSON.parse(raw) } catch { throw new Error(`Интерфейс журнала работы вернул HTTP ${response.status}，Проверьте плагин и маршрут удалённого доступа.`) }
+  if (!response.ok) throw new Error(result.error || `Запрос не выполнен (${response.status})`)
   return result
 }
 

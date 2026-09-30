@@ -36,11 +36,11 @@ export function installSelectControls(root = document.body) {
     select.tabIndex = -1
     select.setAttribute('aria-hidden', 'true')
     const sync = () => {
-      button.textContent = select.selectedOptions[0]?.label || '请选择'
+      button.textContent = select.selectedOptions[0]?.label || 'Выберите'
       button.disabled = select.disabled
       button.setAttribute('aria-required', String(select.required))
       if (select.validity.valid) button.removeAttribute('aria-invalid')
-      const label = select.getAttribute('aria-label') || select.labels?.[0]?.textContent || select.closest('.field, label')?.querySelector('label, span')?.textContent || '选择选项'
+      const label = select.getAttribute('aria-label') || select.labels?.[0]?.textContent || select.closest('.field, label')?.querySelector('label, span')?.textContent || 'Выбрать вариант'
       button.setAttribute('aria-label', `${label}：${button.textContent}`)
       if (select.getAttribute('aria-labelledby')) button.setAttribute('aria-labelledby', select.getAttribute('aria-labelledby'))
       button.title = button.textContent
@@ -94,7 +94,7 @@ export function installSelectControls(root = document.body) {
         menu.append(item)
         if (!item.disabled) items.push(item)
       }
-      if (!menu.childElementCount) menu.append(make('p', 'knowledge-select-empty', '暂无可选项'))
+      if (!menu.childElementCount) menu.append(make('p', 'knowledge-select-empty', 'Нет доступных вариантов'))
       active = { select, button, menu, place }
       root.append(menu)
       button.setAttribute('aria-expanded', 'true')

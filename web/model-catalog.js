@@ -12,7 +12,7 @@ export function createModelCatalogLoader(request = fetch, ttlMs = 60000) {
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const payload = await response.json()
-      if (!Array.isArray(payload.providers)) throw new Error('模型目录返回了无效数据')
+      if (!Array.isArray(payload.providers)) throw new Error('Каталог моделей вернул некорректные данные')
       cached = payload.providers
       expires = Date.now() + ttlMs
       return cached
