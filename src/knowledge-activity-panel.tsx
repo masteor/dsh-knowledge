@@ -218,21 +218,21 @@ export function KnowledgeActivityPanel(
     props.controller.select(sessionId, { ...props.controller.selection(sessionId), mode: nextMode })
   }
 
-  return <section className="dsh-knowledge-activity-panel" data-knowledge-surface="activity" aria-label="会话知识库">
+  return <section className="dsh-knowledge-activity-panel" data-knowledge-surface="activity" aria-label="База знаний сессии">
     <header className="dsh-knowledge-activity-header">
       <div className="dsh-knowledge-activity-title">
         <span className="dsh-knowledge-activity-mark"><IconDatabaseOutline16 size={17} /></span>
-        <span><strong>知识库</strong><small>当前会话 · {shortId(sessionId)}</small></span>
+        <span><strong>База знаний</strong><small>Текущая сессия · {shortId(sessionId)}</small></span>
       </div>
       <div className="dsh-knowledge-activity-header-actions">
-        <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="在完整工作区中打开" title="完整工作区" onClick={openWorkspace}><IconFullscreenOutline16 size={16} /></button>
-        <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="关闭会话知识库" title="关闭" onClick={() => props.controller.close(sessionId)}><IconCloseOutline16 size={16} /></button>
+        <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="Открыть в полном рабочем пространстве" title="Полное рабочее пространство" onClick={openWorkspace}><IconFullscreenOutline16 size={16} /></button>
+        <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="Закрыть базу знаний сессии" title="Закрыть" onClick={() => props.controller.close(sessionId)}><IconCloseOutline16 size={16} /></button>
       </div>
     </header>
 
-    <nav className="dsh-knowledge-activity-tabs" aria-label="知识库内容类型">
-      <button type="button" className={mode === 'knowledge' ? 'is-active' : ''} aria-pressed={mode === 'knowledge'} onClick={() => selectMode('knowledge')}><IconDatabaseOutline16 size={15} />知识文档</button>
-      <button type="button" className={mode === 'notes' ? 'is-active' : ''} aria-pressed={mode === 'notes'} onClick={() => selectMode('notes')}><IconDataOutline16 size={15} />笔记文档</button>
+    <nav className="dsh-knowledge-activity-tabs" aria-label="Типы содержимого базы знаний">
+      <button type="button" className={mode === 'knowledge' ? 'is-active' : ''} aria-pressed={mode === 'knowledge'} onClick={() => selectMode('knowledge')}><IconDatabaseOutline16 size={15} />Документы знаний</button>
+      <button type="button" className={mode === 'notes' ? 'is-active' : ''} aria-pressed={mode === 'notes'} onClick={() => selectMode('notes')}><IconDataOutline16 size={15} />Заметки</button>
     </nav>
 
     {mode === 'notes'
@@ -241,21 +241,21 @@ export function KnowledgeActivityPanel(
       ? <div className="dsh-knowledge-activity-browser">
         <form className="dsh-knowledge-activity-search" role="search" onSubmit={submitSearch}>
           <IconSearchOutline16 size={16} aria-hidden="true" />
-          <input aria-label="搜索当前会话知识文档" value={queryInput} placeholder="搜索已挂载知识…" onChange={event => setQueryInput(event.target.value)} />
-          {queryInput && <button type="button" onClick={clearSearch} aria-label="清除搜索"><IconCloseOutline16 size={14} /></button>}
+          <input aria-label="Поиск по документам знаний текущей сессии" value={queryInput} placeholder="Поиск по подключённым знаниям…" onChange={event => setQueryInput(event.target.value)} />
+          {queryInput && <button type="button" onClick={clearSearch} aria-label="Очистить поиск"><IconCloseOutline16 size={14} /></button>}
         </form>
 
-        {mountState === 'loading' ? <ActivityState label="正在读取会话挂载…" />
+        {mountState === 'loading' ? <ActivityState label="Чтение подключений сессии…" />
           : mountState === 'error' ? <ActivityError message={error} onRetry={() => { void refreshMounts() }} />
-            : mounts.length === 0 ? <ActivityEmpty title="当前会话没有挂载知识库" description="在完整工作区中挂载后，就能在这里随手查阅文档。" />
+            : mounts.length === 0 ? <ActivityEmpty title="В текущей сессии нет подключённых баз знаний" description="Подключите базу в полном рабочем пространстве — и документы будут под рукой." />
               : <>
                 <div ref={scopeRef} className="dsh-knowledge-activity-scope">
                   <button type="button" className="dsh-knowledge-activity-scope-trigger" aria-haspopup="listbox" aria-expanded={baseMenuOpen} onClick={() => setBaseMenuOpen(value => !value)}>
                     <span className="dsh-knowledge-activity-scope-icon"><IconDatabaseOutline16 size={15} /></span>
-                    <span><small>当前知识库</small><strong>{mounts.find(item => item.knowledgeBaseId === selectedBaseId)?.base.name}</strong></span>
+                    <span><small>Текущая база знаний</small><strong>{mounts.find(item => item.knowledgeBaseId === selectedBaseId)?.base.name}</strong></span>
                     <IconChevronDownOutline14 size={14} className={baseMenuOpen ? 'is-open' : ''} />
                   </button>
-                  {baseMenuOpen && <div className="dsh-knowledge-activity-scope-menu" role="listbox" aria-label="切换知识库">
+                  {baseMenuOpen && <div className="dsh-knowledge-activity-scope-menu" role="listbox" aria-label="Переключить базу знаний">
                     {mounts.map(mount => <button
                       type="button"
                       role="option"
@@ -263,19 +263,19 @@ export function KnowledgeActivityPanel(
                       key={mount.knowledgeBaseId}
                       className={selectedBaseId === mount.knowledgeBaseId ? 'is-active' : ''}
                       onClick={() => selectBase(mount.knowledgeBaseId)}
-                    ><IconDataOutline16 size={15} /><span><strong>{mount.base.name}</strong><small>{mount.inheritedFrom === 'project' ? '项目挂载' : '会话挂载'}</small></span></button>)}
+                    ><IconDataOutline16 size={15} /><span><strong>{mount.base.name}</strong><small>{mount.inheritedFrom === 'project' ? 'Подключение проекта' : 'Подключение сессии'}</small></span></button>)}
                   </div>}
                 </div>
                 <div className="dsh-knowledge-activity-list-heading">
-                  <span><strong>{query ? `“${query}” 的结果` : '知识文档'}</strong><small>{query ? '搜索全部已挂载知识库' : `当前显示 ${documents.length} 项`}</small></span>
-                  <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="刷新文档" title="刷新" onClick={() => { void loadIndex() }}><IconRefreshOutline14 size={14} /></button>
+                  <span><strong>{query ? `Результаты «${query}»` : 'Документы знаний'}</strong><small>{query ? 'Поиск по всем подключённым базам' : `Показано: ${documents.length}`}</small></span>
+                  <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="Обновить документы" title="Обновить" onClick={() => { void loadIndex() }}><IconRefreshOutline14 size={14} /></button>
                 </div>
                 <div className="dsh-knowledge-activity-list" aria-busy={listState === 'loading'}>
-                  {listState === 'loading' && documents.length === 0 ? <ActivityState label="正在读取文档…" />
+                  {listState === 'loading' && documents.length === 0 ? <ActivityState label="Чтение документов…" />
                     : listState === 'error' ? <ActivityError message={error} onRetry={() => { void loadIndex() }} />
-                      : documents.length === 0 ? <ActivityEmpty title={query ? '没有找到相关文档' : '这里还没有知识文档'} description={query ? '换个关键词，或清除搜索后浏览目录。' : '审核通过或直接回写的知识会出现在这里。'} />
+                      : documents.length === 0 ? <ActivityEmpty title={query ? 'Ничего не найдено' : 'Здесь пока нет документов знаний'} description={query ? 'Измените запрос или очистите поиск и просмотрите каталог.' : 'Одобренные или записанные напрямую знания появятся здесь.'} />
                         : <><GroupedDocuments documents={documents} mounts={mounts} searching={Boolean(query)} onSelect={selectDocument} />
-                        {nextCursor && <button type="button" className="dsh-knowledge-activity-load-more" disabled={listState === 'loading'} onClick={() => { void loadIndex(nextCursor, true) }}>{listState === 'loading' ? '正在加载…' : '加载更多'}</button>}</>}
+                        {nextCursor && <button type="button" className="dsh-knowledge-activity-load-more" disabled={listState === 'loading'} onClick={() => { void loadIndex(nextCursor, true) }}>{listState === 'loading' ? 'Загрузка…' : 'Загрузить ещё'}</button>}</>}
                 </div>
               </>}
       </div>
@@ -298,14 +298,14 @@ function GroupedDocuments({ documents, mounts, searching, onSelect }: { document
   }, [documents])
   return <>{groups.map(([key, members]) => {
     const first = members[0]!
-    const name = first.group || '未分组'
+    const name = first.group || 'Без группы'
     const expanded = searching || !collapsed.has(key)
     return <section key={key} className="dsh-knowledge-activity-document-group"><button type="button" className="dsh-knowledge-activity-group-toggle" aria-expanded={expanded} onClick={() => setCollapsed(previous => { const next = new Set(previous); if (expanded) next.add(key); else next.delete(key); return next })}><IconChevronDownOutline14 size={14} /><strong>{name}</strong><small>{members.length}</small></button>{expanded && members.map(document => <DocumentRow key={document.id} document={document} baseName={searching ? mounts.find(item => item.knowledgeBaseId === document.knowledgeBaseId)?.base.name : undefined} onClick={() => onSelect(document)} />)}</section>
   })}</>
 }
 
 function DocumentRow({ document, baseName, onClick }: { document: KnowledgeDocumentSummary; baseName: string | undefined; onClick(): void }): JSX.Element {
-  const stateLabel = document.documentState === 'resolved' ? '已解决' : document.documentState === 'complete' ? '已完成' : undefined
+  const stateLabel = document.documentState === 'resolved' ? 'Решён' : document.documentState === 'complete' ? 'Завершён' : undefined
   return <button type="button" className="dsh-knowledge-activity-row" onClick={onClick}>
     <span className="dsh-knowledge-activity-row-icon"><IconDataOutline16 size={16} /></span>
     <span className="dsh-knowledge-activity-row-copy"><strong>{document.title}</strong><small>{baseName ? `${baseName} · ${document.relPath}` : document.relPath}</small></span>
@@ -323,12 +323,12 @@ function DocumentReader({ value, state, error, onBack, onRetry }: {
   const html = useMemo(() => value === undefined ? '' : renderMarkdown(readableMarkdown(value.content)), [value])
   return <div className="dsh-knowledge-activity-reader">
     <div className="dsh-knowledge-activity-reader-bar">
-      <button type="button" className="dsh-knowledge-activity-back" onClick={onBack}><IconChevronLeftOutline14 size={14} />文档目录</button>
-      {value && <span>{formatDate(value.updatedAt)} 更新</span>}
+      <button type="button" className="dsh-knowledge-activity-back" onClick={onBack}><IconChevronLeftOutline14 size={14} />Каталог документов</button>
+      {value && <span>Обновлено {formatDate(value.updatedAt)}</span>}
     </div>
-    {state === 'loading' ? <ActivityState label="正在打开文档…" />
+    {state === 'loading' ? <ActivityState label="Открытие документа…" />
       : state === 'error' ? <ActivityError message={error} onRetry={onRetry} />
-        : value === undefined ? <ActivityState label="正在准备文档…" />
+        : value === undefined ? <ActivityState label="Подготовка документа…" />
           : <><div className="dsh-knowledge-activity-document-heading">
             <span className="dsh-knowledge-activity-document-icon"><IconDataOutline16 size={18} /></span>
             <div><h2>{value.title}</h2><p>{value.relPath}</p></div>
@@ -342,7 +342,7 @@ function ActivityState({ label }: { label: string }): JSX.Element {
 }
 
 function ActivityError({ message, onRetry }: { message: string; onRetry(): void }): JSX.Element {
-  return <div className="dsh-knowledge-activity-error" role="alert"><strong>暂时无法读取</strong><p>{message}</p><button type="button" onClick={onRetry}>重试</button></div>
+  return <div className="dsh-knowledge-activity-error" role="alert"><strong>Не удаётся прочитать</strong><p>{message}</p><button type="button" onClick={onRetry}>Повторить</button></div>
 }
 
 function ActivityEmpty({ title, description }: { title: string; description: string }): JSX.Element {
@@ -359,8 +359,9 @@ function shortId(value: string): string {
 
 function formatDate(value: string): string {
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '未知时间'
-  return new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(date)
+  if (Number.isNaN(date.getTime())) return 'Неизвестное время'
+  // Локаль НЕ прибита к zh-CN: иначе порядок и вид даты не соответствуют UI.
+  return new Intl.DateTimeFormat('ru-RU', { month: '2-digit', day: '2-digit' }).format(date)
 }
 
 function message(reason: unknown): string {

@@ -86,7 +86,7 @@ export function createMarkdownEditor(options: MarkdownEditorOptions): MarkdownEd
       }),
       Markdown,
       NoteSearch,
-      Placeholder.configure({ placeholder: '输入正文，或使用 Markdown 快捷语法…' }),
+      Placeholder.configure({ placeholder: 'Введите текст или используйте Markdown-сокращения…' }),
       Image.configure({ allowBase64: false, inline: false }),
       TableKit.configure({ table: { resizable: false } }),
       TaskList,

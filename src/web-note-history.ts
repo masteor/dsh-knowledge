@@ -46,9 +46,9 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
   let destroyed = false
   const cache = new Map<number, string>()
   const timeline = node('nav', 'note-history-timeline')
-  timeline.setAttribute('aria-label', '页面历史版本')
+  timeline.setAttribute('aria-label', 'История версий страницы')
   const timelineHeading = node('div', 'note-history-timeline-heading')
-  timelineHeading.append(node('strong', '', '保存记录'), node('span', '', `最近 ${options.versions.length} 个版本`))
+  timelineHeading.append(node('strong', '', 'Сохранения'), node('span', '', `Последних версий: ${options.versions.length}`))
   const versionList = node('div', 'note-history-version-list')
   timeline.append(timelineHeading, versionList)
 
@@ -60,9 +60,9 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
   const detailMeta = node('span')
   detailCopy.append(detailTitle, detailMeta)
   const detailActions = node('div', 'note-history-detail-actions')
-  const previewButton = modeButton('内容预览', 'preview')
-  const diffButton = modeButton('与当前比较', 'diff')
-  const restoreButton = node('button', 'button primary small', '恢复为新版本')
+  const previewButton = modeButton('Просмотр содержимого', 'preview')
+  const diffButton = modeButton('Сравнить с текущей', 'diff')
+  const restoreButton = node('button', 'button primary small', 'Восстановить как новую версию')
   restoreButton.type = 'button'
   detailActions.append(previewButton, diffButton, restoreButton)
   detailHeader.append(detailCopy, detailActions)
@@ -108,16 +108,16 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
   function syncDetailHeader(): void {
     if (!selected) return
     const current = selected.version === options.currentVersion
-    detailTitle.textContent = `版本 ${selected.version}${current ? ' · 当前' : ''}`
+    detailTitle.textContent = `Версия ${selected.version}${current ? ' · текущая' : ''}`
     detailMeta.textContent = `${options.formatDate(selected.createdAt)} · ${options.formatBytes(selected.size)}`
     const sameContent = contentLoaded && selectedContent === options.currentContent
     restoreButton.disabled = current || !contentLoaded || sameContent
-    restoreButton.textContent = current ? '当前版本' : sameContent ? '内容相同' : '恢复为新版本'
+    restoreButton.textContent = current ? 'Текущая версия' : sameContent ? 'Содержимое совпадает' : 'Восстановить как новую версию'
   }
 
   function renderSelectedContent(): void {
     if (!contentLoaded) {
-      content.replaceChildren(node('div', 'note-history-loading', '正在读取版本内容…'))
+      content.replaceChildren(node('div', 'note-history-loading', 'Чтение содержимого версии…'))
       return
     }
     content.replaceChildren(mode === 'preview'
@@ -146,7 +146,7 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
       renderSelectedContent()
     } catch (error) {
       if (destroyed || currentRequest !== request || (error instanceof DOMException && error.name === 'AbortError')) return
-      content.replaceChildren(node('div', 'note-history-error', '无法读取这个历史版本。'))
+      content.replaceChildren(node('div', 'note-history-error', 'Не удалось прочитать эту версию.'))
       options.onError(error)
     }
   }
@@ -157,7 +157,7 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
     button.type = 'button'
     button.dataset.noteVersion = String(version.version)
     button.append(
-      node('strong', '', `版本 ${version.version}${current ? ' · 当前' : ''}`),
+      node('strong', '', `Версия ${version.version}${current ? ' · текущая' : ''}`),
       node('span', '', options.formatDate(version.createdAt)),
       node('small', '', options.formatBytes(version.size)),
     )
@@ -169,7 +169,7 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
     if (!selected || !contentLoaded || restoreButton.disabled) return
     restoreButton.disabled = true
     restoreButton.setAttribute('aria-busy', 'true')
-    restoreButton.textContent = '正在恢复…'
+    restoreButton.textContent = 'Восстановление…'
     try {
       await options.onRestore(selected, selectedContent)
     } catch (error) {
@@ -183,7 +183,7 @@ export function createNoteHistoryView(options: NoteHistoryViewOptions): NoteHist
   })
 
   if (selected) void selectVersion(selected)
-  else content.replaceChildren(node('div', 'note-history-error', '还没有可查看的保存记录。'))
+  else content.replaceChildren(node('div', 'note-history-error', 'Сохранений для просмотра пока нет.'))
 
   return {
     element: root,

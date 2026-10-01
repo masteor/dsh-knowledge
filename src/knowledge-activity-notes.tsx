@@ -27,7 +27,7 @@ interface FolderCrumb { id: string | null; name: string }
 export function KnowledgeActivityNotes({ sessionId, projectId, controller }: NotesPaneProps): JSX.Element {
   const initial = controller.selection(sessionId)
   const [folderId, setFolderId] = useState<string | null>(initial.noteFolderId ?? null)
-  const [crumbs, setCrumbs] = useState<FolderCrumb[]>(initial.noteCrumbs ?? [{ id: null, name: '全部笔记' }])
+  const [crumbs, setCrumbs] = useState<FolderCrumb[]>(initial.noteCrumbs ?? [{ id: null, name: 'Все заметки' }])
   const [selectedId, setSelectedId] = useState(initial.noteDocumentId)
   const [nodes, setNodes] = useState<NoteNode[]>([])
   const [content, setContent] = useState<KnowledgeActivityNoteContent>()
@@ -137,11 +137,11 @@ export function KnowledgeActivityNotes({ sessionId, projectId, controller }: Not
   return <div className="dsh-knowledge-activity-browser">
     <form className="dsh-knowledge-activity-search" role="search" onSubmit={submitSearch}>
       <IconSearchOutline16 size={16} aria-hidden="true" />
-      <input aria-label="搜索笔记文档" value={queryInput} placeholder="搜索笔记和目录…" onChange={event => setQueryInput(event.target.value)} />
-      {queryInput && <button type="button" onClick={() => { setQueryInput(''); setQuery('') }} aria-label="清除搜索"><IconCloseOutline16 size={14} /></button>}
+      <input aria-label="Поиск по заметкам" value={queryInput} placeholder="Поиск по заметкам и папкам…" onChange={event => setQueryInput(event.target.value)} />
+      {queryInput && <button type="button" onClick={() => { setQueryInput(''); setQuery('') }} aria-label="Очистить поиск"><IconCloseOutline16 size={14} /></button>}
     </form>
 
-    {!query && <nav className="dsh-knowledge-activity-breadcrumbs" aria-label="笔记目录路径">
+    {!query && <nav className="dsh-knowledge-activity-breadcrumbs" aria-label="Путь к папке заметок">
       {crumbs.map((crumb, index) => <span key={`${crumb.id ?? 'root'}-${index}`}>
         {index > 0 && <IconChevronRightOutline14 size={12} />}
         <button type="button" aria-current={index === crumbs.length - 1 ? 'location' : undefined} onClick={() => openCrumb(crumb, index)}>{crumb.name}</button>
@@ -149,16 +149,16 @@ export function KnowledgeActivityNotes({ sessionId, projectId, controller }: Not
     </nav>}
 
     <div className="dsh-knowledge-activity-list-heading">
-      <span><strong>{query ? `“${query}” 的结果` : crumbs.at(-1)?.name ?? '笔记文档'}</strong><small>{query ? '搜索全部笔记' : `当前显示 ${nodes.length} 项`}</small></span>
-      <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="刷新笔记" title="刷新" onClick={() => setRefresh(value => value + 1)}><IconRefreshOutline14 size={14} /></button>
+      <span><strong>{query ? `Результаты «${query}»` : crumbs.at(-1)?.name ?? 'Заметки'}</strong><small>{query ? 'Поиск по всем заметкам' : `Показано: ${nodes.length}`}</small></span>
+      <button type="button" className="dsh-knowledge-activity-icon-button" aria-label="Обновить заметки" title="Обновить" onClick={() => setRefresh(value => value + 1)}><IconRefreshOutline14 size={14} /></button>
     </div>
     <div className="dsh-knowledge-activity-list" aria-busy={listState === 'loading'}>
-      {listState === 'loading' && nodes.length === 0 ? <ActivityState label="正在读取笔记…" />
+      {listState === 'loading' && nodes.length === 0 ? <ActivityState label="Чтение заметок…" />
         : listState === 'error' ? <ActivityError error={error} onRetry={() => setRefresh(value => value + 1)} />
           : nodes.length === 0 ? <ActivityEmpty query={query} />
             : nodes.map(node => <button type="button" key={node.id} className="dsh-knowledge-activity-row" disabled={node.kind !== 'folder' && !node.editable} onClick={() => openNode(node)}>
               <span className="dsh-knowledge-activity-row-icon">{node.kind === 'folder' ? <IconFolderOpenOutline16 size={16} /> : <IconDataOutline16 size={16} />}</span>
-              <span className="dsh-knowledge-activity-row-copy"><strong>{node.name}</strong><small>{node.kind === 'folder' ? '目录' : node.editable ? formatSize(node.size) : '暂不支持侧栏预览'}</small></span>
+              <span className="dsh-knowledge-activity-row-copy"><strong>{node.name}</strong><small>{node.kind === 'folder' ? 'Папка' : node.editable ? formatSize(node.size) : 'Предпросмотр в панели недоступен'}</small></span>
               <span className="dsh-knowledge-activity-row-meta"><time dateTime={node.updatedAt}>{formatDate(node.updatedAt)}</time>{node.kind === 'folder' && <IconChevronRightOutline14 size={13} />}</span>
             </button>)}
     </div>
@@ -175,15 +175,15 @@ function NoteReader({ value, state, error, onBack, onRetry }: {
   const html = useMemo(() => value === undefined ? '' : renderMarkdown(value.content), [value])
   return <div className="dsh-knowledge-activity-reader">
     <div className="dsh-knowledge-activity-reader-bar">
-      <button type="button" className="dsh-knowledge-activity-back" onClick={onBack}><IconChevronLeftOutline14 size={14} />笔记目录</button>
-      {value && <span>{formatDate(value.node.updatedAt)} 更新</span>}
+      <button type="button" className="dsh-knowledge-activity-back" onClick={onBack}><IconChevronLeftOutline14 size={14} />Каталог заметок</button>
+      {value && <span>Обновлено {formatDate(value.node.updatedAt)}</span>}
     </div>
-    {state === 'loading' ? <ActivityState label="正在打开笔记…" />
+    {state === 'loading' ? <ActivityState label="Открытие заметки…" />
       : state === 'error' ? <ActivityError error={error} onRetry={onRetry} />
-        : value === undefined ? <ActivityState label="正在准备笔记…" />
+        : value === undefined ? <ActivityState label="Подготовка заметки…" />
           : <><div className="dsh-knowledge-activity-document-heading">
             <span className="dsh-knowledge-activity-document-icon"><IconDataOutline16 size={18} /></span>
-            <div><h2>{value.node.name}</h2><p>笔记文档 · {formatSize(value.node.size)}</p></div>
+            <div><h2>{value.node.name}</h2><p>Заметка · {formatSize(value.node.size)}</p></div>
           </div>
           <article className="dsh-knowledge-activity-markdown" dangerouslySetInnerHTML={{ __html: html }} /></>}
   </div>
@@ -194,17 +194,18 @@ function ActivityState({ label }: { label: string }): JSX.Element {
 }
 
 function ActivityError({ error, onRetry }: { error: string; onRetry(): void }): JSX.Element {
-  return <div className="dsh-knowledge-activity-error" role="alert"><strong>暂时无法读取</strong><p>{error}</p><button type="button" onClick={onRetry}>重试</button></div>
+  return <div className="dsh-knowledge-activity-error" role="alert"><strong>Не удаётся прочитать</strong><p>{error}</p><button type="button" onClick={onRetry}>Повторить</button></div>
 }
 
 function ActivityEmpty({ query }: { query: string }): JSX.Element {
-  return <div className="dsh-knowledge-activity-empty"><span><IconDataOutline16 size={20} /></span><strong>{query ? '没有找到相关笔记' : '这个目录还是空的'}</strong><p>{query ? '换个关键词，或清除搜索后浏览目录。' : '可以在完整工作区中新建或导入笔记。'}</p></div>
+  return <div className="dsh-knowledge-activity-empty"><span><IconDataOutline16 size={20} /></span><strong>{query ? 'Заметки не найдены' : 'Эта папка пуста'}</strong><p>{query ? 'Измените запрос или очистите поиск и просмотрите каталог.' : 'Заметки можно создать или импортировать в полном рабочем пространстве.'}</p></div>
 }
 
 function formatDate(value: string): string {
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '未知时间'
-  return new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(date)
+  if (Number.isNaN(date.getTime())) return 'Неизвестное время'
+  // Локаль НЕ прибита к zh-CN: иначе порядок и вид даты не соответствуют UI.
+  return new Intl.DateTimeFormat('ru-RU', { month: '2-digit', day: '2-digit' }).format(date)
 }
 
 function formatSize(value: number): string {

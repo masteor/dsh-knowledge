@@ -33,7 +33,7 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
   const panel = document.createElement('section')
   panel.className = 'notes-find-panel'
   panel.setAttribute('role', 'search')
-  panel.setAttribute('aria-label', '在当前笔记中查找和替换')
+  panel.setAttribute('aria-label', 'Поиск и замена в текущей заметке')
   panel.hidden = true
 
   const findRow = document.createElement('div')
@@ -41,8 +41,8 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
   const query = document.createElement('input')
   query.className = 'notes-find-input'
   query.type = 'search'
-  query.placeholder = '查找当前笔记'
-  query.setAttribute('aria-label', '查找当前笔记')
+  query.placeholder = 'Поиск в текущей заметке'
+  query.setAttribute('aria-label', 'Поиск в текущей заметке')
   query.autocomplete = 'off'
   query.spellcheck = false
 
@@ -51,19 +51,19 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
   status.setAttribute('role', 'status')
   status.setAttribute('aria-live', 'polite')
 
-  const previous = button('上一个', 'notes-find-button', () => move(-1))
-  previous.setAttribute('aria-label', '上一个匹配项（Shift+Enter）')
-  const next = button('下一个', 'notes-find-button', () => move(1))
-  next.setAttribute('aria-label', '下一个匹配项（Enter）')
+  const previous = button('Предыдущий', 'notes-find-button', () => move(-1))
+  previous.setAttribute('aria-label', 'Предыдущее совпадение (Shift+Enter)')
+  const next = button('Следующий', 'notes-find-button', () => move(1))
+  next.setAttribute('aria-label', 'Следующее совпадение (Enter)')
   const caseSensitive = button('Aa', 'notes-find-button notes-find-case', () => {
     const enabled = caseSensitive.getAttribute('aria-pressed') !== 'true'
     caseSensitive.setAttribute('aria-pressed', String(enabled))
     updateNoteSearch(editor, { query: query.value, caseSensitive: enabled, activeIndex: 0 })
     renderState(true)
   })
-  caseSensitive.setAttribute('aria-label', '区分大小写')
+  caseSensitive.setAttribute('aria-label', 'Учитывать регистр')
   caseSensitive.setAttribute('aria-pressed', 'false')
-  const replaceToggle = button('替换', 'notes-find-button', () => {
+  const replaceToggle = button('Заменить', 'notes-find-button', () => {
     const expanded = replaceToggle.getAttribute('aria-expanded') !== 'true'
     replaceToggle.setAttribute('aria-expanded', String(expanded))
     replaceRow.hidden = !expanded
@@ -71,8 +71,8 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
   })
   replaceToggle.setAttribute('aria-controls', 'dsh-note-replace-row')
   replaceToggle.setAttribute('aria-expanded', 'false')
-  const closeButton = button('关闭', 'notes-find-button notes-find-close', () => close({ restoreEditorFocus: true }))
-  closeButton.setAttribute('aria-label', '关闭查找（Escape）')
+  const closeButton = button('Закрыть', 'notes-find-button notes-find-close', () => close({ restoreEditorFocus: true }))
+  closeButton.setAttribute('aria-label', 'Закрыть поиск (Escape)')
 
   findRow.append(query, status, previous, next, caseSensitive, replaceToggle, closeButton)
 
@@ -83,12 +83,12 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
   const replacement = document.createElement('input')
   replacement.className = 'notes-find-input'
   replacement.type = 'text'
-  replacement.placeholder = '替换为'
-  replacement.setAttribute('aria-label', '替换为')
+  replacement.placeholder = 'Заменить на'
+  replacement.setAttribute('aria-label', 'Заменить на')
   replacement.autocomplete = 'off'
   replacement.spellcheck = false
-  const replaceOne = button('替换当前', 'notes-find-button', replaceCurrent)
-  const replaceAll = button('全部替换', 'notes-find-button', replaceEveryMatch)
+  const replaceOne = button('Заменить текущее', 'notes-find-button', replaceCurrent)
+  const replaceAll = button('Заменить всё', 'notes-find-button', replaceEveryMatch)
   replaceRow.append(replacement, replaceOne, replaceAll)
   panel.append(findRow, replaceRow)
   frame.append(panel)
@@ -133,7 +133,7 @@ export function createNoteFindController(options: NoteFindOptions): NoteFindCont
     const state = getNoteSearchState(editor)
     const total = state?.results.length ?? 0
     const current = total ? (state?.activeIndex ?? 0) + 1 : 0
-    status.textContent = query.value ? (total ? `${current} / ${total}` : '未找到') : ''
+    status.textContent = query.value ? (total ? `${current} / ${total}` : 'Не найдено') : ''
     previous.disabled = total === 0
     next.disabled = total === 0
     replaceOne.disabled = total === 0

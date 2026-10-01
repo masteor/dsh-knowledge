@@ -68,7 +68,7 @@
     "node": "^22.19.0 || >=24.0.0"
   },
   "scripts": {
-    "build": "node --check web/app.js && tsc -p tsconfig.json && node scripts/build-client.mjs",
+    "build": "node --check web/app.js && tsc -p tsconfig.json && node scripts/decode-tsc-escapes.mjs && node scripts/build-client.mjs",
     "clean": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\"",
     "prepare": "npm run clean && npm run build",
     "test": "npm run build && node --test test/*.test.mjs",

@@ -59,18 +59,18 @@ export function createNoteOutlineController(options: NoteOutlineOptions): NoteOu
   const header = document.createElement('header')
   header.className = 'notes-editor-outline-header'
   const title = document.createElement('strong')
-  title.textContent = '文档大纲'
+  title.textContent = 'Структура документа'
   const count = document.createElement('span')
   const closeButton = document.createElement('button')
   closeButton.type = 'button'
   closeButton.className = 'notes-editor-outline-close'
-  closeButton.textContent = '关闭'
-  closeButton.setAttribute('aria-label', '关闭文档大纲')
+  closeButton.textContent = 'Закрыть'
+  closeButton.setAttribute('aria-label', 'Закрыть структуру документа')
   header.append(title, count, closeButton)
 
   const list = document.createElement('nav')
   list.className = 'notes-editor-outline-list'
-  list.setAttribute('aria-label', '笔记标题导航')
+  list.setAttribute('aria-label', 'Навигация по заголовкам заметки')
   host.append(header, list)
 
   let headings: HeadingItem[] = []
@@ -123,12 +123,12 @@ export function createNoteOutlineController(options: NoteOutlineOptions): NoteOu
   }
 
   function renderHeadings(): void {
-    count.textContent = headings.length ? `${headings.length} 个标题` : ''
+    count.textContent = headings.length ? `Заголовков: ${headings.length}` : ''
     list.replaceChildren()
     if (!headings.length) {
       const empty = document.createElement('p')
       empty.className = 'notes-editor-outline-empty'
-      empty.textContent = '使用标题 1–3 后，会在这里生成可定位的大纲。'
+      empty.textContent = 'Используйте заголовки 1–3 — здесь появится структура с переходом к разделам.'
       list.append(empty)
       return
     }

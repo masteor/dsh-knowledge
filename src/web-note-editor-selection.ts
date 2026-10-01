@@ -44,12 +44,12 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
   const menu = document.createElement('div')
   menu.className = 'notes-selection-menu'
   menu.setAttribute('role', 'toolbar')
-  menu.setAttribute('aria-label', '所选文字格式')
+  menu.setAttribute('aria-label', 'Формат выделенного текста')
   menu.hidden = true
 
   const primary = document.createElement('div')
   primary.className = 'notes-selection-primary'
-  const blockToggle = control('正文', '更改段落格式', () => {
+  const blockToggle = control('Обычный текст', 'Изменить формат абзаца', () => {
     const expanded = blockToggle.getAttribute('aria-expanded') !== 'true'
     blockToggle.setAttribute('aria-expanded', String(expanded))
     blockMenu.hidden = !expanded
@@ -67,7 +67,7 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
     { label: 'S', active: () => editor.isActive('strike'), run: () => { editor.chain().focus().toggleStrike().run() } },
     { label: '</>', active: () => editor.isActive('code'), run: () => { editor.chain().focus().toggleCode().run() } },
   ]
-  const markLabels = ['加粗', '斜体', '下划线', '删除线', '行内代码']
+  const markLabels = ['Полужирный', 'Курсив', 'Подчёркнутый', 'Зачёркнутый', 'Код в строке']
   const markButtons = markActions.map((action, index) => {
     const button = control(action.label, markLabels[index] ?? action.label, () => {
       action.run()
@@ -77,7 +77,7 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
     return button
   })
 
-  const linkToggle = control('链接', '添加或编辑链接', () => {
+  const linkToggle = control('Ссылка', 'Добавить или изменить ссылку', () => {
     blockMenu.hidden = true
     blockToggle.setAttribute('aria-expanded', 'false')
     linkForm.hidden = false
@@ -87,14 +87,14 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
     positionMenu()
     window.requestAnimationFrame(() => { linkInput.focus(); linkInput.select() })
   })
-  const copyButton = control('复制', '复制所选文字', () => {
+  const copyButton = control('Копировать', 'Копировать выделенный текст', () => {
     const { from, to } = editor.state.selection
     const text = editor.state.doc.textBetween(from, to, ' ')
     void navigator.clipboard?.writeText(text).catch(() => {})
   })
   primary.append(blockToggle, ...markButtons, linkToggle, copyButton)
   if (options.onExcerpt) {
-    const excerpt = control('摘录到知识库', '摘录所选文字到知识库', () => {
+    const excerpt = control('Выдержка в базу знаний', 'Сохранить выделенный текст в базу знаний', () => {
       const { from, to } = editor.state.selection
       const text = editor.state.doc.textBetween(from, to, '\n')
       if (text.trim()) { hide(); options.onExcerpt?.(text) }
@@ -108,14 +108,14 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
   blockMenu.setAttribute('role', 'menu')
   blockMenu.hidden = true
   const blockActions: FormatAction[] = [
-    { label: '正文', active: () => editor.isActive('paragraph'), run: () => { editor.chain().focus().setParagraph().run() } },
-    { label: '标题 1', active: () => editor.isActive('heading', { level: 1 }), run: () => { editor.chain().focus().toggleHeading({ level: 1 }).run() } },
-    { label: '标题 2', active: () => editor.isActive('heading', { level: 2 }), run: () => { editor.chain().focus().toggleHeading({ level: 2 }).run() } },
-    { label: '标题 3', active: () => editor.isActive('heading', { level: 3 }), run: () => { editor.chain().focus().toggleHeading({ level: 3 }).run() } },
-    { label: '项目符号', active: () => editor.isActive('bulletList'), run: () => { editor.chain().focus().toggleBulletList().run() } },
-    { label: '编号列表', active: () => editor.isActive('orderedList'), run: () => { editor.chain().focus().toggleOrderedList().run() } },
-    { label: '引用', active: () => editor.isActive('blockquote'), run: () => { editor.chain().focus().toggleBlockquote().run() } },
-    { label: '代码块', active: () => editor.isActive('codeBlock'), run: () => { editor.chain().focus().toggleCodeBlock().run() } },
+    { label: 'Обычный текст', active: () => editor.isActive('paragraph'), run: () => { editor.chain().focus().setParagraph().run() } },
+    { label: 'Заголовок 1', active: () => editor.isActive('heading', { level: 1 }), run: () => { editor.chain().focus().toggleHeading({ level: 1 }).run() } },
+    { label: 'Заголовок 2', active: () => editor.isActive('heading', { level: 2 }), run: () => { editor.chain().focus().toggleHeading({ level: 2 }).run() } },
+    { label: 'Заголовок 3', active: () => editor.isActive('heading', { level: 3 }), run: () => { editor.chain().focus().toggleHeading({ level: 3 }).run() } },
+    { label: 'Маркированный список', active: () => editor.isActive('bulletList'), run: () => { editor.chain().focus().toggleBulletList().run() } },
+    { label: 'Нумерованный список', active: () => editor.isActive('orderedList'), run: () => { editor.chain().focus().toggleOrderedList().run() } },
+    { label: 'Цитата', active: () => editor.isActive('blockquote'), run: () => { editor.chain().focus().toggleBlockquote().run() } },
+    { label: 'Блок кода', active: () => editor.isActive('codeBlock'), run: () => { editor.chain().focus().toggleCodeBlock().run() } },
   ]
   const blockButtons = blockActions.map(action => {
     const button = control(action.label, action.label, () => {
@@ -138,10 +138,10 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
   linkInput.inputMode = 'url'
   linkInput.className = 'notes-selection-link-input'
   linkInput.placeholder = 'https://example.com'
-  linkInput.setAttribute('aria-label', '链接地址')
+  linkInput.setAttribute('aria-label', 'Адрес ссылки')
   linkInput.autocomplete = 'off'
-  const applyLink = control('应用', '应用链接', () => submitLink())
-  const removeLink = control('移除', '移除链接', () => {
+  const applyLink = control('Применить', 'Применить ссылку', () => submitLink())
+  const removeLink = control('Убрать', 'Убрать ссылку', () => {
     editor.chain().focus().extendMarkRange('link').unsetLink().run()
     linkForm.hidden = true
     refreshActiveStates()
@@ -167,14 +167,14 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
   let lastState: typeof editor.state | undefined
 
   function currentBlockLabel(): string {
-    if (editor.isActive('heading', { level: 1 })) return '标题 1'
-    if (editor.isActive('heading', { level: 2 })) return '标题 2'
-    if (editor.isActive('heading', { level: 3 })) return '标题 3'
-    if (editor.isActive('bulletList')) return '项目符号'
-    if (editor.isActive('orderedList')) return '编号列表'
-    if (editor.isActive('blockquote')) return '引用'
-    if (editor.isActive('codeBlock')) return '代码块'
-    return '正文'
+    if (editor.isActive('heading', { level: 1 })) return 'Заголовок 1'
+    if (editor.isActive('heading', { level: 2 })) return 'Заголовок 2'
+    if (editor.isActive('heading', { level: 3 })) return 'Заголовок 3'
+    if (editor.isActive('bulletList')) return 'Маркированный список'
+    if (editor.isActive('orderedList')) return 'Нумерованный список'
+    if (editor.isActive('blockquote')) return 'Цитата'
+    if (editor.isActive('codeBlock')) return 'Блок кода'
+    return 'Обычный текст'
   }
 
   function refreshActiveStates(): void {
@@ -187,7 +187,7 @@ export function createNoteSelectionMenu(options: NoteSelectionMenuOptions): Note
   function submitLink(): void {
     const href = safeLink(linkInput.value)
     if (href === null) {
-      linkError.textContent = '请输入有效的网页或邮件地址。'
+      linkError.textContent = 'Введите корректный адрес веб-страницы или электронной почты.'
       linkInput.focus()
       return
     }

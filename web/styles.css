@@ -969,8 +969,8 @@ html,
 .notes-tree-item[data-drop-target="true"],
 .note-tree-group[data-drop-target="true"] > .note-tree-base { background: color-mix(in srgb, var(--accent) 13%, var(--surface)); outline: 1px solid color-mix(in srgb, var(--accent) 38%, transparent); outline-offset: -1px; }
 .notes-tree-item[data-drop-target="true"]::after,
-.note-tree-group[data-drop-target="true"] > .note-tree-base::after { content: "放入此目录"; position: absolute; right: 6px; z-index: 2; border-radius: 4px; padding: 2px 5px; background: color-mix(in srgb, var(--surface-raised) 92%, transparent); color: var(--accent); font-size: 8px; font-weight: 620; pointer-events: none; }
-.note-tree-group[data-drop-target="true"] > .note-tree-base::after { content: "移入此知识库"; }
+.note-tree-group[data-drop-target="true"] > .note-tree-base::after { content: "В эту папку"; position: absolute; right: 6px; z-index: 2; border-radius: 4px; padding: 2px 5px; background: color-mix(in srgb, var(--surface-raised) 92%, transparent); color: var(--accent); font-size: 8px; font-weight: 620; pointer-events: none; }
+.note-tree-group[data-drop-target="true"] > .note-tree-base::after { content: "В эту базу знаний"; }
 .notes-tree-item[data-drop-target="true"] .notes-row-actions { opacity: 0; pointer-events: none; }
 .notes-tree-item[data-dragging="true"], .note-tree-document[data-dragging="true"] { opacity: .45; }
 .notes-tree-row { width: 100%; min-width: 0; min-height: 34px; display: flex; align-items: center; flex: 1 1 0; gap: 7px; overflow: hidden; border: 0; padding: 3px 4px; background: transparent; color: var(--text-secondary); font: inherit; text-align: left; }

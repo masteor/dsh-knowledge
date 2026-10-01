@@ -164,7 +164,7 @@ function createDockedKnowledgeController(
   const listeners = new Set<() => void>()
   const notify = (): void => { for (const listener of listeners) listener() }
   const current = (): string | undefined => normalizeSessionId(deriveCurrentSession((ctx.sessions as unknown as ISessions).list.getSnapshot()))
-  const panel = createDockedPanel(ctx, '@lemoncat7/dsh-knowledge/activity', '知识库',
+  const panel = createDockedPanel(ctx, '@lemoncat7/dsh-knowledge/activity', 'База знаний',
     props => <KnowledgeActivityPanel {...props} controller={controller} />, notify)
   const controller: KnowledgeActivityController = {
     open(sessionId, selection) {

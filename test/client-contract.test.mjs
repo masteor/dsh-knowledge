@@ -56,12 +56,14 @@ test('browser integration is type-checked against the official DSH client contra
   assert.match(activityController, /states\.get\(nextSessionId\)\?\.open/)
   assert.match(activityController, /ctx\.layout\.openDetails\(\)/)
   assert.match(activityController, /ctx\.layout\.closeDetails\(\)/)
-  assert.match(activitySource, /会话知识库/)
-  assert.match(activitySource, /完整工作区/)
+  // Локализованные (ru) строки панели: проверяем, что разметка панели на месте.
+  // Раньше здесь были китайские литералы — после русификации они стали русскими.
+  assert.match(activitySource, /База знаний сессии/)
+  assert.match(activitySource, /Полное рабочее пространство/)
   assert.match(activitySource, /IconFullscreenOutline16/)
   assert.match(activitySource, /loadKnowledgeDocumentIndex/)
-  assert.match(activitySource, /知识文档/)
-  assert.match(activitySource, /笔记文档/)
+  assert.match(activitySource, /Документы знаний/)
+  assert.match(activitySource, /Заметки/)
   assert.match(activityCss, /\.dsh-knowledge-activity-panel[\s\S]*backdrop-filter:/)
   assert.match(activityCss, /appearance:\s*none/)
   assert.match(activityCss, /prefers-reduced-motion/)
