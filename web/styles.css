@@ -930,7 +930,11 @@ html,
   min-width: 0;
   height: 100%;
   display: grid;
-  grid-template-columns: clamp(250px, 25%, 320px) minmax(0, 1fr);
+  /* Позиция вертикальной линии = ширина первой колонки (border-right у .notes-browser).
+     ФИКСИРОВАННАЯ ширина, без clamp: у clamp побеждал минимум (контейнер ~889px,
+     а 30% от него = 267px < минимума), поэтому потолок не достигался и линия
+     почти не двигалась. Здесь ширина задана прямо — 400px. */
+  grid-template-columns: 400px minmax(0, 1fr);
   overflow: hidden;
   background: transparent;
 }
@@ -1889,7 +1893,10 @@ html,
     position: absolute;
     inset: 0 auto 0 0;
     z-index: 16;
-    width: min(88vw, 320px);
+    /* Узкий экран (<=1120px) или тач: каталог выносится из сетки в оверлей,
+       поэтому его ширину задаёт ЭТО правило, а не grid-колонка .notes-workspace.
+       На широком экране с мышью работает колонка (см. .notes-workspace выше). */
+    width: min(88vw, 440px);
     display: grid;
     border-right-color: var(--glass-border);
     background: var(--surface);
